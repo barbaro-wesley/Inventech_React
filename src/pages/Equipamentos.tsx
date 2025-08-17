@@ -4,36 +4,56 @@ import { Button } from "@/components/ui/button";
 import { Settings, Plus, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { EquipamentoForm } from "@/components/EquipamentoForm";
+import api from "@/lib/api";
 
 const Equipamentos = () => {
   const [equipments, setEquipments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [editingEquipment, setEditingEquipment] = useState(null);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const fetchEquipments = async () => {
-      try {
-        const response = await fetch('/api/hcr-equipaments', {
-          credentials: 'include',
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          setEquipments(data);
-        }
-      } catch (error) {
-        toast({
-          title: "Erro ao carregar equipamentos",
-          description: "Não foi possível carregar a lista de equipamentos",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchEquipments = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/equipamentos-medicos', {
+        withCredentials: true,
+      });
+      setEquipments(response.data);
+    } catch (error) {
+      toast({
+        title: "Erro ao carregar equipamentos",
+        description: "Não foi possível carregar a lista de equipamentos",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchEquipments();
-  }, [toast]);
+  }, []);
+
+  const handleFormSubmit = (data: any) => {
+    if (editingEquipment) {
+      setEquipments(prev => prev.map((eq: any) => eq.id === data.id ? data : eq));
+    } else {
+      setEquipments(prev => [...prev, data]);
+    }
+    setEditingEquipment(null);
+  };
+
+  const handleEdit = (equipment: any) => {
+    setEditingEquipment(equipment);
+    setShowForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setShowForm(false);
+    setEditingEquipment(null);
+  };
 
   return (
     <div className="space-y-6">
@@ -48,7 +68,10 @@ const Equipamentos = () => {
           </p>
         </div>
         
-        <Button className="bg-gradient-brand hover:opacity-90 transition-opacity">
+        <Button 
+          className="bg-gradient-brand hover:opacity-90 transition-opacity"
+          onClick={() => setShowForm(true)}
+        >
           <Plus className="h-4 w-4 mr-2" />
           Novo Equipamento
         </Button>
@@ -119,31 +142,41 @@ const Equipamentos = () => {
                   
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg mb-1">
-                      Equipamento Médico #{index + 1}
+                      {equipment.nomeEquipamento || `Equipamento #${index + 1}`}
                     </h3>
                     <p className="text-muted-foreground mb-3">
-                      Categoria: Equipamento Médico
+                      {equipment.tipoEquipamento?.nome || 'Equipamento Médico'}
                     </p>
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                       <div>
-                        <span className="font-medium">Local:</span>
-                        <span className="text-muted-foreground ml-1">UTI - Ala {index + 1}</span>
+                        <span className="font-medium">Setor:</span>
+                        <span className="text-muted-foreground ml-1">
+                          {equipment.setor?.nome || 'Não informado'}
+                        </span>
                       </div>
                       <div>
                         <span className="font-medium">Modelo:</span>
-                        <span className="text-muted-foreground ml-1">MED-{1000 + index}</span>
+                        <span className="text-muted-foreground ml-1">
+                          {equipment.modelo || 'Não informado'}
+                        </span>
                       </div>
                       <div>
-                        <span className="font-medium">Status:</span>
-                        <span className="text-green-600 ml-1">Operacional</span>
+                        <span className="font-medium">Patrimônio:</span>
+                        <span className="text-muted-foreground ml-1">
+                          {equipment.numeroPatrimonio || 'Não informado'}
+                        </span>
                       </div>
                     </div>
                   </div>
                 </div>
                 
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleEdit(equipment)}
+                  >
                     Editar
                   </Button>
                   <Button variant="outline" size="sm">
@@ -160,13 +193,23 @@ const Equipamentos = () => {
             <p className="text-muted-foreground mb-4">
               Comece adicionando o primeiro equipamento ao sistema
             </p>
-            <Button className="bg-gradient-brand hover:opacity-90">
+            <Button 
+              className="bg-gradient-brand hover:opacity-90"
+              onClick={() => setShowForm(true)}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Adicionar Equipamento
             </Button>
           </Card>
         )}
       </div>
+
+      <EquipamentoForm
+        isOpen={showForm}
+        onClose={handleCloseForm}
+        onSubmit={handleFormSubmit}
+        initialData={editingEquipment}
+      />
     </div>
   );
 };
