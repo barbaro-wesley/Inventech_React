@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Logo } from "@/components/Logo";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -13,30 +14,19 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
-      const response = await fetch("http://localhost:5000/api/usuarios/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ email, senha: password }),
+      await login(email, password);
+      toast({
+        title: "Login realizado com sucesso!",
+        description: "Bem-vindo ao InvenTech",
       });
-
-      if (response.ok) {
-        toast({
-          title: "Login realizado com sucesso!",
-          description: "Bem-vindo ao InvenTech",
-        });
-        navigate("/dashboard");
-      } else {
-        throw new Error("Credenciais inválidas");
-      }
+      navigate("/dashboard");
     } catch (error) {
       toast({
         title: "Erro no login",
