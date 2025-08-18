@@ -1,10 +1,17 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Settings, Plus, Search } from "lucide-react";
+import { Settings, Plus, Search, Wrench, Calendar, Hammer } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { EquipamentoForm } from "@/components/EquipamentoForm";
+import { OSForm } from "@/components/OSForm";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import api from "@/lib/api";
 
 const Equipamentos = () => {
@@ -12,6 +19,8 @@ const Equipamentos = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingEquipment, setEditingEquipment] = useState(null);
+  const [showOSForm, setShowOSForm] = useState(false);
+  const [selectedEquipmentForOS, setSelectedEquipmentForOS] = useState(null);
   const { toast } = useToast();
 
   const fetchEquipments = async () => {
@@ -53,6 +62,26 @@ const Equipamentos = () => {
   const handleCloseForm = () => {
     setShowForm(false);
     setEditingEquipment(null);
+  };
+
+  const handleMaintenanceClick = (equipment: any, type: 'preventiva' | 'corretiva') => {
+    setSelectedEquipmentForOS({
+      equipamento: equipment,
+      preventiva: type === 'preventiva'
+    });
+    setShowOSForm(true);
+  };
+
+  const handleCloseOSForm = () => {
+    setShowOSForm(false);
+    setSelectedEquipmentForOS(null);
+  };
+
+  const handleOSSubmit = (data: any) => {
+    toast({
+      title: "Sucesso",
+      description: "Ordem de serviço criada com sucesso!",
+    });
   };
 
   return (
@@ -179,6 +208,32 @@ const Equipamentos = () => {
                   >
                     Editar
                   </Button>
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Wrench className="h-4 w-4 mr-1" />
+                        Manutenção
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem 
+                        onClick={() => handleMaintenanceClick(equipment, 'preventiva')}
+                        className="cursor-pointer"
+                      >
+                        <Calendar className="h-4 w-4 mr-2" />
+                        Preventiva
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => handleMaintenanceClick(equipment, 'corretiva')}
+                        className="cursor-pointer"
+                      >
+                        <Hammer className="h-4 w-4 mr-2" />
+                        Corretiva
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  
                   <Button variant="outline" size="sm">
                     Histórico
                   </Button>
@@ -209,6 +264,13 @@ const Equipamentos = () => {
         onClose={handleCloseForm}
         onSubmit={handleFormSubmit}
         initialData={editingEquipment}
+      />
+
+      <OSForm
+        isOpen={showOSForm}
+        onClose={handleCloseOSForm}
+        onSubmit={handleOSSubmit}
+        initialData={selectedEquipmentForOS}
       />
     </div>
   );
