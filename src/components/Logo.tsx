@@ -1,5 +1,3 @@
-import { Monitor } from "lucide-react";
-
 interface LogoProps {
   size?: "sm" | "md" | "lg";
   showText?: boolean;
@@ -21,8 +19,12 @@ export const Logo = ({ size = "md", showText = true, className = "" }: LogoProps
 
   return (
     <div className={`flex items-center gap-3 ${className}`}>
-      <div className="bg-gradient-brand p-2 rounded-xl shadow-brand">
-        <Monitor className={`${iconSizes[size]} text-white`} />
+      <div className="bg-gradient-brand p-2 rounded-xl shadow-brand flex items-center justify-center">
+        <img
+          src="../logo.png"   // coloque sua imagem em public/logo.png
+          alt="Logo"
+          className={`${iconSizes[size]} object-contain`}
+        />
       </div>
       {showText && (
         <span className={`${textSizes[size]} font-bold bg-gradient-brand bg-clip-text text-transparent`}>

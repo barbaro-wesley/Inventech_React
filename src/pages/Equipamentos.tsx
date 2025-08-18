@@ -6,12 +6,15 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { EquipamentoForm } from "@/components/EquipamentoForm";
 import api from "@/lib/api";
+import PopupEquip from "@/components/popups/PopupEquip";
+
 
 const Equipamentos = () => {
   const [equipments, setEquipments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingEquipment, setEditingEquipment] = useState(null);
+  const [selectedEquipment, setSelectedEquipment] = useState(null);
   const { toast } = useToast();
 
   const fetchEquipments = async () => {
@@ -55,6 +58,18 @@ const Equipamentos = () => {
     setEditingEquipment(null);
   };
 
+  const handleOpenPopup = (equipment: any) => {
+    setSelectedEquipment(equipment);
+  };
+
+  const handleClosePopup = () => {
+    setSelectedEquipment(null);
+  };
+
+  const handleOptionClick = (tipo: string) => {
+    console.log(`Selected maintenance type: ${tipo}`);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -77,7 +92,6 @@ const Equipamentos = () => {
         </Button>
       </div>
 
-      {/* Search and Filters */}
       <Card className="p-4">
         <div className="flex gap-4">
           <div className="relative flex-1">
@@ -91,7 +105,6 @@ const Equipamentos = () => {
         </div>
       </Card>
 
-      {/* Equipment Categories */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[
           { name: "Médicos", count: 45, color: "text-red-600" },
@@ -112,7 +125,6 @@ const Equipamentos = () => {
         ))}
       </div>
 
-      {/* Equipment List */}
       <div className="space-y-4">
         {loading ? (
           Array.from({ length: 5 }).map((_, i) => (
@@ -179,6 +191,13 @@ const Equipamentos = () => {
                   >
                     Editar
                   </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleOpenPopup(equipment)}
+                  >
+                    Detalhes
+                  </Button>
                   <Button variant="outline" size="sm">
                     Histórico
                   </Button>
@@ -210,6 +229,14 @@ const Equipamentos = () => {
         onSubmit={handleFormSubmit}
         initialData={editingEquipment}
       />
+
+      {selectedEquipment && (
+        <PopupEquip
+          equipamento={selectedEquipment}
+          onClose={handleClosePopup}
+          onOptionClick={handleOptionClick}
+        />
+      )}
     </div>
   );
 };
