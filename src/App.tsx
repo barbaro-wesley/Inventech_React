@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Computadores from "./pages/Computadores";
 import Equipamentos from "./pages/Equipamentos";
+import Condicionados from "./pages/Air";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -43,6 +44,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
                   <Equipamentos />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/condicionadores" 
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
+                  <Condicionados/>
                 </ProtectedRoute>
               } 
             />

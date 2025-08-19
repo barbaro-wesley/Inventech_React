@@ -49,21 +49,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const login = async (email: string, senha: string) => {
-    try {
-      const response = await api.post('/usuarios/login', { email, senha });
-      const userData = response.data.user || response.data;
-      console.log('Dados do usuário após login:', userData); // Debug
-      setUser(userData);
-      setIsLoading(false);
-      return userData;
-    } catch (error) {
-      console.error('Erro no login:', error);
-      setUser(null);
-      setIsLoading(false);
-      throw error;
-    }
-  };
+const login = async (email: string, senha: string) => {
+  const response = await api.post('/usuarios/login', { email, senha });
+
+  // aqui response.data é só o token
+  console.log("Token recebido:", response.data);
+
+  // depois chama /usuarios/me para buscar os dados do usuário
+  const me = await api.get("/usuarios/me");
+  setUser(me.data);
+
+  return me.data;
+};
 
   const logout = async () => {
     try {
