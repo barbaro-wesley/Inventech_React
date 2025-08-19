@@ -13,7 +13,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, senha: string) => Promise<void>;
+  login: (email: string, senha: string) => Promise<User>;
   logout: () => void;
   checkAuth: () => Promise<void>;
 }
@@ -48,8 +48,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const login = async (email: string, senha: string) => {
-    const response = await api.post('/usuarios/login', { email, senha });
-    setUser(response.data.user);
+    try {
+      const response = await api.post('/usuarios/login', { email, senha });
+      const userData = response.data.user || response.data;
+      setUser(userData);
+      setIsLoading(false);
+      return userData;
+    } catch (error) {
+      setUser(null);
+      setIsLoading(false);
+      throw error;
+    }
   };
 
   const logout = async () => {
