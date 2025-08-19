@@ -15,6 +15,14 @@ import {
   Building,
   MapPin,
   Wrench,
+  Plus,
+  List,
+  FileText,
+  Package,
+  Shield,
+  AlertTriangle,
+  Calendar,
+  CheckCircle,
 } from "lucide-react";
 
 import {
@@ -36,14 +44,34 @@ const menuItems = [
     icon: Home,
   },
   {
-    title: "Equipamentos",
-    icon: Monitor,
+    title: "Cadastros",
+    icon: Plus,
     items: [
       { title: "Computadores", url: "/computadores", icon: Monitor },
       { title: "Impressoras", url: "/impressoras", icon: Printer },
       { title: "Equipamentos Médicos", url: "/equipamentos", icon: Stethoscope },
-      { title: "Condicionadores", url: "/condicionadores", icon: Wind },
+      { title: "Ar Condicionado", url: "/ar-condicionado", icon: Wind },
+      { title: "Mobílias", url: "/mobilias", icon: Package },
     ],
+  },
+  {
+    title: "Manutenção",
+    icon: Wrench,
+    items: [
+      { title: "Preventiva", url: "/manutencao/preventiva", icon: Shield },
+      { title: "Corretiva", url: "/manutencao/corretiva", icon: AlertTriangle },
+      { title: "Calendário", url: "/manutencao/calendario", icon: Calendar },
+    ],
+  },
+  {
+    title: "Todas Liberadas",
+    url: "/todas-liberadas",
+    icon: CheckCircle,
+  },
+  {
+    title: "Registro TI",
+    url: "/registro-ti",
+    icon: Settings,
   },
   {
     title: "Usuários e Permissões",
@@ -64,9 +92,12 @@ const menuItems = [
     ],
   },
   {
-    title: "Ordem de Serviços",
-    url: "/os",
-    icon: ClipboardList,
+    title: "Relatórios",
+    icon: FileText,
+    items: [
+      { title: "Relatório de Equipamentos", url: "/relatorios/equipamentos", icon: FileText },
+      { title: "Relatório de Usuários", url: "/relatorios/usuarios", icon: FileText },
+    ],
   },
 ];
 
