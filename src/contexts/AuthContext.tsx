@@ -13,7 +13,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, senha: string) => Promise<void>;
+  login: (email: string, senha: string) => Promise<User>;
   logout: () => void;
   checkAuth: () => Promise<void>;
 }
@@ -39,18 +39,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const checkAuth = async () => {
     try {
       const response = await api.get('/usuarios/me');
+      console.log('Dados do usuário em checkAuth:', response.data); // Debug
       setUser(response.data);
     } catch (error) {
+      console.log('Erro em checkAuth:', error);
       setUser(null);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const login = async (email: string, senha: string) => {
-    const response = await api.post('/usuarios/login', { email, senha });
-    setUser(response.data.user);
-  };
+const login = async (email: string, senha: string) => {
+  const response = await api.post('/usuarios/login', { email, senha });
+
+  // aqui response.data é só o token
+  console.log("Token recebido:", response.data);
+
+  // depois chama /usuarios/me para buscar os dados do usuário
+  const me = await api.get("/usuarios/me");
+  setUser(me.data);
+
+  return me.data;
+};
 
   const logout = async () => {
     try {

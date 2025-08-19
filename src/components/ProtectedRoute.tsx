@@ -43,6 +43,8 @@ export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) 
 
   // Escolhe o layout baseado no papel do usuário
   const getLayoutByRole = (role: UserRole, children: ReactNode) => {
+    console.log('Papel do usuário:', role); // Debug para verificar o papel
+    
     switch (role) {
       case 'admin':
         return <AdminLayout>{children}</AdminLayout>;
@@ -55,6 +57,7 @@ export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) 
       case 'usuario_comum':
         return <UsuarioComumLayout>{children}</UsuarioComumLayout>;
       default:
+        console.warn('Papel desconhecido:', role, 'usando AdminLayout como fallback');
         return <AdminLayout>{children}</AdminLayout>;
     }
   };

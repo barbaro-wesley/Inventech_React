@@ -8,6 +8,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
+// Substitua pelo caminho da sua imagem
+import LoginIllustration from "@/assets/logo.png";
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,14 +22,16 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       await login(email, password);
       toast({
         title: "Login realizado com sucesso!",
         description: "Bem-vindo ao InvenTech",
       });
-      navigate("/dashboard");
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 100);
     } catch (error) {
       toast({
         title: "Erro no login",
@@ -39,45 +44,41 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Side - Brand Section */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-brand p-12 flex-col justify-center items-center text-white">
-        <div className="max-w-md text-center space-y-8">
-          <Logo size="lg" className="justify-center mb-8" />
-          
-          <div className="space-y-4">
-            <h1 className="text-4xl font-bold leading-tight">
-              Controle total sobre equipamentos
-            </h1>
-            <p className="text-xl opacity-90 leading-relaxed">
-              Controle total sobre computadores, impressoras, equipamentos médicos e manutenções. 
-              Tudo em uma plataforma moderna e intuitiva.
-            </p>
-          </div>
+    <div className="flex h-screen w-screen flex-col md:flex-row">
+      {/* Painel esquerdo */}
+      <div className="flex flex-1 flex-col items-center justify-center bg-gray-100 text-center p-8 md:p-12">
+        <Logo size="lg" className="max-w-[280px] mb-8" />
 
-          <div className="grid grid-cols-2 gap-4 pt-8">
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-              <h3 className="font-semibold mb-2">Gestão Completa</h3>
-              <p className="text-sm opacity-80">Equipamentos, manutenções e registros</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-              <h3 className="font-semibold mb-2">Interface Moderna</h3>
-              <p className="text-sm opacity-80">Design intuitivo e responsivo</p>
-            </div>
-          </div>
-        </div>
+        <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-900 via-blue-600 to-orange-500 bg-clip-text text-transparent">
+          Controle total sobre equipamentos
+        </h1>
+        <p className="text-gray-600 text-lg max-w-md">
+          Controle total sobre computadores, impressoras, equipamentos médicos e
+          manutenções. Tudo em uma plataforma moderna e intuitiva.
+        </p>
       </div>
 
-      {/* Right Side - Login Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gradient-subtle">
-        <Card className="w-full max-w-md p-8 shadow-soft border-0">
-          <div className="space-y-6">
-            <div className="text-center space-y-2">
-              <div className="lg:hidden mb-6">
-                <Logo size="md" className="justify-center" />
+      {/* Painel direito */}
+      <div className="flex flex-1 items-center justify-center bg-blue-50 p-6 md:p-10">
+        <div className="w-full max-w-lg">
+          <Card className="p-8 shadow-lg border-0 space-y-6">
+            {/* Imagem dentro do Card, acima do email */}
+            <div className="flex justify-center mb-4">
+              <img
+                src={LoginIllustration}
+                alt="Login Illustration"
+                className="w-32 md:w-40"
+              />
+            </div>
+
+            <div className="text-center space-y-2 mb-4">
+              <div className="md:hidden mb-2">
+                <Logo size="md" className="mx-auto" />
               </div>
-              <h2 className="text-3xl font-bold text-foreground">Bem-vindo</h2>
-              <p className="text-muted-foreground">
+              <h2 className="text-3xl font-bold text-gray-800">
+                Bem-vindo
+              </h2>
+              <p className="text-gray-500">
                 Faça login para acessar sua conta
               </p>
             </div>
@@ -111,7 +112,7 @@ const Login = () => {
 
               <Button
                 type="submit"
-                className="w-full h-12 bg-gradient-brand hover:opacity-90 transition-opacity font-semibold"
+                className="w-full h-12 bg-gradient-to-r from-blue-900 via-blue-600 to-orange-500 text-white hover:opacity-90 transition-opacity font-semibold rounded-lg"
                 disabled={isLoading}
               >
                 {isLoading ? "Entrando..." : "Entrar"}
@@ -119,12 +120,15 @@ const Login = () => {
             </form>
 
             <div className="text-center">
-              <a href="#" className="text-sm text-primary hover:underline">
+              <a
+                href="#"
+                className="text-sm text-blue-600 hover:underline"
+              >
                 Esqueceu sua senha?
               </a>
             </div>
-          </div>
-        </Card>
+          </Card>
+        </div>
       </div>
     </div>
   );
