@@ -26,7 +26,10 @@ const Login = () => {
         title: "Login realizado com sucesso!",
         description: "Bem-vindo ao InvenTech",
       });
-      navigate("/dashboard");
+      // Pequeno delay para garantir que o estado seja atualizado
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 100);
     } catch (error) {
       toast({
         title: "Erro no login",
