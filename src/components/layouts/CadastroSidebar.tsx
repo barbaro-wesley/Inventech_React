@@ -5,11 +5,13 @@ import {
   ChevronRight,
   Home,
   Monitor,
-  Printer,
-  Stethoscope,
   Wind,
   Plus,
-  List,
+  Package,
+  Wrench,
+  Shield,
+  AlertTriangle,
+  Calendar,
 } from "lucide-react";
 
 import {
@@ -31,23 +33,21 @@ const menuItems = [
     icon: Home,
   },
   {
-    title: "Equipamentos",
-    icon: Monitor,
-    items: [
-      { title: "Computadores", url: "/computadores", icon: Monitor },
-      { title: "Impressoras", url: "/impressoras", icon: Printer },
-      { title: "Equipamentos Médicos", url: "/equipamentos", icon: Stethoscope },
-      { title: "Condicionadores", url: "/condicionadores", icon: Wind },
-    ],
-  },
-  {
     title: "Cadastros",
     icon: Plus,
     items: [
-      { title: "Novo Computador", url: "/computadores/novo", icon: Plus },
-      { title: "Nova Impressora", url: "/impressoras/novo", icon: Plus },
-      { title: "Novo Equipamento Médico", url: "/equipamentos/novo", icon: Plus },
-      { title: "Novo Condicionador", url: "/condicionadores/novo", icon: Plus },
+      { title: "Equipamentos", url: "/equipamentos", icon: Monitor },
+      { title: "Ar Condicionado", url: "/ar-condicionado", icon: Wind },
+      { title: "Mobílias", url: "/mobilias", icon: Package },
+    ],
+  },
+  {
+    title: "Manutenção",
+    icon: Wrench,
+    items: [
+      { title: "Preventiva", url: "/manutencao/preventiva", icon: Shield },
+      { title: "Corretiva", url: "/manutencao/corretiva", icon: AlertTriangle },
+      { title: "Calendário", url: "/manutencao/calendario", icon: Calendar },
     ],
   },
 ];
