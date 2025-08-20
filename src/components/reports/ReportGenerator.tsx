@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,9 +8,11 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, Download, FileText, Eye } from 'lucide-react';
 import { EquipamentosReport } from './EquipamentosReport';
+import { CondicionadoresReport } from './CondicionadoresReport';
+import api from '@/lib/api';
 
 export const ReportGenerator: React.FC = () => {
-  const [reportType, setReportType] = useState<string>('equipamentos');
+  const [reportType, setReportType] = useState<string>('condicionadores');
   const [filters, setFilters] = useState({
     dataInicio: '',
     dataFim: '',
@@ -18,8 +20,28 @@ export const ReportGenerator: React.FC = () => {
     tipo: '',
   });
   const [showPreview, setShowPreview] = useState(false);
+  const [condicionadores, setCondicionadores] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // Dados mockados para exemplo
+  useEffect(() => {
+    if (reportType === 'condicionadores') {
+      fetchCondicionadores();
+    }
+  }, [reportType]);
+
+  const fetchCondicionadores = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/condicionadores');
+      setCondicionadores(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar condicionadores:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Dados mockados para equipamentos
   const mockEquipamentos = [
     {
       id: 'EQ001',
@@ -37,30 +59,6 @@ export const ReportGenerator: React.FC = () => {
       status: 'Ativo',
       dataAquisicao: '2023-02-20',
     },
-    {
-      id: 'EQ003',
-      nome: 'Monitor Samsung 24"',
-      tipo: 'Monitor',
-      setor: 'TI',
-      status: 'Em Manutenção',
-      dataAquisicao: '2023-03-10',
-    },
-    {
-      id: 'EQ004',
-      nome: 'Notebook Lenovo ThinkPad',
-      tipo: 'Notebook',
-      setor: 'Vendas',
-      status: 'Ativo',
-      dataAquisicao: '2023-04-05',
-    },
-    {
-      id: 'EQ005',
-      nome: 'Projetor Epson',
-      tipo: 'Projetor',
-      setor: 'Sala de Reunião',
-      status: 'Inativo',
-      dataAquisicao: '2022-12-15',
-    },
   ];
 
   const getReportComponent = () => {
@@ -69,6 +67,13 @@ export const ReportGenerator: React.FC = () => {
         return (
           <EquipamentosReport
             equipamentos={mockEquipamentos}
+            filtros={filters}
+          />
+        );
+      case 'condicionadores':
+        return (
+          <CondicionadoresReport
+            condicionadores={condicionadores}
             filtros={filters}
           />
         );
@@ -82,6 +87,8 @@ export const ReportGenerator: React.FC = () => {
     switch (reportType) {
       case 'equipamentos':
         return `relatorio-equipamentos-${now}.pdf`;
+      case 'condicionadores':
+        return `relatorio-condicionadores-${now}.pdf`;
       default:
         return `relatorio-${now}.pdf`;
     }
@@ -110,6 +117,7 @@ export const ReportGenerator: React.FC = () => {
                     <SelectValue placeholder="Selecione o tipo" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="condicionadores">Relatório de Condicionadores de Ar</SelectItem>
                     <SelectItem value="equipamentos">Relatório de Equipamentos</SelectItem>
                     <SelectItem value="usuarios">Relatório de Usuários</SelectItem>
                     <SelectItem value="manutencao">Relatório de Manutenção</SelectItem>
@@ -180,7 +188,7 @@ export const ReportGenerator: React.FC = () => {
                     {({ loading }) => (
                       <Button disabled={loading} className="flex-1">
                         <Download className="h-4 w-4 mr-2" />
-                        {loading ? 'Gerando...' : 'Download'}
+                        {loading ? 'Carregando dados...' : 'Download'}
                       </Button>
                     )}
                   </PDFDownloadLink>
