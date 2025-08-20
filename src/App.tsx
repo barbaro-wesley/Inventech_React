@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import Computadores from "./pages/Computadores";
 import Equipamentos from "./pages/Equipamentos";
 import Condicionados from "./pages/Air";
+import Relatorios from "./pages/Relatorios";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -52,6 +53,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
                   <Condicionados/>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/relatorios" 
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'visualizador']}>
+                  <Relatorios />
                 </ProtectedRoute>
               } 
             />
