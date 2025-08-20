@@ -15,7 +15,8 @@ import {
   Calendar,
   Users,
   UsersRound,
-  Group
+  Group,
+  BarChart3
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 
@@ -62,6 +63,11 @@ const menuItems = [
     title: "Registros T.I",
     icon: FileText,
     url: "/registros-ti"
+  },
+  {
+    title: "Relatórios",
+    icon: BarChart3,
+    url: "/relatorios"
   },
   {
     title: "Cadastro",
