@@ -30,7 +30,7 @@ const Login = () => {
         description: "Bem-vindo ao InvenTech",
       });
       setTimeout(() => {
-        navigate("/dashboard");
+        navigate("/modules");
       }, 100);
     } catch (error) {
       toast({

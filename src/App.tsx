@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import { ModuleSelection } from "./pages/ModuleSelection";
 import Computadores from "./pages/Computadores";
 import Equipamentos from "./pages/Equipamentos";
 import Condicionados from "./pages/Air";
@@ -24,6 +25,14 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Login />} />
+            <Route 
+              path="/modules" 
+              element={
+                <ProtectedRoute>
+                  <ModuleSelection />
+                </ProtectedRoute>
+              } 
+            />
             <Route 
               path="/dashboard" 
               element={
