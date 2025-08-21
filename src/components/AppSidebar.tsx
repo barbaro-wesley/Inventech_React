@@ -57,6 +57,11 @@ const menuItems = [
       { title: "Preventiva", url: "/preventiva", icon: Shield },
       { title: "Corretiva", url: "/corretiva", icon: Zap },
       { title: "Calendário de Manutenção", url: "/calendario", icon: Calendar },
+      {
+    title: "Relatórios",
+    icon: BarChart3,
+    url: "/relatorios"
+  },
     ]
   },
   {
@@ -64,11 +69,7 @@ const menuItems = [
     icon: FileText,
     url: "/registros-ti"
   },
-  {
-    title: "Relatórios",
-    icon: BarChart3,
-    url: "/relatorios"
-  },
+  
   {
     title: "Cadastro",
     icon: UserPlus,

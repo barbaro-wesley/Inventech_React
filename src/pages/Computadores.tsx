@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Computer, Plus, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-
+import api from "@/lib/api";
 const Computadores = () => {
   const [computers, setComputers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,14 +13,10 @@ const Computadores = () => {
   useEffect(() => {
     const fetchComputers = async () => {
       try {
-        const response = await fetch('/api/hcr-computers', {
-          credentials: 'include',
+        const { data } = await api.get("/hcr-computers", {
+          withCredentials: true, // equivalente a credentials: 'include'
         });
-        
-        if (response.ok) {
-          const data = await response.json();
-          setComputers(data);
-        }
+        setComputers(data);
       } catch (error) {
         toast({
           title: "Erro ao carregar computadores",
@@ -47,7 +43,7 @@ const Computadores = () => {
             Gerencie todos os computadores da organização
           </p>
         </div>
-        
+
         <Button className="bg-gradient-brand hover:opacity-90 transition-opacity">
           <Plus className="h-4 w-4 mr-2" />
           Novo Computador
@@ -59,8 +55,8 @@ const Computadores = () => {
         <div className="flex gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Pesquisar computadores..." 
+            <Input
+              placeholder="Pesquisar computadores..."
               className="pl-9"
             />
           </div>
@@ -82,8 +78,8 @@ const Computadores = () => {
             </Card>
           ))
         ) : computers.length > 0 ? (
-          computers.map((computer: any, index) => (
-            <Card key={index} className="p-6 hover:shadow-soft transition-shadow">
+          computers.map((computer: any) => (
+            <Card key={computer.id} className="p-6 hover:shadow-soft transition-shadow">
               <div className="flex items-start justify-between mb-4">
                 <div className="p-2 bg-gradient-brand rounded-lg">
                   <Computer className="h-6 w-6 text-white" />
@@ -92,17 +88,16 @@ const Computadores = () => {
                   Ativo
                 </span>
               </div>
-              
-              <h3 className="font-semibold text-lg mb-2">
-                Computador #{index + 1}
-              </h3>
-              
+
+              <h3 className="font-semibold text-lg mb-2">{computer.nomePC}</h3>
+
               <div className="space-y-1 text-sm text-muted-foreground">
-                <p>Marca: Dell OptiPlex</p>
-                <p>Local: Setor {index + 1}</p>
-                <p>Última manutenção: 15/12/2024</p>
+                <p>Patrimônio: {computer.nPatrimonio}</p>
+                <p>Setor: {computer.setor?.nome || "-"}</p>
+                <p>Localização: {computer.localizacao?.nome || "-"}</p>
+                <p>Sistema Operacional: {computer.sistemaOperacional}</p>
               </div>
-              
+
               <div className="mt-4 flex gap-2">
                 <Button variant="outline" size="sm" className="flex-1">
                   Editar

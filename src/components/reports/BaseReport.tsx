@@ -1,11 +1,5 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Image, Font } from '@react-pdf/renderer';
-
-// Registrar fonte personalizada se necessário
-// Font.register({
-//   family: 'Roboto',
-//   src: 'https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Mu4mxP.ttf',
-// });
+import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 
 const styles = StyleSheet.create({
   page: {
@@ -15,44 +9,48 @@ const styles = StyleSheet.create({
     fontFamily: 'Helvetica',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 30,
-    paddingBottom: 20,
-    borderBottomWidth: 2,
+    marginBottom: 20,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
   },
   logo: {
-    width: 80,
-    height: 40,
+    width: 50,
+    height: 50,
+    marginBottom: 5,
   },
   companyInfo: {
-    flexDirection: 'column',
-    alignItems: 'flex-end',
+    alignItems: 'center',
   },
   companyName: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: 'bold',
-    color: '#1f2937',
-    marginBottom: 4,
+    color: '#082C5E',
+    marginBottom: 2,
   },
   companyAddress: {
-    fontSize: 10,
-    color: '#6b7280',
+    fontSize: 9,
+    color: '#0B428E',
   },
   title: {
-    fontSize: 24,
+    fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 30,
-    color: '#1f2937',
+    marginVertical: 20,
+    color: '#082C5E',
   },
   subtitle: {
-    fontSize: 14,
-    textAlign: 'center',
-    marginBottom: 20,
-    color: '#6b7280',
+    fontSize: 12,
+    textAlign: 'justify',
+    marginBottom: 25,
+    padding: 10,
+    borderLeftWidth: 3,
+    borderLeftColor: '#3b82f6',
+    color: '#374151',
+    fontStyle: 'italic',
+    lineHeight: 1.4,
+    backgroundColor: '#f9fafb',
   },
   content: {
     flex: 1,
@@ -62,16 +60,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 20,
+    paddingTop: 10,
     borderTopWidth: 1,
     borderTopColor: '#e5e7eb',
   },
   footerText: {
-    fontSize: 10,
+    fontSize: 9,
     color: '#6b7280',
   },
   pageNumber: {
-    fontSize: 10,
+    fontSize: 9,
     color: '#6b7280',
   },
 });
@@ -89,7 +87,7 @@ export interface BaseReportProps {
 export const BaseReport: React.FC<BaseReportProps> = ({
   title,
   subtitle,
-  companyName = "Sistema de Gestão",
+  companyName = "Inventech",
   companyAddress = "Rua Exemplo, 123 - Cidade, Estado",
   logoUrl,
   children,
@@ -97,32 +95,29 @@ export const BaseReport: React.FC<BaseReportProps> = ({
 }) => (
   <Document>
     <Page size="A4" style={styles.page}>
-      {/* Header */}
       <View style={styles.header}>
-        <View>
-          {logoUrl && <Image style={styles.logo} src={logoUrl} />}
-        </View>
+        {logoUrl && <Image style={styles.logo} src={logoUrl} />}
         <View style={styles.companyInfo}>
           <Text style={styles.companyName}>{companyName}</Text>
           <Text style={styles.companyAddress}>{companyAddress}</Text>
         </View>
       </View>
 
-      {/* Title */}
       <Text style={styles.title}>{title}</Text>
       {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
 
-      {/* Content */}
       <View style={styles.content}>
         {children}
       </View>
 
-      {/* Footer */}
       <View style={styles.footer} fixed>
         <Text style={styles.footerText}>{footerText}</Text>
-        <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => 
-          `Página ${pageNumber} de ${totalPages}`
-        } />
+        <Text
+          style={styles.pageNumber}
+          render={({ pageNumber, totalPages }) =>
+            `Página ${pageNumber} de ${totalPages}`
+          }
+        />
       </View>
     </Page>
   </Document>

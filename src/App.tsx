@@ -12,7 +12,7 @@ import Relatorios from "./pages/Relatorios";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-
+import PrinterPage from "./pages/printer";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -53,6 +53,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
                   <Condicionados/>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/impressoras" 
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
+                  <PrinterPage/>
                 </ProtectedRoute>
               } 
             />

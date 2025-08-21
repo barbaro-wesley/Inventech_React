@@ -40,8 +40,6 @@ export const ReportGenerator: React.FC = () => {
       setLoading(false);
     }
   };
-
-  // Dados mockados para equipamentos
   const mockEquipamentos = [
     {
       id: 'EQ001',
@@ -153,16 +151,19 @@ export const ReportGenerator: React.FC = () => {
               <div>
                 <Label htmlFor="setor">Setor</Label>
                 <Select
-                  value={filters.setor}
+                  value={filters.setor || "all"}
                   onValueChange={(value) =>
-                    setFilters(prev => ({ ...prev, setor: value }))
+                    setFilters(prev => ({
+                      ...prev,
+                      setor: value === "all" ? "" : value, // mantém "" internamente se quiser
+                    }))
                   }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Todos os setores" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos os setores</SelectItem>
+                    <SelectItem value="all">Todos os setores</SelectItem>
                     <SelectItem value="TI">TI</SelectItem>
                     <SelectItem value="Administrativo">Administrativo</SelectItem>
                     <SelectItem value="Vendas">Vendas</SelectItem>

@@ -95,7 +95,7 @@ export const CondicionadoresReport: React.FC<CondicionadoresReportProps> = ({
   const totalCondicionadores = condicionadores.length;
   const comPatrimonio = condicionadores.filter(eq => eq.nPatrimonio && eq.nPatrimonio !== 'Nao tem').length;
   const semPatrimonio = totalCondicionadores - comPatrimonio;
-  
+
   // Contagem por marca
   const marcas = condicionadores.reduce((acc, curr) => {
     const marca = curr.marca || 'Não informado';
@@ -103,7 +103,7 @@ export const CondicionadoresReport: React.FC<CondicionadoresReportProps> = ({
     return acc;
   }, {} as Record<string, number>);
 
-  const subtitle = filtros?.dataInicio && filtros?.dataFim 
+  const subtitle = filtros?.dataInicio && filtros?.dataFim
     ? `Período: ${filtros.dataInicio} a ${filtros.dataFim}`
     : `Gerado em ${new Date().toLocaleDateString('pt-BR')}`;
 
@@ -119,12 +119,12 @@ export const CondicionadoresReport: React.FC<CondicionadoresReportProps> = ({
         <Text style={styles.summaryText}>Total de Condicionadores: {totalCondicionadores}</Text>
         <Text style={styles.summaryText}>Com Patrimônio: {comPatrimonio}</Text>
         <Text style={styles.summaryText}>Sem Patrimônio: {semPatrimonio}</Text>
-        
+
         <Text style={[styles.summaryText, { marginTop: 8, fontWeight: 'bold' }]}>Por Marca:</Text>
         {Object.entries(marcas).map(([marca, quantidade]) => (
           <Text key={marca} style={styles.summaryText}>• {marca}: {quantidade}</Text>
         ))}
-        
+
         {filtros?.setor && (
           <Text style={styles.summaryText}>Setor Filtrado: {filtros.setor}</Text>
         )}
@@ -135,13 +135,7 @@ export const CondicionadoresReport: React.FC<CondicionadoresReportProps> = ({
         {/* Header */}
         <View style={[styles.tableRow, styles.tableHeader]}>
           <View style={styles.tableColHeader}>
-            <Text style={styles.tableCellHeader}>ID</Text>
-          </View>
-          <View style={styles.tableColHeader}>
             <Text style={styles.tableCellHeader}>Patrimônio</Text>
-          </View>
-          <View style={styles.tableColHeader}>
-            <Text style={styles.tableCellHeader}>Controle</Text>
           </View>
           <View style={styles.tableColHeader}>
             <Text style={styles.tableCellHeader}>Marca</Text>
@@ -152,30 +146,32 @@ export const CondicionadoresReport: React.FC<CondicionadoresReportProps> = ({
           <View style={styles.tableColHeader}>
             <Text style={styles.tableCellHeader}>BTUs</Text>
           </View>
+          <View style={styles.tableColHeader}>
+            <Text style={styles.tableCellHeader}>Localização</Text>
+          </View>
+
         </View>
 
         {/* Rows */}
         {condicionadores.map((condicionador) => (
-          <View key={condicionador.id} style={styles.tableRow}>
+          <View key={condicionador.id} style={styles.tableRow}>   
             <View style={styles.tableCol}>
-              <Text style={styles.tableCell}>{condicionador.id}</Text>
+              <Text style={styles.tableCell}>{String(condicionador.nPatrimonio || "-")}</Text>
             </View>
             <View style={styles.tableCol}>
-              <Text style={styles.tableCell}>{condicionador.nPatrimonio}</Text>
+             <Text style={styles.tableCell}>{String(condicionador.marca || "-")}</Text>
             </View>
             <View style={styles.tableCol}>
-              <Text style={styles.tableCell}>{condicionador.nControle}</Text>
+              <Text style={styles.tableCell}>{String(condicionador.modelo || "-")}</Text>
             </View>
             <View style={styles.tableCol}>
-              <Text style={styles.tableCell}>{condicionador.marca}</Text>
+              <Text style={styles.tableCell}>{String(condicionador.BTUS || "-")}</Text>
             </View>
             <View style={styles.tableCol}>
-              <Text style={styles.tableCell}>{condicionador.modelo}</Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCell}>{condicionador.BTUS}</Text>
+              <Text style={styles.tableCell}>{String(condicionador.localizacao?.nome || "-")}</Text>
             </View>
           </View>
+          
         ))}
       </View>
     </BaseReport>
