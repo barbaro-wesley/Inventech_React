@@ -1,289 +1,181 @@
 import { useState } from "react";
-import { Layout } from "@/components/Layout";
+import { Plus, Search, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Plus, Edit, Trash2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { mockEmployees } from "@/data/mockData";
+import { Employee } from "@/types";
 
-interface Funcionario {
-  id: number;
-  nome: string;
-  cpf: string;
-  cargo: string;
-  setor: string;
-  email: string;
-  telefone: string;
-}
-
-const mockFuncionarios: Funcionario[] = [
-  {
-    id: 1,
-    nome: "João Silva",
-    cpf: "123.456.789-01",
-    cargo: "Analista",
-    setor: "TI",
-    email: "joao@empresa.com",
-    telefone: "(11) 99999-9999"
-  },
-  {
-    id: 2,
-    nome: "Maria Santos",
-    cpf: "987.654.321-02", 
-    cargo: "Gerente",
-    setor: "RH",
-    email: "maria@empresa.com",
-    telefone: "(11) 88888-8888"
-  }
-];
-
-const Funcionarios = () => {
-  const [funcionarios, setFuncionarios] = useState<Funcionario[]>(mockFuncionarios);
+export default function Funcionarios() {
+  const [employees, setEmployees] = useState<Employee[]>(mockEmployees);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filtroSetor, setFiltroSetor] = useState("todos");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [funcionarioSelecionado, setFuncionarioSelecionado] = useState<Funcionario | null>(null);
-  const { toast } = useToast();
+  const [filterCargo, setFilterCargo] = useState("all");
+  const [filterSetor, setFilterSetor] = useState("all");
 
-  const [formData, setFormData] = useState({
-    nome: "",
-    cpf: "",
-    cargo: "",
-    setor: "",
-    email: "",
-    telefone: ""
+  const filteredEmployees = employees.filter((employee) => {
+    const matchesSearch =
+      employee.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      employee.cpf.includes(searchTerm) ||
+      employee.email.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesCargo = filterCargo === "all" || employee.cargo === filterCargo;
+    const matchesSetor = filterSetor === "all" || employee.setor === filterSetor;
+
+    return matchesSearch && matchesCargo && matchesSetor;
   });
 
-  const funcionariosFiltrados = funcionarios.filter(func => {
-    const matchSearch = func.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                       func.cpf.includes(searchTerm) ||
-                       func.cargo.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchSetor = filtroSetor === "todos" || func.setor === filtroSetor;
-    return matchSearch && matchSetor;
-  });
+  const uniqueCargos = [...new Set(employees.map((emp) => emp.cargo))];
+  const uniqueSetores = [...new Set(employees.map((emp) => emp.setor))];
 
-  const setores = [...new Set(funcionarios.map(f => f.setor))];
-
-  const abrirDialog = (funcionario?: Funcionario) => {
-    if (funcionario) {
-      setFuncionarioSelecionado(funcionario);
-      setFormData(funcionario);
-    } else {
-      setFuncionarioSelecionado(null);
-      setFormData({
-        nome: "",
-        cpf: "",
-        cargo: "",
-        setor: "",
-        email: "",
-        telefone: ""
-      });
+  const handleDelete = (id: string) => {
+    if (confirm("Tem certeza que deseja excluir este funcionário?")) {
+      setEmployees(employees.filter((emp) => emp.id !== id));
     }
-    setIsDialogOpen(true);
-  };
-
-  const salvarFuncionario = () => {
-    if (funcionarioSelecionado) {
-      // Editar
-      setFuncionarios(prev => prev.map(f => 
-        f.id === funcionarioSelecionado.id ? { ...formData, id: f.id } : f
-      ));
-      toast({ title: "Funcionário atualizado com sucesso!" });
-    } else {
-      // Novo
-      const novoFuncionario = {
-        ...formData,
-        id: Math.max(...funcionarios.map(f => f.id)) + 1
-      };
-      setFuncionarios(prev => [...prev, novoFuncionario]);
-      toast({ title: "Funcionário cadastrado com sucesso!" });
-    }
-    setIsDialogOpen(false);
-  };
-
-  const excluirFuncionario = (id: number) => {
-    setFuncionarios(prev => prev.filter(f => f.id !== id));
-    toast({ title: "Funcionário excluído com sucesso!" });
   };
 
   return (
-    <Layout>
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h1 className="text-2xl font-bold text-foreground">Funcionários</h1>
-          
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => abrirDialog()} className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Novo Funcionário
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>
-                  {funcionarioSelecionado ? "Editar Funcionário" : "Novo Funcionário"}
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="nome">Nome Completo</Label>
-                  <Input
-                    id="nome"
-                    value={formData.nome}
-                    onChange={(e) => setFormData(prev => ({ ...prev, nome: e.target.value }))}
-                    placeholder="Digite o nome completo"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="cpf">CPF</Label>
-                  <Input
-                    id="cpf"
-                    value={formData.cpf}
-                    onChange={(e) => setFormData(prev => ({ ...prev, cpf: e.target.value }))}
-                    placeholder="000.000.000-00"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="cargo">Cargo</Label>
-                  <Input
-                    id="cargo"
-                    value={formData.cargo}
-                    onChange={(e) => setFormData(prev => ({ ...prev, cargo: e.target.value }))}
-                    placeholder="Digite o cargo"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="setor">Setor</Label>
-                  <Input
-                    id="setor"
-                    value={formData.setor}
-                    onChange={(e) => setFormData(prev => ({ ...prev, setor: e.target.value }))}
-                    placeholder="Digite o setor"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="email">E-mail</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    placeholder="funcionario@empresa.com"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="telefone">Telefone</Label>
-                  <Input
-                    id="telefone"
-                    value={formData.telefone}
-                    onChange={(e) => setFormData(prev => ({ ...prev, telefone: e.target.value }))}
-                    placeholder="(11) 99999-9999"
-                  />
-                </div>
-                <Button onClick={salvarFuncionario} className="w-full">
-                  {funcionarioSelecionado ? "Atualizar" : "Cadastrar"}
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Funcionários</h1>
+          <p className="text-muted-foreground mt-1">
+            Gerencie os funcionários da empresa
+          </p>
         </div>
-
-        {/* Filtros */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Filtros</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Buscar por nome, CPF ou cargo..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-              <div className="sm:w-48">
-                <Select value={filtroSetor} onValueChange={setFiltroSetor}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Filtrar por setor" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="todos">Todos os setores</SelectItem>
-                    {setores.map(setor => (
-                      <SelectItem key={setor} value={setor}>{setor}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Tabela */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Lista de Funcionários ({funcionariosFiltrados.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>CPF</TableHead>
-                    <TableHead>Cargo</TableHead>
-                    <TableHead>Setor</TableHead>
-                    <TableHead>E-mail</TableHead>
-                    <TableHead>Telefone</TableHead>
-                    <TableHead className="w-24">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {funcionariosFiltrados.map((funcionario) => (
-                    <TableRow key={funcionario.id}>
-                      <TableCell className="font-medium">{funcionario.nome}</TableCell>
-                      <TableCell>{funcionario.cpf}</TableCell>
-                      <TableCell>{funcionario.cargo}</TableCell>
-                      <TableCell>{funcionario.setor}</TableCell>
-                      <TableCell>{funcionario.email}</TableCell>
-                      <TableCell>{funcionario.telefone}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => abrirDialog(funcionario)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => excluirFuncionario(funcionario.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+        <Button className="bg-gradient-primary hover:bg-primary-hover shadow-medium">
+          <Plus className="w-4 h-4 mr-2" />
+          Novo Funcionário
+        </Button>
       </div>
-    </Layout>
-  );
-};
 
-export default Funcionarios;
+      <Card className="shadow-medium">
+        <CardHeader>
+          <CardTitle className="text-lg">Filtros de Busca</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por nome, CPF ou email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Select value={filterCargo} onValueChange={setFilterCargo}>
+              <SelectTrigger>
+                <SelectValue placeholder="Filtrar por cargo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os cargos</SelectItem>
+                {uniqueCargos.map((cargo) => (
+                  <SelectItem key={cargo} value={cargo}>
+                    {cargo}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={filterSetor} onValueChange={setFilterSetor}>
+              <SelectTrigger>
+                <SelectValue placeholder="Filtrar por setor" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os setores</SelectItem>
+                {uniqueSetores.map((setor) => (
+                  <SelectItem key={setor} value={setor}>
+                    {setor}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSearchTerm("");
+                setFilterCargo("all");
+                setFilterSetor("all");
+              }}
+            >
+              Limpar Filtros
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="shadow-medium">
+        <CardHeader>
+          <CardTitle className="text-lg">
+            Lista de Funcionários ({filteredEmployees.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>CPF</TableHead>
+                  <TableHead>Cargo</TableHead>
+                  <TableHead>Setor</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Telefone</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredEmployees.map((employee) => (
+                  <TableRow key={employee.id} className="hover:bg-muted/50">
+                    <TableCell className="font-medium">{employee.nome}</TableCell>
+                    <TableCell className="font-mono text-sm">{employee.cpf}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">{employee.cargo}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{employee.setor}</Badge>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {employee.email}
+                    </TableCell>
+                    <TableCell className="text-sm">{employee.telefone}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button variant="ghost" size="sm">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(employee.id)}
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
