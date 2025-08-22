@@ -18,6 +18,7 @@ import Funcionarios from "./pages/Funcionarios";
 import TiposDocumentos from "./pages/TiposDocumentos";
 import RegistrosCapacitacao from "./pages/RegistrosCapacitacao";
 import PesquisarDocumentos from "./pages/PesquisarDocumentos";
+import { DocumentosLayout } from "./components/layouts/DocumentosLayout";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -90,7 +91,9 @@ const App = () => (
               path="/funcionarios" 
               element={
                 <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-                  <Funcionarios />
+                  <DocumentosLayout>
+                    <Funcionarios />
+                  </DocumentosLayout>
                 </ProtectedRoute>
               } 
             />
@@ -98,7 +101,9 @@ const App = () => (
               path="/tipos-documentos" 
               element={
                 <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
-                  <TiposDocumentos />
+                  <DocumentosLayout>
+                    <TiposDocumentos />
+                  </DocumentosLayout>
                 </ProtectedRoute>
               } 
             />
@@ -106,7 +111,9 @@ const App = () => (
               path="/registros-capacitacao" 
               element={
                 <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-                  <RegistrosCapacitacao />
+                  <DocumentosLayout>
+                    <RegistrosCapacitacao />
+                  </DocumentosLayout>
                 </ProtectedRoute>
               } 
             />
@@ -114,7 +121,9 @@ const App = () => (
               path="/pesquisar-documentos" 
               element={
                 <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-                  <PesquisarDocumentos />
+                  <DocumentosLayout>
+                    <PesquisarDocumentos />
+                  </DocumentosLayout>
                 </ProtectedRoute>
               } 
             />
