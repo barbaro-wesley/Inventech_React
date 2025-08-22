@@ -2,23 +2,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import { ModuleSelection } from "./pages/ModuleSelection";
-import Computadores from "./pages/Computadores";
-import Equipamentos from "./pages/Equipamentos";
-import Condicionados from "./pages/Air";
-import Relatorios from "./pages/Relatorios";
-import NotFound from "./pages/NotFound";
+import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
-import { ProtectedRoute } from "./components/ProtectedRoute";
-import PrinterPage from "./pages/printer";
-import Funcionarios from "./pages/Funcionarios";
-import TiposDocumentos from "./pages/TiposDocumentos";
-import RegistrosCapacitacao from "./pages/RegistrosCapacitacao";
-import PesquisarDocumentos from "./pages/PesquisarDocumentos";
-import { DocumentosLayout } from "./components/layouts/DocumentosLayout";
+import { AppRoutes } from "./components/AppRoutes";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -28,108 +15,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Login />} />
-            <Route 
-              path="/modules" 
-              element={
-                <ProtectedRoute>
-                  <ModuleSelection />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/computadores" 
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-                  <Computadores />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/equipamentos" 
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-                  <Equipamentos />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/condicionadores" 
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-                  <Condicionados/>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/impressoras" 
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-                  <PrinterPage/>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/relatorios" 
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'visualizador']}>
-                  <Relatorios />
-                </ProtectedRoute>
-              } 
-            />
-            {/* Gestão de Documentos Routes */}
-            <Route 
-              path="/funcionarios" 
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-                  <DocumentosLayout>
-                    <Funcionarios />
-                  </DocumentosLayout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/tipos-documentos" 
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
-                  <DocumentosLayout>
-                    <TiposDocumentos />
-                  </DocumentosLayout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/registros-capacitacao" 
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-                  <DocumentosLayout>
-                    <RegistrosCapacitacao />
-                  </DocumentosLayout>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/pesquisar-documentos" 
-              element={
-                <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-                  <DocumentosLayout>
-                    <PesquisarDocumentos />
-                  </DocumentosLayout>
-                </ProtectedRoute>
-              } 
-            />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AppRoutes />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
