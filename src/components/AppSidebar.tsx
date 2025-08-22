@@ -15,7 +15,10 @@ import {
   Calendar,
   Users,
   UsersRound,
-  Group
+  Group,
+  BarChart3,
+  GraduationCap,
+  Search
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 
@@ -43,8 +46,7 @@ const menuItems = [
     items: [
       { title: "Computadores", url: "/computadores", icon: Computer },
       { title: "Equipamentos", url: "/equipamentos", icon: Settings },
-      { title: "Ar-Condicionado", url: "/ar-condicionado", icon: AirVent },
-      { title: "Mobilias", url: "/mobilias", icon: Sofa },
+      { title: "Ar-Condicionado", url: "/condicionadores", icon: AirVent },
       { title: "Impressoras", url: "/impressoras", icon: Printer },
     ]
   },
@@ -59,9 +61,24 @@ const menuItems = [
     ]
   },
   {
+    title: "Gestão de Documentos",
+    icon: GraduationCap,
+    items: [
+      { title: "Funcionários", url: "/funcionarios", icon: Users },
+      { title: "Tipos de Documentos", url: "/tipos-documentos", icon: FileText },
+      { title: "Registros de Capacitação", url: "/registros-capacitacao", icon: GraduationCap },
+      { title: "Pesquisar Documentos", url: "/pesquisar-documentos", icon: Search },
+    ]
+  },
+  {
     title: "Registros T.I",
     icon: FileText,
     url: "/registros-ti"
+  },
+  {
+    title: "Relatórios",
+    icon: BarChart3,
+    url: "/relatorios"
   },
   {
     title: "Cadastro",

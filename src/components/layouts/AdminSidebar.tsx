@@ -23,6 +23,7 @@ import {
   AlertTriangle,
   Calendar,
   CheckCircle,
+  BarChart3
 } from "lucide-react";
 
 import {
@@ -64,11 +65,6 @@ const menuItems = [
     ],
   },
   {
-    title: "Todas Liberadas",
-    url: "/todas-liberadas",
-    icon: CheckCircle,
-  },
-  {
     title: "Registro TI",
     url: "/registro-ti",
     icon: Settings,
@@ -97,6 +93,11 @@ const menuItems = [
     items: [
       { title: "Relatório de Equipamentos", url: "/relatorios/equipamentos", icon: FileText },
       { title: "Relatório de Usuários", url: "/relatorios/usuarios", icon: FileText },
+      {
+    title: "Relatórios",
+    icon: BarChart3,
+    url: "/relatorios"
+  },
     ],
   },
 ];

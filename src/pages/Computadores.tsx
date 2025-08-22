@@ -5,6 +5,7 @@ import { Computer, Plus, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import api from "@/lib/api";
+import api from "@/lib/api";
 const Computadores = () => {
   const [computers, setComputers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -47,6 +48,7 @@ const Computadores = () => {
           </p>
         </div>
 
+
         <Button className="bg-gradient-brand hover:opacity-90 transition-opacity">
           <Plus className="h-4 w-4 mr-2" />
           Novo Computador
@@ -58,6 +60,8 @@ const Computadores = () => {
         <div className="flex gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Pesquisar computadores..."
             <Input
               placeholder="Pesquisar computadores..."
               className="pl-9"
@@ -83,6 +87,8 @@ const Computadores = () => {
         ) : computers.length > 0 ? (
           computers.map((computer: any) => (
             <Card key={computer.id} className="p-6 hover:shadow-soft transition-shadow">
+          computers.map((computer: any) => (
+            <Card key={computer.id} className="p-6 hover:shadow-soft transition-shadow">
               <div className="flex items-start justify-between mb-4">
                 <div className="p-2 bg-gradient-brand rounded-lg">
                   <Computer className="h-6 w-6 text-white" />
@@ -101,6 +107,7 @@ const Computadores = () => {
                 <p><span className="font-medium">SO:</span> {computer.sistemaOperacional}</p>
                 <p><span className="font-medium">Setor:</span> {computer.setor?.nome}</p>
               </div>
+
 
               <div className="mt-4 flex gap-2">
                 <Button variant="outline" size="sm" className="flex-1">
