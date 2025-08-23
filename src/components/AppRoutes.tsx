@@ -14,8 +14,6 @@ import TiposDocumentos from "@/pages/TiposDocumentos";
 import RegistrosCapacitacao from "@/pages/RegistrosCapacitacao";
 import PesquisarDocumentos from "@/pages/PesquisarDocumentos";
 import Calendario from "@/pages/Calendario";
-import { DocumentosLayout } from "@/components/layouts/DocumentosLayout";
-import { InventechLayout } from "@/components/layouts/InventechLayout";
 
 export const AppRoutes = () => {
   return (
@@ -35,9 +33,7 @@ export const AppRoutes = () => {
         path="/app/dashboard" 
         element={
           <ProtectedRoute>
-            <InventechLayout>
-              <Dashboard />
-            </InventechLayout>
+            <Dashboard />
           </ProtectedRoute>
         } 
       />
@@ -45,9 +41,7 @@ export const AppRoutes = () => {
         path="/app/computadores" 
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-            <InventechLayout>
-              <Computadores />
-            </InventechLayout>
+            <Computadores />
           </ProtectedRoute>
         } 
       />
@@ -55,9 +49,7 @@ export const AppRoutes = () => {
         path="/app/equipamentos" 
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-            <InventechLayout>
-              <Equipamentos />
-            </InventechLayout>
+            <Equipamentos />
           </ProtectedRoute>
         } 
       />
@@ -65,9 +57,7 @@ export const AppRoutes = () => {
         path="/app/condicionadores" 
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-            <InventechLayout>
-              <Condicionados/>
-            </InventechLayout>
+            <Condicionados/>
           </ProtectedRoute>
         } 
       />
@@ -75,9 +65,7 @@ export const AppRoutes = () => {
         path="/app/impressoras" 
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-            <InventechLayout>
-              <PrinterPage/>
-            </InventechLayout>
+            <PrinterPage/>
           </ProtectedRoute>
         } 
       />
@@ -85,9 +73,7 @@ export const AppRoutes = () => {
         path="/app/calendario" 
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-            <InventechLayout>
-              <Calendario />
-            </InventechLayout>
+            <Calendario />
           </ProtectedRoute>
         } 
       />
@@ -95,9 +81,7 @@ export const AppRoutes = () => {
         path="/app/relatorios" 
         element={
           <ProtectedRoute allowedRoles={['admin', 'visualizador']}>
-            <InventechLayout>
-              <Relatorios />
-            </InventechLayout>
+            <Relatorios />
           </ProtectedRoute>
         } 
       />
@@ -107,9 +91,7 @@ export const AppRoutes = () => {
         path="/gestao/funcionarios" 
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-            <DocumentosLayout>
-              <Funcionarios />
-            </DocumentosLayout>
+            <Funcionarios />
           </ProtectedRoute>
         } 
       />
@@ -117,9 +99,7 @@ export const AppRoutes = () => {
         path="/gestao/tipos-documentos" 
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
-            <DocumentosLayout>
-              <TiposDocumentos />
-            </DocumentosLayout>
+            <TiposDocumentos />
           </ProtectedRoute>
         } 
       />
@@ -127,9 +107,7 @@ export const AppRoutes = () => {
         path="/gestao/registros-capacitacao" 
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-            <DocumentosLayout>
-              <RegistrosCapacitacao />
-            </DocumentosLayout>
+            <RegistrosCapacitacao />
           </ProtectedRoute>
         } 
       />
@@ -137,9 +115,7 @@ export const AppRoutes = () => {
         path="/gestao/pesquisar-documentos" 
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-            <DocumentosLayout>
-              <PesquisarDocumentos />
-            </DocumentosLayout>
+            <PesquisarDocumentos />
           </ProtectedRoute>
         } 
       />
