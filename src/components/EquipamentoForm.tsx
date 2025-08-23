@@ -249,81 +249,88 @@ export function EquipamentoForm({ isOpen, onClose, onSubmit, initialData = null 
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="w-[600px] sm:max-w-[600px] overflow-y-auto">
+      <SheetContent className="w-full sm:max-w-[600px] overflow-y-auto p-4 sm:p-6">
         <SheetHeader>
-          <SheetTitle>
+          <SheetTitle className="text-lg sm:text-xl">
             {initialData ? 'Editar Equipamento' : 'Novo Equipamento Médico'}
           </SheetTitle>
         </SheetHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-6 mt-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
           {/* Identificação */}
-          <Card className="p-4">
-            <h3 className="font-semibold mb-4">Identificação</h3>
-            <div className="grid grid-cols-2 gap-4">
+          <Card className="p-4 sm:p-5">
+            <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Identificação</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <Label htmlFor="numeroPatrimonio">Número Patrimônio</Label>
+                <Label htmlFor="numeroPatrimonio" className="text-sm sm:text-base">Número Patrimônio</Label>
                 <Input
                   id="numeroPatrimonio"
                   value={formData.numeroPatrimonio}
                   onChange={(e) => handleChange('numeroPatrimonio', e.target.value)}
+                  className="text-sm sm:text-base"
                 />
               </div>
               <div>
-                <Label htmlFor="identificacao">Identificação</Label>
+                <Label htmlFor="identificacao" className="text-sm sm:text-base">Identificação</Label>
                 <Input
                   id="identificacao"
                   value={formData.identificacao}
                   onChange={(e) => handleChange('identificacao', e.target.value)}
+                  className="text-sm sm:text-base"
                 />
               </div>
               <div>
-                <Label htmlFor="numeroSerie">Número Série</Label>
+                <Label htmlFor="numeroSerie" className="text-sm sm:text-base">Número Série</Label>
                 <Input
                   id="numeroSerie"
                   value={formData.numeroSerie}
                   onChange={(e) => handleChange('numeroSerie', e.target.value)}
+                  className="text-sm sm:text-base"
                 />
               </div>
               <div>
-                <Label htmlFor="numeroAnvisa">Número ANVISA</Label>
+                <Label htmlFor="numeroAnvisa" className="text-sm sm:text-base">Número ANVISA</Label>
                 <Input
                   id="numeroAnvisa"
                   value={formData.numeroAnvisa}
                   onChange={(e) => handleChange('numeroAnvisa', e.target.value)}
+                  className="text-sm sm:text-base"
                 />
               </div>
             </div>
           </Card>
 
           {/* Informações Básicas */}
-          <Card className="p-4">
-            <h3 className="font-semibold mb-4">Informações Básicas</h3>
-            <div className="space-y-4">
+          <Card className="p-4 sm:p-5">
+            <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Informações Básicas</h3>
+            <div className="space-y-3 sm:space-y-4">
               <div>
-                <Label htmlFor="nomeEquipamento">Nome do Equipamento *</Label>
+                <Label htmlFor="nomeEquipamento" className="text-sm sm:text-base">Nome do Equipamento *</Label>
                 <Input
                   id="nomeEquipamento"
                   value={formData.nomeEquipamento}
                   onChange={(e) => handleChange('nomeEquipamento', e.target.value)}
                   required
+                  className="text-sm sm:text-base"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <Label htmlFor="modelo">Modelo</Label>
+                  <Label htmlFor="modelo" className="text-sm sm:text-base">Modelo</Label>
                   <Input
                     id="modelo"
                     value={formData.modelo}
                     onChange={(e) => handleChange('modelo', e.target.value)}
+                    className="text-sm sm:text-base"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="fabricante">Fabricante</Label>
+                  <Label htmlFor="fabricante" className="text-sm sm:text-base">Fabricante</Label>
                   <Input
                     id="fabricante"
                     value={formData.fabricante}
                     onChange={(e) => handleChange('fabricante', e.target.value)}
+                    className="text-sm sm:text-base"
                   />
                 </div>
               </div>
@@ -331,18 +338,18 @@ export function EquipamentoForm({ isOpen, onClose, onSubmit, initialData = null 
           </Card>
 
           {/* Localização */}
-          <Card className="p-4">
-            <h3 className="font-semibold mb-4">Localização</h3>
-            <div className="grid grid-cols-2 gap-4">
+          <Card className="p-4 sm:p-5">
+            <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Localização</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <Label htmlFor="setorId">Setor</Label>
+                <Label htmlFor="setorId" className="text-sm sm:text-base">Setor</Label>
                 <Select value={formData.setorId} onValueChange={(value) => handleChange('setorId', value)}>
-                  <SelectTrigger>
+                  <SelectTrigger className="text-sm sm:text-base">
                     <SelectValue placeholder="Selecione o setor" />
                   </SelectTrigger>
                   <SelectContent>
                     {setores.map((setor) => (
-                      <SelectItem key={setor.id} value={String(setor.id)}>
+                      <SelectItem key={setor.id} value={String(setor.id)} className="text-sm sm:text-base">
                         {setor.nome}
                       </SelectItem>
                     ))}
@@ -350,18 +357,19 @@ export function EquipamentoForm({ isOpen, onClose, onSubmit, initialData = null 
                 </Select>
               </div>
               <div>
-                <Label htmlFor="localizacaoId">Localização</Label>
+                <Label htmlFor="localizacaoId" className="text-sm sm:text-base">Localização</Label>
                 <Select 
                   value={formData.localizacaoId} 
                   onValueChange={(value) => handleChange('localizacaoId', value)}
                   disabled={!formData.setorId}
+                  className="text-sm sm:text-base"
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="text-sm sm:text-base">
                     <SelectValue placeholder="Selecione a localização" />
                   </SelectTrigger>
                   <SelectContent>
                     {filteredLocalizacoes.map((localizacao) => (
-                      <SelectItem key={localizacao.id} value={String(localizacao.id)}>
+                      <SelectItem key={localizacao.id} value={String(localizacao.id)} className="text-sm sm:text-base">
                         {localizacao.nome}
                       </SelectItem>
                     ))}
@@ -369,15 +377,15 @@ export function EquipamentoForm({ isOpen, onClose, onSubmit, initialData = null 
                 </Select>
               </div>
             </div>
-            <div className="mt-4">
-              <Label htmlFor="tipoEquipamentoId">Tipo de Equipamento</Label>
+            <div className="mt-3 sm:mt-4">
+              <Label htmlFor="tipoEquipamentoId" className="text-sm sm:text-base">Tipo de Equipamento</Label>
               <Select value={formData.tipoEquipamentoId} onValueChange={(value) => handleChange('tipoEquipamentoId', value)}>
-                <SelectTrigger>
+                <SelectTrigger className="text-sm sm:text-base">
                   <SelectValue placeholder="Selecione o tipo" />
                 </SelectTrigger>
                 <SelectContent>
                   {tiposEquipamentos.map((tipo) => (
-                    <SelectItem key={tipo.id} value={String(tipo.id)}>
+                    <SelectItem key={tipo.id} value={String(tipo.id)} className="text-sm sm:text-base">
                       {tipo.nome}
                     </SelectItem>
                   ))}
@@ -387,80 +395,87 @@ export function EquipamentoForm({ isOpen, onClose, onSubmit, initialData = null 
           </Card>
 
           {/* Financeiro e Garantia */}
-          <Card className="p-4">
-            <h3 className="font-semibold mb-4">Financeiro e Garantia</h3>
-            <div className="grid grid-cols-2 gap-4">
+          <Card className="p-4 sm:p-5">
+            <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Financeiro e Garantia</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <Label htmlFor="valorCompra">Valor da Compra</Label>
+                <Label htmlFor="valorCompra" className="text-sm sm:text-base">Valor da Compra</Label>
                 <Input
                   id="valorCompra"
                   type="number"
                   step="0.01"
                   value={formData.valorCompra}
                   onChange={(e) => handleChange('valorCompra', e.target.value)}
+                  className="text-sm sm:text-base"
                 />
               </div>
               <div>
-                <Label htmlFor="dataCompra">Data da Compra</Label>
+                <Label htmlFor="dataCompra" className="text-sm sm:text-base">Data da Compra</Label>
                 <Input
                   id="dataCompra"
                   type="date"
                   value={formData.dataCompra}
                   onChange={(e) => handleChange('dataCompra', e.target.value)}
+                  className="text-sm sm:text-base"
                 />
               </div>
               <div>
-                <Label htmlFor="inicioGarantia">Início da Garantia</Label>
+                <Label htmlFor="inicioGarantia" className="text-sm sm:text-base">Início da Garantia</Label>
                 <Input
                   id="inicioGarantia"
                   type="date"
                   value={formData.inicioGarantia}
                   onChange={(e) => handleChange('inicioGarantia', e.target.value)}
+                  className="text-sm sm:text-base"
                 />
               </div>
               <div>
-                <Label htmlFor="terminoGarantia">Término da Garantia</Label>
+                <Label htmlFor="terminoGarantia" className="text-sm sm:text-base">Término da Garantia</Label>
                 <Input
                   id="terminoGarantia"
                   type="date"
                   value={formData.terminoGarantia}
                   onChange={(e) => handleChange('terminoGarantia', e.target.value)}
+                  className="text-sm sm:text-base"
                 />
               </div>
             </div>
-            <div className="mt-4">
-              <Label htmlFor="notaFiscal">Nota Fiscal</Label>
+            <div className="mt-3 sm:mt-4">
+              <Label htmlFor="notaFiscal" className="text-sm sm:text-base">Nota Fiscal</Label>
               <Input
                 id="notaFiscal"
                 value={formData.notaFiscal}
                 onChange={(e) => handleChange('notaFiscal', e.target.value)}
+                className="text-sm sm:text-base"
               />
             </div>
           </Card>
 
           {/* Observações e Arquivos */}
-          <Card className="p-4">
-            <h3 className="font-semibold mb-4">Observações e Arquivos</h3>
-            <div className="space-y-4">
+          <Card className="p-4 sm:p-5">
+            <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Observações e Arquivos</h3>
+            <div className="space-y-3 sm:space-y-4">
               <div>
-                <Label htmlFor="obs">Observações</Label>
+                <Label htmlFor="obs" className="text-sm sm:text-base">Observações</Label>
                 <Textarea
                   id="obs"
                   value={formData.obs}
                   onChange={(e) => handleChange('obs', e.target.value)}
                   rows={3}
+                  className="text-sm sm:text-base"
                 />
               </div>
               <div>
-                <Label htmlFor="arquivos">Arquivos</Label>
+                <Label htmlFor="arquivos" className="text-sm sm:text-base">Arquivos</Label>
                 <Input
                   id="arquivos"
                   type="file"
                   multiple
                   onChange={(e) => handleChange('arquivos', e.target.files)}
+                  className="text-sm sm:text-base"
                 />
                 {fileNames.length > 0 && (
-                  <div className="mt-2 text-sm text-muted-foreground">
+                  <div className="mt-2 text-xs sm:text-sm text-muted-foreground">
                     Arquivos: {fileNames.join(', ')}
                   </div>
                 )}
@@ -468,11 +483,11 @@ export function EquipamentoForm({ isOpen, onClose, onSubmit, initialData = null 
             </div>
           </Card>
 
-          <div className="flex gap-2 justify-end">
-            <Button type="button" variant="outline" onClick={onClose}>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-end">
+            <Button type="button" variant="outline" onClick={onClose} className="w-full sm:w-auto text-sm sm:text-base">
               Cancelar
             </Button>
-            <Button type="submit" className="bg-gradient-brand hover:opacity-90">
+            <Button type="submit" className="bg-gradient-brand hover:opacity-90 w-full sm:w-auto text-sm sm:text-base">
               {initialData ? 'Atualizar' : 'Cadastrar'}
             </Button>
           </div>

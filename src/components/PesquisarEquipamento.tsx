@@ -42,7 +42,7 @@ const PesquisarEquipamento = () => {
       const response = await api.get(`/equipamentos-medicos/patrimonio/${patrimonio}`, {
         withCredentials: true,
       });
-      
+
       if (response.data) {
         setEquipamento(response.data);
         toast({
@@ -98,54 +98,58 @@ const PesquisarEquipamento = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 px-4 sm:px-6 lg:px-8">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-            <Search className="h-8 w-8 text-brand-secondary" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-2 sm:gap-3">
+            <Search className="h-6 w-6 sm:h-8 sm:w-8 text-brand-secondary" />
             Pesquisar Equipamento
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
             Encontre equipamentos pelo número de patrimônio ou código de barras
           </p>
         </div>
       </div>
 
       {/* Search Section */}
-      <Card className="p-6">
+      <Card className="p-4 sm:p-6">
         <div className="space-y-4">
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-2.5 sm:top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Digite o número de patrimônio..."
-                className="pl-9"
+                className="pl-9 text-sm sm:text-base"
                 value={numeroPatrimonio}
                 onChange={(e) => setNumeroPatrimonio(e.target.value)}
                 onKeyPress={handleKeyPress}
               />
             </div>
-            <Button
-              onClick={handleSearch}
-              disabled={loading}
-              className="bg-gradient-brand hover:opacity-90"
-            >
-              {loading ? "Pesquisando..." : "Pesquisar"}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setShowScanner(!showScanner)}
-            >
-              <Scan className="h-4 w-4 mr-2" />
-              Scanner
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleSearch}
+                disabled={loading}
+                className="bg-gradient-brand hover:opacity-90 text-sm sm:text-base px-3 sm:px-4"
+              >
+                {loading ? "Pesquisando..." : "Pesquisar"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowScanner(!showScanner)}
+                className="text-sm sm:text-base px-3 sm:px-4"
+              >
+                <Scan className="h-4 w-4 mr-2" />
+                Scanner
+              </Button>
+            </div>
           </div>
 
           {/* Barcode Scanner */}
           {showScanner && (
             <div className="border rounded-lg p-4 bg-background">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Scanner de Código de Barras</h3>
+                <h3 className="text-base sm:text-lg font-semibold">Scanner de Código de Barras</h3>
                 <Button
                   variant="outline"
                   size="sm"
@@ -154,10 +158,10 @@ const PesquisarEquipamento = () => {
                   Fechar
                 </Button>
               </div>
-              <div ref={scannerRef} className="w-full max-w-md mx-auto">
+              <div ref={scannerRef} className="w-full max-w-[90vw] sm:max-w-md mx-auto">
                 <BarcodeScannerComponent
-                  width={300}
-                  height={300}
+                  width="100%"
+                  height={window.innerWidth < 640 ? 200 : 300} // Smaller height on mobile
                   onUpdate={(err: any, result: any) => {
                     if (result) {
                       handleScanResult(result.getText());
@@ -168,7 +172,7 @@ const PesquisarEquipamento = () => {
                   }}
                 />
               </div>
-              <p className="text-sm text-muted-foreground text-center mt-2">
+              <p className="text-xs sm:text-sm text-muted-foreground text-center mt-2">
                 Posicione o código de barras dentro da área de leitura
               </p>
             </div>
@@ -178,22 +182,20 @@ const PesquisarEquipamento = () => {
 
       {/* Equipment Result */}
       {equipamento && (
-        <Card className="p-6">
-          <div className="flex justify-between items-start">
-            <div className="flex gap-4 flex-1">
-              <div className="p-3 bg-gradient-brand rounded-lg">
-                <Search className="h-6 w-6 text-white" />
+        <Card className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-1">
+              <div className="p-2 sm:p-3 bg-gradient-brand rounded-lg">
+                <Search className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
-              
               <div className="flex-1">
-                <h3 className="font-semibold text-xl mb-2">
+                <h3 className="font-semibold text-lg sm:text-xl mb-2">
                   {equipamento.nomeEquipamento}
                 </h3>
-                <p className="text-muted-foreground mb-4">
+                <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4">
                   {equipamento.tipoEquipamento?.nome || 'Equipamento'}
                 </p>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 text-xs sm:text-sm">
                   <div>
                     <span className="font-medium">Nº Patrimônio:</span>
                     <span className="text-muted-foreground ml-1">
@@ -221,10 +223,9 @@ const PesquisarEquipamento = () => {
                 </div>
               </div>
             </div>
-            
             <Button
               onClick={() => setShowPopup(true)}
-              className="bg-gradient-brand hover:opacity-90"
+              className="bg-gradient-brand hover:opacity-90 text-sm sm:text-base px-3 sm:px-4 w-full sm:w-auto"
             >
               <Eye className="h-4 w-4 mr-2" />
               Ver Detalhes
