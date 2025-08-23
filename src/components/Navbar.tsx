@@ -5,8 +5,6 @@ import { LogOut, Menu } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { AppSidebar } from "./AppSidebar";
 import { useState } from "react";
 
 interface NavbarProps {
@@ -17,8 +15,6 @@ export const Navbar = ({ onLogoClick }: NavbarProps) => {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-
   const handleLogout = async () => {
     await logout();
     navigate("/");
@@ -28,20 +24,7 @@ export const Navbar = ({ onLogoClick }: NavbarProps) => {
     <header className="h-14 md:h-16 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
       <div className="flex items-center justify-between h-full px-3 md:px-6">
         <div className="flex items-center gap-2 md:gap-4">
-          {isMobile ? (
-            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <Menu className="h-4 w-4" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="p-0 w-64">
-                <AppSidebar />
-              </SheetContent>
-            </Sheet>
-          ) : (
-            <SidebarTrigger className="h-8 w-8" />
-          )}
+          <SidebarTrigger className="h-8 w-8" />
           
           <button
             onClick={onLogoClick}
