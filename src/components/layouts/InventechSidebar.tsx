@@ -38,7 +38,7 @@ const menuItems = [
     title: "Equipamentos",
     icon: Package,
     items: [
-      { title: "Pesquisar", url: "/pesquisar-equipamento", icon: Search },
+      { title: "Pesquisar Equipamento", url: "/pesquisar-equipamento", icon: Search },
       { title: "Computadores", url: "/computadores", icon: Monitor },
       { title: "Equipamentos", url: "/equipamentos", icon: Package },
       { title: "Condicionadores", url: "/condicionadores", icon: Wind },
