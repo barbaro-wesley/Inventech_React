@@ -14,7 +14,7 @@ import TiposDocumentos from "@/pages/TiposDocumentos";
 import RegistrosCapacitacao from "@/pages/RegistrosCapacitacao";
 import PesquisarDocumentos from "@/pages/PesquisarDocumentos";
 import Calendario from "@/pages/Calendario";
-
+import MobiliasPage from "@/pages/Mobilia";
 export const AppRoutes = () => {
   return (
     <Routes>
@@ -30,7 +30,7 @@ export const AppRoutes = () => {
       
       {/* Inventech Module Routes - /app */}
       <Route 
-        path="/app/dashboard" 
+        path="/dashboard" 
         element={
           <ProtectedRoute>
             <Dashboard />
@@ -38,7 +38,7 @@ export const AppRoutes = () => {
         } 
       />
       <Route 
-        path="/app/computadores" 
+        path="/computadores" 
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
             <Computadores />
@@ -46,7 +46,7 @@ export const AppRoutes = () => {
         } 
       />
       <Route 
-        path="/app/equipamentos" 
+        path="/equipamentos" 
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
             <Equipamentos />
@@ -54,7 +54,7 @@ export const AppRoutes = () => {
         } 
       />
       <Route 
-        path="/app/condicionadores" 
+        path="/condicionadores" 
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
             <Condicionados/>
@@ -62,23 +62,32 @@ export const AppRoutes = () => {
         } 
       />
       <Route 
-        path="/app/impressoras" 
+        path="/impressoras" 
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
             <PrinterPage/>
           </ProtectedRoute>
         } 
       />
-      <Route 
-        path="/app/calendario" 
+       <Route 
+        path="/mobilias" 
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-            <Calendario />
+            <MobiliasPage/>
+          </ProtectedRoute>
+        } 
+      />
+
+      <Route 
+        path="/calendario" 
+        element={
+          <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
+            <Calendario/>
           </ProtectedRoute>
         } 
       />
       <Route 
-        path="/app/relatorios" 
+        path="/relatorios" 
         element={
           <ProtectedRoute allowedRoles={['admin', 'visualizador']}>
             <Relatorios />
@@ -88,7 +97,7 @@ export const AppRoutes = () => {
 
       {/* Gestão de Documentos Module Routes - /gestao */}
       <Route 
-        path="/gestao/funcionarios" 
+        path="/funcionarios" 
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
             <Funcionarios />
@@ -96,7 +105,7 @@ export const AppRoutes = () => {
         } 
       />
       <Route 
-        path="/gestao/tipos-documentos" 
+        path="/tipos-documentos" 
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
             <TiposDocumentos />
