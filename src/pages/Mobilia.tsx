@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Settings, Plus, Search, Edit2 } from "lucide-react";
+import { Settings, Plus, Search, Edit2, Eye } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { PrinterForm } from "@/components/PrinterForm"; // Note: You may need to update this to a MobiliasForm
+import { MobiliaForm } from "@/components/MobiliaForm";
+import PopupEquip from "@/components/popups/PopupEquip";
 import api from "@/lib/api";
 
 // Update the interface to match the /mobilias endpoint data structure
@@ -22,6 +23,7 @@ const MobiliasPage = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingMobilia, setEditingMobilia] = useState<Mobilia | null>(null);
+  const [selectedMobilia, setSelectedMobilia] = useState<Mobilia | null>(null);
   const { toast } = useToast();
 
   const fetchMobilias = async () => {
@@ -172,6 +174,15 @@ const MobiliasPage = () => {
                     <Edit2 className="h-4 w-4 mr-1" />
                     Editar
                   </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedMobilia(mobilia)}
+                  >
+                    <Eye className="h-4 w-4 mr-1" />
+                    Detalhes
+                  </Button>
                 </div>
               </div>
             </Card>
@@ -196,12 +207,23 @@ const MobiliasPage = () => {
         )}
       </div>
 
-      <PrinterForm
+      <MobiliaForm
         isOpen={showForm}
         onClose={handleCloseForm}
         onSubmit={handleFormSubmit}
         initialData={editingMobilia}
       />
+
+      {selectedMobilia && (
+        <PopupEquip
+          equipamento={selectedMobilia}
+          onClose={() => setSelectedMobilia(null)}
+          onOptionClick={(tipo) => {
+            console.log(`Ação ${tipo} para mobilia ${selectedMobilia.id}`);
+            setSelectedMobilia(null);
+          }}
+        />
+      )}
     </div>
   );
 };

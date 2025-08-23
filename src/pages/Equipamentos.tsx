@@ -23,6 +23,7 @@ const Equipamentos = () => {
   const [editingEquipment, setEditingEquipment] = useState(null);
   const [showOSForm, setShowOSForm] = useState(false);
   const [selectedEquipmentForOS, setSelectedEquipmentForOS] = useState(null);
+  const [selectedEquipment, setSelectedEquipment] = useState(null);
   const { toast } = useToast();
 
   const fetchEquipments = async () => {
@@ -208,6 +209,14 @@ const Equipamentos = () => {
                     Editar
                   </Button>
                   
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setSelectedEquipment(equipment)}
+                  >
+                    Detalhes
+                  </Button>
+                  
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" size="sm">
@@ -271,6 +280,17 @@ const Equipamentos = () => {
         onSubmit={handleOSSubmit}
         initialData={selectedEquipmentForOS}
       />
+
+      {selectedEquipment && (
+        <PopupEquip
+          equipamento={selectedEquipment}
+          onClose={() => setSelectedEquipment(null)}
+          onOptionClick={(tipo) => {
+            handleMaintenanceClick(selectedEquipment, tipo.toLowerCase() as 'preventiva' | 'corretiva');
+            setSelectedEquipment(null);
+          }}
+        />
+      )}
     </div>
   );
 };

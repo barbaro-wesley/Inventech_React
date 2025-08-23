@@ -15,6 +15,7 @@ import RegistrosCapacitacao from "@/pages/RegistrosCapacitacao";
 import PesquisarDocumentos from "@/pages/PesquisarDocumentos";
 import Calendario from "@/pages/Calendario";
 import MobiliasPage from "@/pages/Mobilia";
+import PesquisarEquipamento from "@/components/PesquisarEquipamento";
 export const AppRoutes = () => {
   return (
     <Routes>
@@ -74,6 +75,14 @@ export const AppRoutes = () => {
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
             <MobiliasPage/>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/pesquisar-equipamento" 
+        element={
+          <ProtectedRoute allowedRoles={['admin', 'cadastro', 'tecnico', 'visualizador']}>
+            <PesquisarEquipamento/>
           </ProtectedRoute>
         } 
       />

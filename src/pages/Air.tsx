@@ -13,6 +13,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import api from "@/lib/api";
+import PopupEquip from "@/components/popups/PopupEquip";
+import { Eye } from "lucide-react";
 
 const Condicionados = () => {
   const [condicionados, setCondicionados] = useState([]);
@@ -21,6 +23,7 @@ const Condicionados = () => {
   const [editingCondicionado, setEditingCondicionado] = useState(null);
   const [showOSForm, setShowOSForm] = useState(false);
   const [selectedCondicionadoForOS, setSelectedCondicionadoForOS] = useState(null);
+  const [selectedCondicionado, setSelectedCondicionado] = useState(null);
   const { toast } = useToast();
 
   const fetchCondicionados = async () => {
@@ -195,6 +198,15 @@ const Condicionados = () => {
                     Editar
                   </Button>
 
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedCondicionado(condicionado)}
+                  >
+                    <Eye className="h-4 w-4 mr-1" />
+                    Detalhes
+                  </Button>
+
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" size="sm">
@@ -264,6 +276,17 @@ const Condicionados = () => {
         onSubmit={handleOSSubmit}
         initialData={selectedCondicionadoForOS}
       />
+
+      {selectedCondicionado && (
+        <PopupEquip
+          equipamento={selectedCondicionado}
+          onClose={() => setSelectedCondicionado(null)}
+          onOptionClick={(tipo) => {
+            handleMaintenanceClick(selectedCondicionado, tipo.toLowerCase() as 'preventiva' | 'corretiva');
+            setSelectedCondicionado(null);
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -12,7 +12,8 @@ import {
   Calendar,
   FileText,
   Settings,
-  Users
+  Users,
+  Search
 } from "lucide-react";
 
 import {
@@ -37,10 +38,12 @@ const menuItems = [
     title: "Equipamentos",
     icon: Package,
     items: [
-      { title: "Computadores", url: "/app/computadores", icon: Monitor },
-      { title: "Equipamentos", url: "/app/equipamentos", icon: Package },
-      { title: "Condicionadores", url: "/app/condicionadores", icon: Wind },
-      { title: "Impressoras", url: "/app/impressoras", icon: Printer },
+      { title: "Pesquisar", url: "/pesquisar-equipamento", icon: Search },
+      { title: "Computadores", url: "/computadores", icon: Monitor },
+      { title: "Equipamentos", url: "/equipamentos", icon: Package },
+      { title: "Condicionadores", url: "/condicionadores", icon: Wind },
+      { title: "Impressoras", url: "/impressoras", icon: Printer },
+      { title: "Mobilias", url: "/mobilias", icon: Package },
     ],
   },
   {

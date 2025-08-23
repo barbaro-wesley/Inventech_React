@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Computer, Plus, Search } from "lucide-react";
+import { Computer, Plus, Search, Eye } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import api from "@/lib/api";
+import PopupEquip from "@/components/popups/PopupEquip";
 const Computadores = () => {
   const [computers, setComputers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedComputer, setSelectedComputer] = useState(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -102,8 +104,14 @@ const Computadores = () => {
                 <Button variant="outline" size="sm" className="flex-1">
                   Editar
                 </Button>
-                <Button variant="outline" size="sm" className="flex-1">
-                  Manutenção
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => setSelectedComputer(computer)}
+                >
+                  <Eye className="h-4 w-4 mr-1" />
+                  Detalhes
                 </Button>
               </div>
             </Card>
@@ -122,6 +130,17 @@ const Computadores = () => {
           </div>
         )}
       </div>
+
+      {selectedComputer && (
+        <PopupEquip
+          equipamento={selectedComputer}
+          onClose={() => setSelectedComputer(null)}
+          onOptionClick={(tipo) => {
+            console.log(`Ação ${tipo} para computador ${selectedComputer.id}`);
+            setSelectedComputer(null);
+          }}
+        />
+      )}
     </div>
   );
 };
