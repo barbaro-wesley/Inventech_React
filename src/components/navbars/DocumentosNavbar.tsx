@@ -1,23 +1,29 @@
-import { Logo } from "./Logo";
+import { Logo } from "../Logo";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { LogOut, Menu } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useState } from "react";
 
-interface NavbarProps {
+interface DocumentosNavbarProps {
   onLogoClick?: () => void;
 }
 
-export const Navbar = ({ onLogoClick }: NavbarProps) => {
+export const DocumentosNavbar = ({ onLogoClick }: DocumentosNavbarProps) => {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
+
   const handleLogout = async () => {
     await logout();
     navigate("/");
+  };
+
+  const handleLogoClick = () => {
+    if (onLogoClick) {
+      onLogoClick();
+    } else {
+      navigate("/modules");
+    }
   };
 
   return (
@@ -27,7 +33,7 @@ export const Navbar = ({ onLogoClick }: NavbarProps) => {
           <SidebarTrigger className="h-8 w-8" />
           
           <button
-            onClick={onLogoClick}
+            onClick={handleLogoClick}
             className="flex items-center gap-3 hover:opacity-80 transition-opacity"
           >
             <Logo size="sm" />
@@ -36,7 +42,7 @@ export const Navbar = ({ onLogoClick }: NavbarProps) => {
 
         <div className="flex items-center gap-2 md:gap-4">
           <div className="hidden sm:block text-xs md:text-sm text-muted-foreground">
-            Sistema InvenTech11
+            Sistema de Gestão de Documentos
           </div>
           
           {user && (

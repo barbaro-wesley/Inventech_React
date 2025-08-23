@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AdminSidebar } from "./AdminSidebar";
-import { Navbar } from "../Navbar";
+import { GenericNavbar } from "../navbars/GenericNavbar";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -14,7 +14,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
         <AdminSidebar />
         
         <div className="flex-1 flex flex-col">
-        
+          <GenericNavbar title="Painel Administrativo" />
           
           <main className="flex-1 p-6">
             {children}

@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { DocumentosSidebar } from "./DocumentosSidebar";
-import { Navbar } from "../Navbar";
+import { DocumentosNavbar } from "../navbars/DocumentosNavbar";
 
 interface DocumentosLayoutProps {
   children: ReactNode;
@@ -14,7 +14,7 @@ export const DocumentosLayout = ({ children }: DocumentosLayoutProps) => {
         <DocumentosSidebar />
         
         <div className="flex-1 flex flex-col">
-          <Navbar />
+          <DocumentosNavbar />
           
           <main className="flex-1 p-6">
             {children}

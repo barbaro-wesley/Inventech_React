@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { CadastroSidebar } from "./CadastroSidebar";
-import { Navbar } from "../Navbar";
+import { GenericNavbar } from "../navbars/GenericNavbar";
 
 interface CadastroLayoutProps {
   children: ReactNode;
@@ -14,7 +14,7 @@ export const CadastroLayout = ({ children }: CadastroLayoutProps) => {
         <CadastroSidebar />
         
         <div className="flex-1 flex flex-col">
-          <Navbar />
+          <GenericNavbar title="Sistema de Cadastro" />
           
           <main className="flex-1 p-6">
             {children}

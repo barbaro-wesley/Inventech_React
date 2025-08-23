@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { VisualizadorSidebar } from "./VisualizadorSidebar";
-import { Navbar } from "../Navbar";
+import { GenericNavbar } from "../navbars/GenericNavbar";
 
 interface VisualizadorLayoutProps {
   children: ReactNode;
@@ -14,7 +14,7 @@ export const VisualizadorLayout = ({ children }: VisualizadorLayoutProps) => {
         <VisualizadorSidebar />
         
         <div className="flex-1 flex flex-col">
-          <Navbar />
+          <GenericNavbar title="Painel Visualizador" />
           
           <main className="flex-1 p-6">
             {children}

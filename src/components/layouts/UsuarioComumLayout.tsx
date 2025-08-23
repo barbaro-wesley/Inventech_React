@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { UsuarioComumSidebar } from "./UsuarioComumSidebar";
-import { Navbar } from "../Navbar";
+import { GenericNavbar } from "../navbars/GenericNavbar";
 
 interface UsuarioComumLayoutProps {
   children: ReactNode;
@@ -14,7 +14,7 @@ export const UsuarioComumLayout = ({ children }: UsuarioComumLayoutProps) => {
         <UsuarioComumSidebar />
         
         <div className="flex-1 flex flex-col">
-          <Navbar />
+          <GenericNavbar title="Painel do Usuário" />
           
           <main className="flex-1 p-6">
             {children}

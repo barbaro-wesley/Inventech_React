@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { TecnicoSidebar } from "./TecnicoSidebar";
-import { Navbar } from "../Navbar";
+import { GenericNavbar } from "../navbars/GenericNavbar";
 
 interface TecnicoLayoutProps {
   children: ReactNode;
@@ -14,7 +14,7 @@ export const TecnicoLayout = ({ children }: TecnicoLayoutProps) => {
         <TecnicoSidebar />
         
         <div className="flex-1 flex flex-col">
-          <Navbar />
+          <GenericNavbar title="Painel Técnico" />
           
           <main className="flex-1 p-6">
             {children}
