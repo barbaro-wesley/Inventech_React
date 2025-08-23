@@ -4,13 +4,15 @@ import {
   ChevronDown,
   ChevronRight,
   Home,
-  Users,
+  Monitor,
+  Package,
+  Wrench,
+  Printer,
+  Wind,
+  Calendar,
   FileText,
-  GraduationCap,
-  Search,
-  UserPlus,
-  ClipboardList,
-  FolderOpen
+  Settings,
+  Users
 } from "lucide-react";
 
 import {
@@ -27,32 +29,44 @@ import {
 
 const menuItems = [
   {
-    title: "Gestão de Pessoas",
-    icon: Users,
+    title: "Dashboard",
+    url: "/app/dashboard",
+    icon: Home,
+  },
+  {
+    title: "Equipamentos",
+    icon: Package,
     items: [
-      { title: "Funcionários", url: "/gestao/funcionarios", icon: Users },
-      { title: "Cadastro de Usuário", url: "/gestao/cadastro-usuario", icon: UserPlus },
+      { title: "Computadores", url: "/app/computadores", icon: Monitor },
+      { title: "Equipamentos", url: "/app/equipamentos", icon: Package },
+      { title: "Condicionadores", url: "/app/condicionadores", icon: Wind },
+      { title: "Impressoras", url: "/app/impressoras", icon: Printer },
     ],
   },
   {
-    title: "Documentos",
+    title: "Manutenção",
+    icon: Wrench,
+    items: [
+      { title: "Ordens de Serviço", url: "/app/os", icon: Wrench },
+      { title: "Calendário", url: "/app/calendario", icon: Calendar },
+    ],
+  },
+  {
+    title: "Relatórios",
+    url: "/app/relatorios",
     icon: FileText,
-    items: [
-      { title: "Tipos de Documentos", url: "/gestao/tipos-documentos", icon: FolderOpen },
-      { title: "Registros de Capacitação", url: "/gestao/registros-capacitacao", icon: GraduationCap },
-    ],
   },
   {
-    title: "Consultas",
-    icon: Search,
+    title: "Configurações",
+    icon: Settings,
     items: [
-      { title: "Pesquisar Documentos", url: "/gestao/pesquisar-documentos", icon: Search },
-      { title: "Relatórios", url: "/gestao/relatorios", icon: ClipboardList },
+      { title: "Usuários", url: "/app/usuarios", icon: Users },
+      { title: "Grupos", url: "/app/grupos", icon: Settings },
     ],
   },
 ];
 
-export function DocumentosSidebar() {
+export function InventechSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
   const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
@@ -73,7 +87,7 @@ export function DocumentosSidebar() {
     <Sidebar className={state === "collapsed" ? "w-14" : "w-60"} collapsible="icon">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Gestão de Documentos</SidebarGroupLabel>
+          <SidebarGroupLabel>Inventech</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
@@ -119,7 +133,21 @@ export function DocumentosSidebar() {
                         </div>
                       )}
                     </>
-                  ) : null}
+                  ) : (
+                    <SidebarMenuButton asChild>
+                      <NavLink
+                        to={item.url}
+                        className={({ isActive }) =>
+                          isActive
+                            ? "bg-muted text-primary font-medium flex items-center"
+                            : "hover:bg-muted/50 flex items-center"
+                        }
+                      >
+                        <item.icon className={`h-4 w-4 ${state === "collapsed" ? "" : "mr-2"}`} />
+                        {state !== "collapsed" && <span>{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  )}
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>

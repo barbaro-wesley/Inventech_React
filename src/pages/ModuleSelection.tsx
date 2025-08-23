@@ -47,9 +47,13 @@ export const ModuleSelection = () => {
     // Simular salvamento da escolha do módulo
     localStorage.setItem("selectedModule", moduleId);
     
-    // Redirecionar para o dashboard do módulo
+    // Redirecionar para o módulo específico
     setTimeout(() => {
-      navigate("/dashboard");
+      if (moduleId === "inventory") {
+        navigate("/app/dashboard");
+      } else if (moduleId === "documents") {
+        navigate("/gestao/funcionarios");
+      }
     }, 500);
   };
 

@@ -15,6 +15,7 @@ import RegistrosCapacitacao from "@/pages/RegistrosCapacitacao";
 import PesquisarDocumentos from "@/pages/PesquisarDocumentos";
 import Calendario from "@/pages/Calendario";
 import { DocumentosLayout } from "@/components/layouts/DocumentosLayout";
+import { InventechLayout } from "@/components/layouts/InventechLayout";
 
 export const AppRoutes = () => {
   return (
@@ -34,7 +35,9 @@ export const AppRoutes = () => {
         path="/app/dashboard" 
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <InventechLayout>
+              <Dashboard />
+            </InventechLayout>
           </ProtectedRoute>
         } 
       />
@@ -42,7 +45,9 @@ export const AppRoutes = () => {
         path="/app/computadores" 
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-            <Computadores />
+            <InventechLayout>
+              <Computadores />
+            </InventechLayout>
           </ProtectedRoute>
         } 
       />
@@ -50,7 +55,9 @@ export const AppRoutes = () => {
         path="/app/equipamentos" 
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-            <Equipamentos />
+            <InventechLayout>
+              <Equipamentos />
+            </InventechLayout>
           </ProtectedRoute>
         } 
       />
@@ -58,7 +65,9 @@ export const AppRoutes = () => {
         path="/app/condicionadores" 
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-            <Condicionados/>
+            <InventechLayout>
+              <Condicionados/>
+            </InventechLayout>
           </ProtectedRoute>
         } 
       />
@@ -66,7 +75,9 @@ export const AppRoutes = () => {
         path="/app/impressoras" 
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-            <PrinterPage/>
+            <InventechLayout>
+              <PrinterPage/>
+            </InventechLayout>
           </ProtectedRoute>
         } 
       />
@@ -74,7 +85,9 @@ export const AppRoutes = () => {
         path="/app/calendario" 
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-            <Calendario />
+            <InventechLayout>
+              <Calendario />
+            </InventechLayout>
           </ProtectedRoute>
         } 
       />
@@ -82,7 +95,9 @@ export const AppRoutes = () => {
         path="/app/relatorios" 
         element={
           <ProtectedRoute allowedRoles={['admin', 'visualizador']}>
-            <Relatorios />
+            <InventechLayout>
+              <Relatorios />
+            </InventechLayout>
           </ProtectedRoute>
         } 
       />
