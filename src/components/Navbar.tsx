@@ -53,7 +53,7 @@ export const Navbar = ({ onLogoClick }: NavbarProps) => {
 
         <div className="flex items-center gap-2 md:gap-4">
           <div className="hidden sm:block text-xs md:text-sm text-muted-foreground">
-            Sistema InvenTech
+            Sistema InvenTech11
           </div>
           
           {user && (

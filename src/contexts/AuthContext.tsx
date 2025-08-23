@@ -42,7 +42,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('Dados do usuário em checkAuth:', response.data); // Debug
       setUser(response.data);
     } catch (error) {
-      console.log('Erro em checkAuth:', error);
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -51,11 +50,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
 const login = async (email: string, senha: string) => {
   const response = await api.post('/usuarios/login', { email, senha });
-
-  // aqui response.data é só o token
-  console.log("Token recebido:", response.data);
-
-  // depois chama /usuarios/me para buscar os dados do usuário
   const me = await api.get("/usuarios/me");
   setUser(me.data);
 
@@ -66,7 +60,6 @@ const login = async (email: string, senha: string) => {
     try {
       await api.post('/usuarios/logout');
     } catch (error) {
-      console.error('Erro no logout:', error);
     } finally {
       setUser(null);
     }
