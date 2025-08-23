@@ -9,7 +9,7 @@ import api from "@/lib/api";
 
 interface Printer {
   id: number;
-  nPatrimonio: string;
+  numeroPatrimonio: string;
   modelo: string;
   marca: string ;
   ip: string;
@@ -28,7 +28,7 @@ const PrinterPage = () => {
   const fetchPrinters = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/printers", {
+      const response = await api.get("/equipamentos-medicos/tipo/2", {
         withCredentials: true,
       });
       setPrinters(response.data);
@@ -138,14 +138,14 @@ const PrinterPage = () => {
                       {printer.modelo || `Impressora #${printer.id}`}
                     </h3>
                     <p className="text-muted-foreground mb-3">
-                      {printer.modelo || "Impressora"}
+                      {printer.marca|| "Impressora"}
                     </p>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                       <div>
                         <span className="font-medium">Nº Patrimônio:</span>
                         <span className="text-muted-foreground ml-1">
-                          {printer.nPatrimonio || "Não informado"}
+                          {printer.numeroPatrimonio || "Não informado"}
                         </span>
                       </div>
                       <div>
@@ -166,12 +166,7 @@ const PrinterPage = () => {
                           {printer.localizacao?.nome || "Não informado"}
                         </span>
                       </div>
-                      <div>
-                        <span className="font-medium">Tipo de Equipamento:</span>
-                        <span className="text-muted-foreground ml-1">
-                          {printer.tipoEquipamento?.nome || "Não informado"}
-                        </span>
-                      </div>
+                      
                     </div>
                   </div>
                 </div>

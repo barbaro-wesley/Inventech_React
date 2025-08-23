@@ -29,7 +29,7 @@ const Condicionados = () => {
   const fetchCondicionados = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/condicionadores", {
+      const response = await api.get("/equipamentos-medicos/tipo/4", {
         withCredentials: true,
       });
       setCondicionados(response.data);
@@ -162,7 +162,7 @@ const Condicionados = () => {
                         `Condicionado #${index + 1}`}
                     </h3>
                     <p className="text-muted-foreground mb-3">
-                      {condicionado.marca ||
+                      {condicionado.modelo ||
                         "Ar-condicionado"}
                     </p>
 
@@ -174,15 +174,15 @@ const Condicionados = () => {
                         </span>
                       </div>
                       <div>
-                        <span className="font-medium">Modelo:</span>
+                        <span className="font-medium">BTUS:</span>
                         <span className="text-muted-foreground ml-1">
-                          {condicionado.modelo || "Não informado"}
+                          {condicionado.BTUS || "Não informado"}
                         </span>
                       </div>
                       <div>
                         <span className="font-medium">Patrimônio:</span>
                         <span className="text-muted-foreground ml-1">
-                          {condicionado.nPatrimonio || "Não informado"}
+                          {condicionado.numeroPatrimonio || "Não informado"}
                         </span>
                       </div>
                     </div>

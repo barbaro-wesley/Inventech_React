@@ -138,9 +138,11 @@ const MobiliasPage = () => {
                     <h3 className="font-semibold text-lg mb-1">
                       {mobilia.nomeEquipamento || `Mobilia #${mobilia.id}`}
                     </h3>
-                    <p className="text-muted-foreground mb-3">
+                    <span className="font-medium">Estado:<p className="text-muted-foreground mb-3">
                       {mobilia.estado || "Mobilia"}
                     </p>
+                    </span>
+                    
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                       <div>

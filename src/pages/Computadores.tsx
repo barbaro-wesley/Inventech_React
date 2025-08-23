@@ -15,8 +15,8 @@ const Computadores = () => {
   useEffect(() => {
     const fetchComputers = async () => {
       try {
-        const { data } = await api.get("/hcr-computers", {
-          withCredentials: true, // equivalente a credentials: 'include'
+        const { data } = await api.get("/equipamentos-medicos/tipo/1", {
+          withCredentials: true,
         });
         setComputers(data);
       } catch (error) {
@@ -94,7 +94,9 @@ const Computadores = () => {
               <h3 className="font-semibold text-lg mb-2">{computer.nomePC}</h3>
 
               <div className="space-y-1 text-sm text-muted-foreground">
-                <p>Patrimônio: {computer.nPatrimonio}</p>
+                <p>Patrimônio: {computer.numeroPatrimonio}</p>
+                <p>HostName: {computer.nomeEquipamento}</p>
+                <p>IP: {computer.ip}</p>
                 <p>Setor: {computer.setor?.nome || "-"}</p>
                 <p>Localização: {computer.localizacao?.nome || "-"}</p>
                 <p>Sistema Operacional: {computer.sistemaOperacional}</p>
@@ -104,9 +106,9 @@ const Computadores = () => {
                 <Button variant="outline" size="sm" className="flex-1">
                   Editar
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="flex-1"
                   onClick={() => setSelectedComputer(computer)}
                 >

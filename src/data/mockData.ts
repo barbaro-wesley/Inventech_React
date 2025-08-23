@@ -9,7 +9,7 @@ export const mockEmployees: Employee[] = [
     setor: "Recursos Humanos",
     email: "maria.santos@empresa.com.br",
     telefone: "(11) 98765-4321",
-    createdAt: new Date("2024-01-15"),
+    createdAt: new Date("2025-08-08"),
     updatedAt: new Date("2024-01-15"),
   },
   {

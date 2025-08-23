@@ -30,7 +30,7 @@ const mockEvents: OSEvent[] = [
     setor: 'Recursos Humanos',
     hora: '09:00',
     status: 'agendada',
-    data: new Date(2024, 8, 25)
+    data: new Date(2025, 8, 25)
   },
   {
     id: 2,
@@ -63,7 +63,7 @@ const Calendario = () => {
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date);
     if (date) {
-      const eventsForDate = mockEvents.filter(event => 
+      const eventsForDate = mockEvents.filter(event =>
         isSameDay(event.data, date)
       );
       setSelectedEvents(eventsForDate);
@@ -127,19 +127,19 @@ const Calendario = () => {
               mode="single"
               selected={selectedDate}
               onSelect={handleDateSelect}
-              className="rounded-md border w-full"
+              className="rounded-md border w-full p-6 text-lg [&_.rdp-day]:w-12 [&_.rdp-day]:h-12 [&_.rdp-day]:text-base"
               modifiers={{
                 hasEvents: (date) => hasEvents(date)
               }}
               modifiersStyles={{
-                hasEvents: { 
+                hasEvents: {
                   backgroundColor: 'hsl(var(--primary))',
                   color: 'hsl(var(--primary-foreground))',
                   fontWeight: 'bold'
                 }
               }}
             />
-            <div className="mt-4 text-sm text-muted-foreground">
+            <div className="mt-4 text-sm text-muted-foreground text-center">
               <p>• Datas destacadas possuem manutenções agendadas</p>
             </div>
           </CardContent>
@@ -150,7 +150,7 @@ const Calendario = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="w-5 h-5" />
-              {selectedDate 
+              {selectedDate
                 ? format(selectedDate, "dd 'de' MMMM", { locale: ptBR })
                 : "Selecione uma data"
               }
@@ -169,7 +169,7 @@ const Calendario = () => {
                         {event.status.replace('_', ' ')}
                       </Badge>
                     </div>
-                    
+
                     <div className="space-y-2 text-sm text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4" />
