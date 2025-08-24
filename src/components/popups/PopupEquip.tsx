@@ -1,9 +1,8 @@
 import { useRef, useState } from 'react';
 import { FaFilePdf, FaPrint, FaCog } from 'react-icons/fa';
 import api from '@/lib/api';
-import { generateEquipamentoPDF } from '@/utils/equipamentoPdfGenerator';
-
-const logoUrl = "/logo.png";
+import { pdf } from '@react-pdf/renderer';
+import { EquipmentDetailReport } from '@/components/reports/EquipmentDetailReport';
 
 const PopupEquip = ({ equipamento, onClose, onOptionClick }) => {
   const modalRef = useRef();
@@ -30,8 +29,10 @@ const PopupEquip = ({ equipamento, onClose, onOptionClick }) => {
     window.open(fileUrl, '_blank');
   };
 
-  const handlePrint = () => {
-    generateEquipamentoPDF(equipamento);
+  const handlePrint = async () => {
+    const blob = await pdf(<EquipmentDetailReport equipamento={equipamento} />).toBlob();
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
   };
 
   const totalManutencao = equipamento.ordensServico
