@@ -362,7 +362,6 @@ export function EquipamentoForm({ isOpen, onClose, onSubmit, initialData = null 
                   value={formData.localizacaoId} 
                   onValueChange={(value) => handleChange('localizacaoId', value)}
                   disabled={!formData.setorId}
-                  className="text-sm sm:text-base"
                 >
                   <SelectTrigger className="text-sm sm:text-base">
                     <SelectValue placeholder="Selecione a localização" />

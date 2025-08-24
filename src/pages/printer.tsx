@@ -8,10 +8,11 @@ import { PrinterForm } from "@/components/PrinterForm";
 import api from "@/lib/api";
 
 interface Printer {
-  id: number;
+  id?: number;
   numeroPatrimonio: string;
+  nPatrimonio: string;
   modelo: string;
-  marca: string ;
+  marca: string;
   ip: string;
   localizacao?: { nome: string };
   setor?: { nome: string };

@@ -17,6 +17,7 @@ interface PrinterFormProps {
 
 interface Printer {
   id?: number;
+  numeroPatrimonio: string;
   nPatrimonio: string;
   ip: string;
   modelo: string;
