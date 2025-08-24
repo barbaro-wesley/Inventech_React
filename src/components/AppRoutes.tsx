@@ -104,7 +104,7 @@ export const AppRoutes = () => {
       <Route
         path="/calendario"
         element={
-          <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
+          <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador','tecnico']}>
             <Calendario />
           </ProtectedRoute>
         }

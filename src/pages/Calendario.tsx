@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { CalendarIcon, Clock, User, Wrench } from 'lucide-react';
 import { format, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-
+import api from '@/lib/api';
 interface OSEvent {
   id: number;
   titulo: string;
@@ -19,51 +19,94 @@ interface OSEvent {
   data: Date;
 }
 
-// Mock data - substituir pela integração com API
-const mockEvents: OSEvent[] = [
-  {
-    id: 1,
-    titulo: 'Manutenção Preventiva - Computadores Setor RH',
-    tipo: 'preventiva',
-    tecnico: 'João Silva',
-    equipamento: 'PC-001, PC-002',
-    setor: 'Recursos Humanos',
-    hora: '09:00',
-    status: 'agendada',
-    data: new Date(2025, 8, 25)
-  },
-  {
-    id: 2,
-    titulo: 'Reparo Impressora HP',
-    tipo: 'corretiva',
-    tecnico: 'Maria Santos',
-    equipamento: 'IMP-003',
-    setor: 'Financeiro',
-    hora: '14:30',
-    status: 'em_andamento',
-    data: new Date(2024, 8, 25)
-  },
-  {
-    id: 3,
-    titulo: 'Manutenção Preventiva - Ar Condicionado',
-    tipo: 'preventiva',
-    tecnico: 'Carlos Oliveira',
-    equipamento: 'AC-001',
-    setor: 'Diretoria',
-    hora: '08:00',
-    status: 'agendada',
-    data: new Date(2024, 8, 26)
-  }
-];
+interface Preventiva {
+  id: number;
+  descricao: string;
+  tipoEquipamentoId: number;
+  equipamentoId: number;
+  tecnicoId: number;
+  solicitanteId: number;
+  status: string;
+  criadoEm: string;
+  finalizadoEm: string | null;
+  valorManutencao: number | null;
+  resolucao: string | null;
+  arquivos: any[];
+  preventiva: boolean;
+  dataAgendada: string | null;
+  recorrencia: string;
+  intervaloDias: number | null;
+  setorId: number | null;
+  tipoEquipamento: {
+    id: number;
+    nome: string;
+    grupoId: number;
+  };
+  tecnico: {
+    id: number;
+    nome: string;
+    email: string;
+    telefone: string;
+    cpf: string;
+    matricula: string;
+    admissao: string;
+    ativo: boolean;
+    telegramChatId: string | null;
+    grupoId: number;
+  };
+  Setor: { id: number; nome: string } | null;
+  solicitante: { nome: string };
+}
 
 const Calendario = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedEvents, setSelectedEvents] = useState<OSEvent[]>([]);
+  const [events, setEvents] = useState<OSEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPreventivas = async () => {
+      try {
+        const response = await api.get('/os'); // Usa o cliente api do componente antigo
+        const data = response.data;
+
+        // Garante que data.preventivas é um array
+        const preventivas: Preventiva[] = Array.isArray(data.preventivas) ? data.preventivas : [];
+
+        const mappedEvents: OSEvent[] = preventivas
+          .filter((item) => item.dataAgendada) // Apenas preventivas com dataAgendada
+          .map((item) => ({
+            id: item.id,
+            titulo: `${item.descricao} - ${item.Setor?.nome || 'Sem setor'}`,
+            tipo: 'preventiva',
+            tecnico: item.tecnico.nome,
+            equipamento: item.tipoEquipamento.nome,
+            setor: item.Setor ? item.Setor.nome : 'Sem setor',
+            hora: item.dataAgendada
+              ? format(new Date(item.dataAgendada), 'HH:mm', { locale: ptBR })
+              : 'N/A',
+            status: item.status === 'ABERTA' ? 'agendada' : item.status === 'CONCLUIDA' ? 'concluida' : 'em_andamento',
+            data: item.dataAgendada ? new Date(item.dataAgendada) : new Date(),
+          }));
+
+        setEvents(mappedEvents);
+        setError(null);
+      } catch (error) {
+        console.error('Erro ao buscar preventivas:', error);
+        setError('Não foi possível carregar as manutenções. Tente novamente mais tarde.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPreventivas();
+  }, []);
 
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date);
     if (date) {
-      const eventsForDate = mockEvents.filter(event =>
+      const eventsForDate = events.filter((event) =>
         isSameDay(event.data, date)
       );
       setSelectedEvents(eventsForDate);
@@ -93,10 +136,22 @@ const Calendario = () => {
     return tipo === 'preventiva' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800';
   };
 
-  // Verificar se uma data tem eventos
   const hasEvents = (date: Date) => {
-    return mockEvents.some(event => isSameDay(event.data, date));
+    return events.some((event) => isSameDay(event.data, date));
   };
+
+  const totalAgendadas = events.filter((e) => e.status === 'agendada').length;
+  const emAndamento = events.filter((e) => e.status === 'em_andamento').length;
+  const totalPreventivas = events.length;
+  const totalCorretivas = 0;
+
+  if (loading) {
+    return <div className="text-center p-4">Carregando...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center p-4 text-red-600">{error}</div>;
+  }
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -114,7 +169,6 @@ const Calendario = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Calendário */}
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -132,14 +186,14 @@ const Calendario = () => {
                  [&_.rdp-months]:w-full [&_.rdp-table]:w-full [&_.rdp-cell]:h-16 
                  [&_.rdp-day]:w-full [&_.rdp-day]:h-full [&_.rdp-day]:text-base"
                 modifiers={{
-                  hasEvents: (date) => hasEvents(date)
+                  hasEvents: (date) => hasEvents(date),
                 }}
                 modifiersStyles={{
                   hasEvents: {
                     backgroundColor: 'hsl(var(--primary))',
                     color: 'hsl(var(--primary-foreground))',
-                    fontWeight: 'bold'
-                  }
+                    fontWeight: 'bold',
+                  },
                 }}
               />
             </div>
@@ -149,15 +203,13 @@ const Calendario = () => {
           </CardContent>
         </Card>
 
-        {/* Eventos do dia selecionado */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="w-5 h-5" />
               {selectedDate
                 ? format(selectedDate, "dd 'de' MMMM", { locale: ptBR })
-                : "Selecione uma data"
-              }
+                : 'Selecione uma data'}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -219,14 +271,13 @@ const Calendario = () => {
         </Card>
       </div>
 
-      {/* Resumo estatístico */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Agendadas</p>
-                <p className="text-2xl font-bold">12</p>
+                <p className="text-2xl font-bold">{totalAgendadas}</p>
               </div>
               <CalendarIcon className="w-8 h-8 text-blue-600" />
             </div>
@@ -238,7 +289,7 @@ const Calendario = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Em Andamento</p>
-                <p className="text-2xl font-bold">3</p>
+                <p className="text-2xl font-bold">{emAndamento}</p>
               </div>
               <Clock className="w-8 h-8 text-yellow-600" />
             </div>
@@ -250,7 +301,7 @@ const Calendario = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Preventivas</p>
-                <p className="text-2xl font-bold">8</p>
+                <p className="text-2xl font-bold">{totalPreventivas}</p>
               </div>
               <CalendarIcon className="w-8 h-8 text-green-600" />
             </div>
@@ -262,7 +313,7 @@ const Calendario = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Corretivas</p>
-                <p className="text-2xl font-bold">4</p>
+                <p className="text-2xl font-bold">{totalCorretivas}</p>
               </div>
               <Wrench className="w-8 h-8 text-orange-600" />
             </div>

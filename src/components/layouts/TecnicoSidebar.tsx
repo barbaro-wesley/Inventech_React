@@ -56,7 +56,7 @@ const menuItems = [
     items: [
       { title: "Preventiva", url: "/manutencao/preventiva", icon: Shield },
       { title: "Corretiva", url: "/manutencao/corretiva", icon: AlertTriangle },
-      { title: "Calendário", url: "/manutencao/calendario", icon: Calendar },
+      { title: "Calendário", url: "/calendario", icon: Calendar },
     ],
   },
 ];
