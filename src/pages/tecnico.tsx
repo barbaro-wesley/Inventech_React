@@ -286,7 +286,7 @@ export default function Tecnicos() {
                                         <TableCell className="font-mono text-sm">{tecnico.cpf}</TableCell>
                                         <TableCell className="text-sm">{tecnico.matricula}</TableCell>
                                         <TableCell>
-                                            <Badge variant="outline">{tecnico.grupo?.nome || "Nenhum"}</Badge>
+                                            <Badge variant="outline">{tecnico.grupoNome || "Nenhum"}</Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex items-center justify-end gap-2">

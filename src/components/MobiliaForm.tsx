@@ -12,8 +12,9 @@ interface Mobilia {
   numeroPatrimonio: string;
   nomeEquipamento: string;
   estado: string;
-  localizacao?: { nome: string };
-  setor?: { nome: string };
+  // IDs selecionados via Select
+  setor?: string;
+  localizacao?: string;
   valorCompra?: string;
   dataCompra?: string;
   inicioGarantia?: string;
@@ -24,8 +25,8 @@ interface Mobilia {
 interface MobiliaFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: Mobilia) => void;
-  initialData?: Mobilia | null;
+  onSubmit: (data: any) => void;
+  initialData?: any;
 }
 
 interface Setor {
@@ -123,8 +124,8 @@ export const MobiliaForm = ({ isOpen, onClose, onSubmit, initialData }: MobiliaF
       const submitData = {
         ...formData,
         tipoEquipamentoId: 6,
-        setorId: formData.setor ? parseInt(formData.setor.id.toString()) : undefined,
-        localizacaoId: formData.localizacao ? parseInt(formData.localizacao.id.toString()) : undefined,
+        setorId: formData.setor ? parseInt(formData.setor) : undefined,
+        localizacaoId: formData.localizacao ? parseInt(formData.localizacao) : undefined,
       };
 
       if (initialData?.id) {

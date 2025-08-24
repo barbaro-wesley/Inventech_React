@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, Download, FileText, Eye } from 'lucide-react';
 import { EquipamentosReport } from './EquipamentosReport';
 import { CondicionadoresReport } from './CondicionadoresReport';
+import { EquipamentosPorSetorReport } from './EquipamentosPorSetorReport';
+import { OsPorTecnicoReport } from './OsPorTecnicoReport';
 import api from '@/lib/api';
 
 export const ReportGenerator: React.FC = () => {
@@ -18,9 +20,18 @@ export const ReportGenerator: React.FC = () => {
     dataFim: '',
     setor: '',
     tipo: '',
+    setores: '',
+    tipos: '',
+    tecnicos: '',
+    inicio: '',
+    fim: '',
+    campoData: 'criadoEm',
+    status: '',
   });
   const [showPreview, setShowPreview] = useState(false);
   const [condicionadores, setCondicionadores] = useState<any[]>([]);
+  const [equipamentosPorSetor, setEquipamentosPorSetor] = useState<any[]>([]);
+  const [osPorTecnico, setOsPorTecnico] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -72,6 +83,20 @@ export const ReportGenerator: React.FC = () => {
         return (
           <CondicionadoresReport
             condicionadores={condicionadores}
+            filtros={filters}
+          />
+        );
+      case 'equipamentos-por-setor':
+        return (
+          <EquipamentosPorSetorReport
+            data={equipamentosPorSetor}
+            filtros={filters}
+          />
+        );
+      case 'os-por-tecnico':
+        return (
+          <OsPorTecnicoReport
+            data={osPorTecnico}
             filtros={filters}
           />
         );
