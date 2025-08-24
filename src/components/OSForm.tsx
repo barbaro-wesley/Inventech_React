@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Paperclip } from "lucide-react";
+import { Paperclip, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import api from "@/lib/api";
 
@@ -264,152 +264,200 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
     }
   };
 
+  const removeFile = (index: number) => {
+    const newFiles = formData.arquivos.filter((_, i) => i !== index);
+    const newFileNames = fileNames.filter((_, i) => i !== index);
+    setFormData(prev => ({ ...prev, arquivos: newFiles }));
+    setFileNames(newFileNames);
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Cadastro de Ordem de Serviço</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
+        <SheetHeader className="mb-6">
+          <SheetTitle>Cadastro de Ordem de Serviço Corretiva</SheetTitle>
+        </SheetHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Tipo de Equipamento */}
+            <div className="space-y-2">
+              <Label htmlFor="tipoEquipamento">Tipo de Equipamento *</Label>
+              <Select
+                value={formData.tipoEquipamentoId}
+                onValueChange={handleTipoEquipamentoChange}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent className="bg-background border z-50">
+                  {tiposEquipamento.map((t) => (
+                    <SelectItem key={t.id} value={String(t.id)}>
+                      {t.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Equipamento */}
+            <div className="space-y-2">
+              <Label htmlFor="equipamento">Equipamento *</Label>
+              <Select
+                value={formData.equipamentoId}
+                onValueChange={handleEquipamentoChange}
+                disabled={loadingEquipamentos || !formData.tipoEquipamentoId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={loadingEquipamentos ? 'Carregando...' : 'Selecione'} />
+                </SelectTrigger>
+                <SelectContent className="bg-background border z-50">
+                  {equipamentos.map((e) => (
+                    <SelectItem key={e.id} value={String(e.id)}>
+                      {getEquipamentoNome(e, formData.tipoEquipamentoId)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Técnico Responsável */}
+            <div className="space-y-2">
+              <Label htmlFor="tecnico">Técnico Responsável *</Label>
+              <Select
+                value={formData.tecnicoId}
+                onValueChange={(value) => setFormData({ ...formData, tecnicoId: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent className="bg-background border z-50">
+                  {filteredTecnicos.map((t) => (
+                    <SelectItem key={t.id} value={String(t.id)}>
+                      {t.nome} {t.matricula ? `(${t.matricula})` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Grupo */}
+            <div className="space-y-2">
+              <Label htmlFor="grupo">Grupo</Label>
+              <Input
+                id="grupo"
+                value={filteredTecnicos.find((t) => t.id === parseInt(formData.tecnicoId))?.grupo?.nome || ""}
+                readOnly
+                className="bg-muted"
+              />
+            </div>
+
+            {/* Status */}
+            <div className="space-y-2">
+              <Label htmlFor="status">Status *</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) => setFormData({ ...formData, status: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent className="bg-background border z-50">
+                  {statusOptions.map((s) => (
+                    <SelectItem key={s.value} value={s.value}>
+                      {s.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Grupo do Equipamento */}
+            <div className="space-y-2">
+              <Label htmlFor="grupoEquipamento">Grupo do Equipamento</Label>
+              <Input 
+                id="grupoEquipamento"
+                value={grupo} 
+                readOnly 
+                className="bg-muted"
+              />
+            </div>
+          </div>
+
+          {/* Descrição */}
           <div className="space-y-2">
-            <Label htmlFor="tipoEquipamento">Tipo de Equipamento</Label>
-            <Select
-              value={formData.tipoEquipamentoId}
-              onValueChange={handleTipoEquipamentoChange}
-              required
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent>
-                {tiposEquipamento.map((t) => (
-                  <SelectItem key={t.id} value={String(t.id)}>
-                    {t.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="equipamento">Equipamento</Label>
-            <Select
-              value={formData.equipamentoId}
-              onValueChange={handleEquipamentoChange}
-              required
-              disabled={loadingEquipamentos || !formData.tipoEquipamentoId}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={loadingEquipamentos ? 'Carregando...' : 'Selecione'} />
-              </SelectTrigger>
-              <SelectContent>
-                {equipamentos.map((e) => (
-                  <SelectItem key={e.id} value={String(e.id)}>
-                    {getEquipamentoNome(e, formData.tipoEquipamentoId)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="tecnico">Técnico Responsável</Label>
-            <Select
-              value={formData.tecnicoId}
-              onValueChange={(value) => setFormData({ ...formData, tecnicoId: value })}
-              required
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent>
-                {filteredTecnicos.map((t) => (
-                  <SelectItem key={t.id} value={String(t.id)}>
-                    {t.nome} {t.matricula ? `(${t.matricula})` : ""}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="grupo">Grupo</Label>
-            <Input
-              value={
-                filteredTecnicos.find((t) => t.id === parseInt(formData.tecnicoId))?.grupo?.nome || ""
-              }
-              readOnly
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="status">Status</Label>
-            <Select
-              value={formData.status}
-              onValueChange={(value) => setFormData({ ...formData, status: value })}
-              required
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent>
-                {statusOptions.map((s) => (
-                  <SelectItem key={s.value} value={s.value}>
-                    {s.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="grupoEquipamento">Grupo do Equipamento</Label>
-            <Input value={grupo} readOnly />
-          </div>
-
-          <div className="col-span-2 space-y-2">
-            <Label htmlFor="arquivos" className="flex items-center gap-2">
-              <Paperclip size={18} />
-              Arquivos (Imagens)
-            </Label>
-            <Input
-              type="file"
-              name="arquivos"
-              multiple
-              accept="image/*"
-              onChange={handleFileChange}
-              className="cursor-pointer"
-            />
-            {fileNames.length > 0 && (
-              <ul className="text-sm text-muted-foreground">
-                {fileNames.map((name, idx) => (
-                  <li key={idx}>• {name}</li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          <div className="col-span-2 space-y-2">
-            <Label htmlFor="descricao">Descrição</Label>
+            <Label htmlFor="descricao">Descrição *</Label>
             <Textarea
+              id="descricao"
               name="descricao"
               value={formData.descricao}
               onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
               rows={4}
               required
+              placeholder="Descreva o problema ou manutenção necessária..."
             />
           </div>
 
-          <div className="col-span-2 flex gap-2 pt-4">
-            <Button type="submit" className="bg-gradient-brand hover:opacity-90">
+          {/* Upload de Arquivos */}
+          <div className="space-y-2">
+            <Label htmlFor="arquivos">
+              <Paperclip className="w-4 h-4 inline mr-2" />
+              Arquivos (Imagens)
+            </Label>
+            <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center hover:border-muted-foreground/50 transition-colors">
+              <input
+                type="file"
+                id="arquivos"
+                name="arquivos"
+                multiple
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              <label htmlFor="arquivos" className="cursor-pointer">
+                <div className="flex flex-col items-center gap-2">
+                  <Paperclip className="w-8 h-8 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    Clique ou arraste arquivos aqui
+                  </span>
+                </div>
+              </label>
+            </div>
+            
+            {fileNames.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Arquivos selecionados:</p>
+                <div className="space-y-1">
+                  {fileNames.map((name, idx) => (
+                    <div key={idx} className="flex items-center justify-between bg-muted p-2 rounded">
+                      <span className="text-sm truncate">{name}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeFile(idx)}
+                        className="h-6 w-6 p-0"
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Botões */}
+          <div className="flex gap-3 pt-4">
+            <Button type="submit" className="flex-1">
               Salvar
             </Button>
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1">
               Cancelar
             </Button>
           </div>
         </form>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 };
