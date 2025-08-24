@@ -14,15 +14,21 @@ interface OS {
   id: number;
   descricao: string;
   status: string;
+  criadoEm: string;
+  finalizadoEm?: string | null;
+  preventiva: boolean;
+  dataAgendada?: string | null;
+  tipoEquipamento?: {
+    nome: string;
+  };
   tecnico: {
     id: number;
     nome: string;
   };
-  equipamento?: {
-    nomeEquipamento?: string;
-    numeroPatrimonio?: string;
+  solicitante?: {
+    nome: string;
   };
-  setor?: {
+  Setor?: {
     nome: string;
   };
 }
@@ -142,6 +148,16 @@ const ChamadosTecnico = () => {
     }
   };
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   if (loading) {
     return (
       <div className="space-y-4 p-4">
@@ -176,22 +192,48 @@ const ChamadosTecnico = () => {
                 <CollapsibleTrigger asChild>
                   <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
                     <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <CardTitle className="text-sm">
-                          #{os.id} - {os.descricao}
-                        </CardTitle>
+                      <div className="space-y-2 flex-1">
                         <div className="flex items-center gap-2">
+                          <CardTitle className="text-sm font-medium">
+                            OS #{os.id}
+                          </CardTitle>
                           <Badge className={`text-white ${getStatusColor(os.status)}`}>
                             {os.status}
                           </Badge>
-                          {os.equipamento?.nomeEquipamento && (
-                            <span className="text-xs text-muted-foreground">
-                              {os.equipamento.nomeEquipamento}
-                            </span>
+                          {os.preventiva && (
+                            <Badge variant="outline" className="text-xs">
+                              Preventiva
+                            </Badge>
                           )}
                         </div>
+                        
+                        <div className="space-y-1">
+                          <p className="text-sm text-foreground font-medium">{os.descricao}</p>
+                          
+                          <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                            {os.tipoEquipamento && (
+                              <div>
+                                <span className="font-medium">Tipo:</span> {os.tipoEquipamento.nome}
+                              </div>
+                            )}
+                            {os.Setor && (
+                              <div>
+                                <span className="font-medium">Setor:</span> {os.Setor.nome}
+                              </div>
+                            )}
+                            {os.solicitante && (
+                              <div>
+                                <span className="font-medium">Solicitante:</span> {os.solicitante.nome}
+                              </div>
+                            )}
+                            <div>
+                              <span className="font-medium">Criado:</span> {formatDate(os.criadoEm)}
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      
+                      <div className="flex items-center gap-2 ml-4">
                         <CheckCircle className="h-4 w-4" />
                         {aberto === os.id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                       </div>
