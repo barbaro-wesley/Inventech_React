@@ -21,22 +21,33 @@ import {
 
 import api from "@/lib/api";
 
-interface TipoEquipamento {
+interface Grupo {
   id: string;
   nome: string;
 }
 
+interface TipoEquipamento {
+  id: string;
+  nome: string;
+  grupo?: Grupo;
+  taxaDepreciacao?: number;
+}
+
 interface FormData {
   nome: string;
+  grupoId: string;
+  taxaDepreciacao: string;
 }
 
 export default function TiposEquipamento() {
   const [tipos, setTipos] = useState<TipoEquipamento[]>([]);
+  const [grupos, setGrupos] = useState<Grupo[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTipo, setEditingTipo] = useState<TipoEquipamento | null>(null);
-  const [formData, setFormData] = useState<FormData>({ nome: "" });
+  const [formData, setFormData] = useState<FormData>({ nome: "", grupoId: "", taxaDepreciacao: "" });
 
+  // Carregar tipos de equipamento
   useEffect(() => {
     const fetchTipos = async () => {
       try {
@@ -49,11 +60,28 @@ export default function TiposEquipamento() {
     fetchTipos();
   }, []);
 
+  // Carregar grupos
+  useEffect(() => {
+    const fetchGrupos = async () => {
+      try {
+        const response = await api.get("/grupos-manutencao", { withCredentials: true });
+        setGrupos(response.data);
+      } catch (error) {
+        console.error("Erro ao buscar grupos:", error);
+      }
+    };
+    fetchGrupos();
+  }, []);
+
   useEffect(() => {
     if (editingTipo) {
-      setFormData({ nome: editingTipo.nome });
+      setFormData({
+        nome: editingTipo.nome,
+        grupoId: editingTipo.grupo?.id || "",
+        taxaDepreciacao: editingTipo.taxaDepreciacao?.toString() || "",
+      });
     } else {
-      setFormData({ nome: "" });
+      setFormData({ nome: "", grupoId: "", taxaDepreciacao: "" });
     }
   }, [editingTipo]);
 
@@ -72,7 +100,12 @@ export default function TiposEquipamento() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEdit = (tipo: TipoEquipamento) => {
+    setEditingTipo(tipo);
+    setIsModalOpen(true);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
@@ -80,7 +113,11 @@ export default function TiposEquipamento() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const payload = { nome: formData.nome };
+      const payload = {
+        nome: formData.nome,
+        grupoId: formData.grupoId,
+        taxaDepreciacao: parseFloat(formData.taxaDepreciacao),
+      };
 
       if (editingTipo?.id) {
         const response = await api.put(`/tipos-equipamento/${editingTipo.id}`, payload, {
@@ -94,7 +131,7 @@ export default function TiposEquipamento() {
         setTipos([...tipos, response.data]);
       }
 
-      setFormData({ nome: "" });
+      setFormData({ nome: "", grupoId: "", taxaDepreciacao: "" });
       setEditingTipo(null);
       setIsModalOpen(false);
     } catch (error) {
@@ -160,6 +197,8 @@ export default function TiposEquipamento() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nome</TableHead>
+                  <TableHead>Grupo</TableHead>
+                  <TableHead>Taxa Depreciação</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -167,27 +206,24 @@ export default function TiposEquipamento() {
                 {filteredTipos.map((tipo) => (
                   <TableRow key={tipo.id} className="hover:bg-muted/50">
                     <TableCell className="font-medium">{tipo.nome}</TableCell>
+                    <TableCell>{tipo.grupo?.nome || "-"}</TableCell>
+                    <TableCell>{tipo.taxaDepreciacao ? `${tipo.taxaDepreciacao * 100}%` : "-"}</TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setEditingTipo(tipo);
-                            setIsModalOpen(true);
-                          }}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(tipo.id)}
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(tipo)}
+                        className="mr-2"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(tipo.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -216,6 +252,38 @@ export default function TiposEquipamento() {
                 required
               />
             </div>
+
+            <div>
+              <label className="text-sm font-medium">Grupo</label>
+              <select
+                name="grupoId"
+                value={formData.grupoId}
+                onChange={handleChange}
+                required
+                className="w-full border rounded-md px-3 py-2"
+              >
+                <option value="">Selecione um grupo</option>
+                {grupos.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.nome}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Taxa de Depreciação (%)</label>
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                name="taxaDepreciacao"
+                value={formData.taxaDepreciacao}
+                onChange={handleChange}
+                required
+                placeholder="Ex: 20 para 20%"
+              />
+            </div>
+
             <DialogFooter>
               <Button
                 type="button"

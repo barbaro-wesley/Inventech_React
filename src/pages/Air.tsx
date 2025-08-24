@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Settings, Plus, Search, Wrench, Calendar, Hammer } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { EquipamentoForm } from "@/components/EquipamentoForm";
+import { AirForm } from "@/components/AirForm";
 import { OSForm } from "@/components/OSForm";
 import {
   DropdownMenu,
@@ -263,7 +263,7 @@ const Condicionados = () => {
         )}
       </div>
 
-      <EquipamentoForm
+      <AirForm
         isOpen={showForm}
         onClose={handleCloseForm}
         onSubmit={handleFormSubmit}

@@ -126,6 +126,12 @@ const PopupEquip = ({ equipamento, onClose, onOptionClick }) => {
                 </span>
               </div>
               <div className="text-sm">
+                <strong className="font-medium text-foreground">Valor Atual:</strong>
+                <span className="text-muted-foreground ml-1">
+                  R$ {equipamento.valorAtual ? equipamento.valorAtual.toFixed(2) : "0.00"}
+                </span>
+              </div>
+              <div className="text-sm">
                 <strong className="font-medium text-foreground">Data da Compra:</strong>
                 <span className="text-muted-foreground ml-1">{formatDate(equipamento.dataCompra)}</span>
               </div>
@@ -213,6 +219,7 @@ const PopupEquip = ({ equipamento, onClose, onOptionClick }) => {
                               }).format(Number(os.valorManutencao))
                             : "-"}
                         </td>
+                        
                         <td className="border border-muted px-4 py-2 text-sm text-muted-foreground">
                           {os.arquivos && os.arquivos.length > 0 ? (
                             os.arquivos.map((arquivo, idx) => (

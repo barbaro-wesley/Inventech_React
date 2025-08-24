@@ -8,14 +8,18 @@ import { MobiliaForm } from "@/components/MobiliaForm";
 import PopupEquip from "@/components/popups/PopupEquip";
 import api from "@/lib/api";
 
-// Update the interface to match the /mobilias endpoint data structure
 interface Mobilia {
   id: number;
   numeroPatrimonio: string;
-  nomeEquipamento: string; // Adjust if the endpoint uses a different field like 'nome'
+  nomeEquipamento: string;
   estado: string;
   localizacao?: { nome: string };
   setor?: { nome: string };
+  valorCompra?: string;
+  dataCompra?: string;
+  inicioGarantia?: string;
+  terminoGarantia?: string;
+  notaFiscal?: string;
 }
 
 const MobiliasPage = () => {
@@ -35,8 +39,8 @@ const MobiliasPage = () => {
       setMobilias(response.data);
     } catch (error) {
       toast({
-        title: "Erro ao carregar mobilias",
-        description: "Não foi possível carregar a lista de mobilias",
+        title: "Erro ao carregar mobiliários",
+        description: "Não foi possível carregar a lista de mobiliários",
         variant: "destructive",
       });
     } finally {
@@ -46,15 +50,23 @@ const MobiliasPage = () => {
 
   useEffect(() => {
     fetchMobilias();
-  }, []);
+  }, [toast]);
 
   const handleFormSubmit = (data: Mobilia) => {
     if (editingMobilia) {
       setMobilias((prev) =>
         prev.map((mobilia) => (mobilia.id === data.id ? data : mobilia))
       );
+      toast({
+        title: "Sucesso",
+        description: "Mobiliário atualizado com sucesso!",
+      });
     } else {
       setMobilias((prev) => [...prev, data]);
+      toast({
+        title: "Sucesso",
+        description: "Mobiliário cadastrado com sucesso!",
+      });
     }
     setEditingMobilia(null);
     setShowForm(false);
@@ -76,10 +88,10 @@ const MobiliasPage = () => {
         <div>
           <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
             <Settings className="h-8 w-8 text-brand-secondary" />
-            Mobilias
+            Mobiliários
           </h1>
           <p className="text-muted-foreground mt-1">
-            Gerencie mobilias do sistema
+            Gerencie mobiliários do sistema
           </p>
         </div>
 
@@ -88,7 +100,7 @@ const MobiliasPage = () => {
           onClick={() => setShowForm(true)}
         >
           <Plus className="h-4 w-4 mr-2" />
-          Nova Mobilia
+          Nova Mobília
         </Button>
       </div>
 
@@ -97,7 +109,7 @@ const MobiliasPage = () => {
         <div className="flex gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Pesquisar mobilias..." className="pl-9" />
+            <Input placeholder="Pesquisar mobiliários..." className="pl-9" />
           </div>
           <Button variant="outline">Filtros</Button>
         </div>
@@ -136,13 +148,11 @@ const MobiliasPage = () => {
 
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg mb-1">
-                      {mobilia.nomeEquipamento || `Mobilia #${mobilia.id}`}
+                      {mobilia.nomeEquipamento || `Mobiliário #${mobilia.id}`}
                     </h3>
-                    <span className="font-medium">Estado:<p className="text-muted-foreground mb-3">
-                      {mobilia.estado || "Mobilia"}
+                    <p className="text-muted-foreground mb-3">
+                      Estado: {mobilia.estado || "Não informado"}
                     </p>
-                    </span>
-                    
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                       <div>
@@ -193,17 +203,17 @@ const MobiliasPage = () => {
           <Card className="p-12 text-center">
             <Settings className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">
-              Nenhuma mobilia encontrada
+              Nenhum mobiliário encontrado
             </h3>
             <p className="text-muted-foreground mb-4">
-              Comece adicionando a primeira mobilia ao sistema
+              Comece adicionando o primeiro mobiliário ao sistema
             </p>
             <Button
               className="bg-gradient-brand hover:opacity-90"
               onClick={() => setShowForm(true)}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Adicionar Mobilia
+              Adicionar Mobília
             </Button>
           </Card>
         )}
@@ -216,12 +226,12 @@ const MobiliasPage = () => {
         initialData={editingMobilia}
       />
 
-      {selectedMobilia && (
+      {selectedMobilia && !showForm && (
         <PopupEquip
           equipamento={selectedMobilia}
           onClose={() => setSelectedMobilia(null)}
           onOptionClick={(tipo) => {
-            console.log(`Ação ${tipo} para mobilia ${selectedMobilia.id}`);
+            console.log(`Ação ${tipo} para mobiliário ${selectedMobilia.id}`);
             setSelectedMobilia(null);
           }}
         />

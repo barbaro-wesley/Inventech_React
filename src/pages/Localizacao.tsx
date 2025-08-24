@@ -198,7 +198,7 @@ export default function Localizacoes() {
                                         <TableCell className="font-medium">{localizacao.nome}</TableCell>
                                         <TableCell>
                                             <Badge variant="outline">
-                                                {localizacao.setorId ? "Setor Vinculado" : "Nenhum"}
+                                                {localizacao.setorId ? localizacao.setor?.nome : "Nenhum"}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right">

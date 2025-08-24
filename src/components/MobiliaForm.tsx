@@ -14,6 +14,11 @@ interface Mobilia {
   estado: string;
   localizacao?: { nome: string };
   setor?: { nome: string };
+  valorCompra?: string;
+  dataCompra?: string;
+  inicioGarantia?: string;
+  terminoGarantia?: string;
+  notaFiscal?: string;
 }
 
 interface MobiliaFormProps {
@@ -38,6 +43,11 @@ export const MobiliaForm = ({ isOpen, onClose, onSubmit, initialData }: MobiliaF
     numeroPatrimonio: "",
     nomeEquipamento: "",
     estado: "",
+    valorCompra: "",
+    dataCompra: "",
+    inicioGarantia: "",
+    terminoGarantia: "",
+    notaFiscal: "",
   });
   const [setores, setSetores] = useState<Setor[]>([]);
   const [localizacoes, setLocalizacoes] = useState<Localizacao[]>([]);
@@ -46,12 +56,26 @@ export const MobiliaForm = ({ isOpen, onClose, onSubmit, initialData }: MobiliaF
 
   useEffect(() => {
     if (initialData) {
-      setFormData(initialData);
+      setFormData({
+        numeroPatrimonio: initialData.numeroPatrimonio ?? "",
+        nomeEquipamento: initialData.nomeEquipamento ?? "",
+        estado: initialData.estado ?? "",
+        valorCompra: initialData.valorCompra ?? "",
+        dataCompra: initialData.dataCompra ? initialData.dataCompra.slice(0, 10) : "",
+        inicioGarantia: initialData.inicioGarantia ? initialData.inicioGarantia.slice(0, 10) : "",
+        terminoGarantia: initialData.terminoGarantia ? initialData.terminoGarantia.slice(0, 10) : "",
+        notaFiscal: initialData.notaFiscal ?? "",
+      });
     } else {
       setFormData({
         numeroPatrimonio: "",
         nomeEquipamento: "",
         estado: "",
+        valorCompra: "",
+        dataCompra: "",
+        inicioGarantia: "",
+        terminoGarantia: "",
+        notaFiscal: "",
       });
     }
   }, [initialData, isOpen]);
@@ -65,7 +89,7 @@ export const MobiliaForm = ({ isOpen, onClose, onSubmit, initialData }: MobiliaF
 
   const fetchSetores = async () => {
     try {
-      const response = await api.get("/setores", { withCredentials: true });
+      const response = await api.get("/setor", { withCredentials: true });
       setSetores(response.data);
     } catch (error) {
       console.error("Erro ao carregar setores:", error);
@@ -74,7 +98,7 @@ export const MobiliaForm = ({ isOpen, onClose, onSubmit, initialData }: MobiliaF
 
   const fetchLocalizacoes = async () => {
     try {
-      const response = await api.get("/localizacoes", { withCredentials: true });
+      const response = await api.get("/localizacao", { withCredentials: true });
       setLocalizacoes(response.data);
     } catch (error) {
       console.error("Erro ao carregar localizações:", error);
@@ -98,7 +122,9 @@ export const MobiliaForm = ({ isOpen, onClose, onSubmit, initialData }: MobiliaF
       
       const submitData = {
         ...formData,
-        tipoEquipamentoId: 6, // ID para mobilias
+        tipoEquipamentoId: 6,
+        setorId: formData.setor ? parseInt(formData.setor.id.toString()) : undefined,
+        localizacaoId: formData.localizacao ? parseInt(formData.localizacao.id.toString()) : undefined,
       };
 
       if (initialData?.id) {
@@ -149,77 +175,134 @@ export const MobiliaForm = ({ isOpen, onClose, onSubmit, initialData }: MobiliaF
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="numeroPatrimonio">Número de Patrimônio *</Label>
-              <Input
-                id="numeroPatrimonio"
-                value={formData.numeroPatrimonio}
-                onChange={(e) => handleInputChange("numeroPatrimonio", e.target.value)}
-                placeholder="Ex: 001234"
-                required
-              />
+          <div className="space-y-2">
+            <h3 className="font-semibold text-base sm:text-lg">Identificação</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="numeroPatrimonio">Número de Patrimônio *</Label>
+                <Input
+                  id="numeroPatrimonio"
+                  value={formData.numeroPatrimonio}
+                  onChange={(e) => handleInputChange("numeroPatrimonio", e.target.value)}
+                  placeholder="Ex: 001234"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="nomeEquipamento">Nome do Mobiliário *</Label>
+                <Input
+                  id="nomeEquipamento"
+                  value={formData.nomeEquipamento}
+                  onChange={(e) => handleInputChange("nomeEquipamento", e.target.value)}
+                  placeholder="Ex: Mesa de Escritório"
+                  required
+                />
+              </div>
             </div>
-            
+
             <div className="space-y-2">
-              <Label htmlFor="nomeEquipamento">Nome do Mobiliário *</Label>
-              <Input
-                id="nomeEquipamento"
-                value={formData.nomeEquipamento}
-                onChange={(e) => handleInputChange("nomeEquipamento", e.target.value)}
-                placeholder="Ex: Mesa de Escritório"
-                required
-              />
+              <Label htmlFor="estado">Estado</Label>
+              <Select value={formData.estado} onValueChange={(value) => handleInputChange("estado", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Novo">Novo</SelectItem>
+                  <SelectItem value="Bom">Bom</SelectItem>
+                  <SelectItem value="Regular">Regular</SelectItem>
+                  <SelectItem value="Ruim">Ruim</SelectItem>
+                  <SelectItem value="Descartado">Descartado</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="estado">Estado</Label>
-            <Select value={formData.estado} onValueChange={(value) => handleInputChange("estado", value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o estado" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Novo">Novo</SelectItem>
-                <SelectItem value="Bom">Bom</SelectItem>
-                <SelectItem value="Regular">Regular</SelectItem>
-                <SelectItem value="Ruim">Ruim</SelectItem>
-                <SelectItem value="Descartado">Descartado</SelectItem>
-              </SelectContent>
-            </Select>
+            <h3 className="font-semibold text-base sm:text-lg">Localização</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="setor">Setor</Label>
+                <Select onValueChange={(value) => handleInputChange("setor", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o setor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {setores.map((setor) => (
+                      <SelectItem key={setor.id} value={setor.id.toString()}>
+                        {setor.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="localizacao">Localização</Label>
+                <Select onValueChange={(value) => handleInputChange("localizacao", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a localização" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {localizacoes.map((localizacao) => (
+                      <SelectItem key={localizacao.id} value={localizacao.id.toString()}>
+                        {localizacao.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="setor">Setor</Label>
-              <Select onValueChange={(value) => handleInputChange("setor", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o setor" />
-                </SelectTrigger>
-                <SelectContent>
-                  {setores.map((setor) => (
-                    <SelectItem key={setor.id} value={setor.id.toString()}>
-                      {setor.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <div className="space-y-2">
+            <h3 className="font-semibold text-base sm:text-lg">Financeiro e Garantia</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="valorCompra">Valor da Compra</Label>
+                <Input
+                  id="valorCompra"
+                  type="number"
+                  step="0.01"
+                  value={formData.valorCompra}
+                  onChange={(e) => handleInputChange("valorCompra", e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="dataCompra">Data da Compra</Label>
+                <Input
+                  id="dataCompra"
+                  type="date"
+                  value={formData.dataCompra}
+                  onChange={(e) => handleInputChange("dataCompra", e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="inicioGarantia">Início da Garantia</Label>
+                <Input
+                  id="inicioGarantia"
+                  type="date"
+                  value={formData.inicioGarantia}
+                  onChange={(e) => handleInputChange("inicioGarantia", e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="terminoGarantia">Término da Garantia</Label>
+                <Input
+                  id="terminoGarantia"
+                  type="date"
+                  value={formData.terminoGarantia}
+                  onChange={(e) => handleInputChange("terminoGarantia", e.target.value)}
+                />
+              </div>
             </div>
-
             <div className="space-y-2">
-              <Label htmlFor="localizacao">Localização</Label>
-              <Select onValueChange={(value) => handleInputChange("localizacao", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione a localização" />
-                </SelectTrigger>
-                <SelectContent>
-                  {localizacoes.map((localizacao) => (
-                    <SelectItem key={localizacao.id} value={localizacao.id.toString()}>
-                      {localizacao.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="notaFiscal">Nota Fiscal</Label>
+              <Input
+                id="notaFiscal"
+                value={formData.notaFiscal}
+                onChange={(e) => handleInputChange("notaFiscal", e.target.value)}
+              />
             </div>
           </div>
 

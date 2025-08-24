@@ -43,14 +43,11 @@ export const ModuleSelection = () => {
 
   const handleModuleSelect = async (moduleId: string) => {
     setIsLoading(true);
-    
-    // Simular salvamento da escolha do módulo
     localStorage.setItem("selectedModule", moduleId);
-    
-    // Redirecionar para o módulo específico
+
     setTimeout(() => {
       if (moduleId === "inventory") {
-        navigate("/app/dashboard");
+        navigate("/dashboard");
       } else if (moduleId === "documents") {
         navigate("/gestao/funcionarios");
       }

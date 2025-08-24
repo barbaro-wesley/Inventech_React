@@ -158,6 +158,7 @@ export const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+     
       
 
       {/* Gestão de Documentos Module Routes - /gestao */}

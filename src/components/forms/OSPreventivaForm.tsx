@@ -37,13 +37,8 @@ interface Equipamento {
   id: number;
   tipoEquipamentoId: number;
   setor?: { id: number; nome: string };
-  nomePC?: string;
-  ip?: string;
-  marca?: string;
-  numeroSerie?: string;
   nomeEquipamento?: string;
-  nPatrimonio?: string;
-  nome?: string;
+  numeroPatrimonio?: string;
 }
 
 const recorrencias = [
@@ -53,15 +48,6 @@ const recorrencias = [
   { value: 'MENSAL', label: 'Mensalmente' },
   { value: 'ANUAL', label: 'Anual' },
 ];
-
-const endpointPorTipo: Record<string, string> = {
-  '1': '/hcr-computers',
-  '2': '/printers',
-  '3': '/equipamentos-medicos',
-  '4': '/condicionadores',
-  '5': '/equipamentos-medicos',
-  '6': '/hcr-mobilia',
-};
 
 export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
   isOpen,
@@ -128,32 +114,29 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
 
       // Fetch additional equipment for the same tipoEquipamentoId
       const tipoId = String(eq.tipoEquipamentoId || '');
-      const endpoint = endpointPorTipo[tipoId];
-      if (endpoint) {
-        (async () => {
-          try {
-            setLoadingEquipamentos(true);
-            const res = await api.get(endpoint, {
-              withCredentials: true,
-              params: { tipoEquipamentoId: tipoId },
-            });
-            const filteredEquipamentos = res.data.filter((e: Equipamento) => String(e.tipoEquipamentoId) === tipoId);
-            setEquipamentos(prev => {
-              const allEquipamentos = [...prev, ...filteredEquipamentos];
-              return Array.from(new Map(allEquipamentos.map(e => [e.id, e])).values());
-            });
-          } catch (error) {
-            console.error('Erro ao buscar equipamentos:', error);
-            toast({
-              title: "Erro",
-              description: "Erro ao carregar equipamentos",
-              variant: "destructive",
-            });
-          } finally {
-            setLoadingEquipamentos(false);
-          }
-        })();
-      }
+      (async () => {
+        try {
+          setLoadingEquipamentos(true);
+          const res = await api.get('/equipamentos-medicos', {
+            withCredentials: true,
+            params: { tipoEquipamentoId: tipoId },
+          });
+          const filteredEquipamentos = res.data.filter((e: Equipamento) => String(e.tipoEquipamentoId) === tipoId);
+          setEquipamentos(prev => {
+            const allEquipamentos = [...prev, ...filteredEquipamentos];
+            return Array.from(new Map(allEquipamentos.map(e => [e.id, e])).values());
+          });
+        } catch (error) {
+          console.error('Erro ao buscar equipamentos:', error);
+          toast({
+            title: "Erro",
+            description: "Erro ao carregar equipamentos",
+            variant: "destructive",
+          });
+        } finally {
+          setLoadingEquipamentos(false);
+        }
+      })();
 
       // Set grupo and filter técnicos based on tipoEquipamentoId
       const selectedTipo = tiposEquipamento.find(t => t.id === parseInt(tipoId));
@@ -188,36 +171,26 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
       }
 
       // Buscar equipamentos
-      const endpoint = endpointPorTipo[tipoId];
-      if (endpoint) {
-        try {
-          setLoadingEquipamentos(true);
-          setEquipamentos([]);
-          const res = await api.get(endpoint, {
-            withCredentials: true,
-            params: { tipoEquipamentoId: tipoId }
-          });
-          const filteredEquipamentos = res.data.filter((e: Equipamento) => String(e.tipoEquipamentoId) === tipoId);
-          setEquipamentos(filteredEquipamentos);
-          setFormData(prev => ({ ...prev, equipamentoId: '', setorId: '' }));
-        } catch (error) {
-          console.error('Erro ao buscar equipamentos:', error);
-          setEquipamentos([]);
-          toast({
-            title: "Erro",
-            description: "Erro ao carregar equipamentos",
-            variant: "destructive",
-          });
-        } finally {
-          setLoadingEquipamentos(false);
-        }
-      } else {
+      try {
+        setLoadingEquipamentos(true);
         setEquipamentos([]);
-        setFormData(prev => ({ ...prev, equipamentoId: '', setorId: '' }));
-        toast({
-          title: "Aviso",
-          description: "Nenhum endpoint configurado para este tipo de equipamento",
+        const res = await api.get('/equipamentos-medicos', {
+          withCredentials: true,
+          params: { tipoEquipamentoId: tipoId },
         });
+        const filteredEquipamentos = res.data.filter((e: Equipamento) => String(e.tipoEquipamentoId) === tipoId);
+        setEquipamentos(filteredEquipamentos);
+        setFormData(prev => ({ ...prev, equipamentoId: '', setorId: '' }));
+      } catch (error) {
+        console.error('Erro ao buscar equipamentos:', error);
+        setEquipamentos([]);
+        toast({
+          title: "Erro",
+          description: "Erro ao carregar equipamentos",
+          variant: "destructive",
+        });
+      } finally {
+        setLoadingEquipamentos(false);
       }
     }
 
@@ -303,22 +276,8 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
     }
   };
 
-  const getEquipamentoNome = (equipamento: Equipamento, tipoEquipamentoId: string) => {
-    switch (String(tipoEquipamentoId)) {
-      case '1': // Computadores
-        return `${equipamento.nomePC || 'Sem Nome'} - ${equipamento.ip || 'Sem IP'}`;
-      case '2': // Impressoras
-        return `${equipamento.ip || 'Sem IP'} - ${equipamento.marca || 'Sem Marca'}`;
-      case '3': // Equipamentos médicos
-      case '5': // Equipamentos Gerais
-        return `${equipamento.numeroSerie || 'Sem Nº de Série'} - ${equipamento.nomeEquipamento || 'Sem Modelo'}`;
-      case '4': // Condicionadores
-        return `${equipamento.marca || 'Sem Marca'} - ${equipamento.nPatrimonio || 'Sem Patrimônio'}`;
-      case '6': // Mobilia
-        return `${equipamento.nPatrimonio || 'Sem Marca'} - ${equipamento.nome || 'Sem Patrimônio'}`;
-      default:
-        return 'Equipamento não identificado';
-    }
+  const getEquipamentoNome = (equipamento: Equipamento) => {
+    return `${equipamento.numeroPatrimonio || 'Sem Nº de Patrimônio'} - ${equipamento.nomeEquipamento || 'Sem Nome'}`;
   };
 
   return (
@@ -372,7 +331,7 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
                 <SelectContent className="bg-background border z-50">
                   {equipamentos.map((eq) => (
                     <SelectItem key={eq.id} value={eq.id.toString()}>
-                      {getEquipamentoNome(eq, formData.tipoEquipamentoId)}
+                      {getEquipamentoNome(eq)}
                     </SelectItem>
                   ))}
                 </SelectContent>

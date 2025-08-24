@@ -35,30 +35,35 @@ const Equipamentos = () => {
   const [selectedEquipmentForOS, setSelectedEquipmentForOS] = useState(null);
   const [selectedEquipment, setSelectedEquipment] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedTipoId, setSelectedTipoId] = useState("");
+  const [selectedTipoId, setSelectedTipoId] = useState("3");
   const { toast } = useToast();
 
-  const fetchEquipments = async () => {
-    try {
-      setLoading(true);
-      const [equipmentsResponse, tiposResponse] = await Promise.all([
-        api.get('/equipamentos-medicos', { withCredentials: true }),
-        api.get('/tipos-equipamento', { withCredentials: true })
-      ]);
-      
-      setAllEquipments(equipmentsResponse.data);
-      setEquipments(equipmentsResponse.data);
-      setTiposEquipamento(tiposResponse.data);
-    } catch (error) {
-      toast({
-        title: "Erro ao carregar dados",
-        description: "Não foi possível carregar equipamentos ou tipos",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const fetchEquipments = async (tipoId: string = "all") => {
+  try {
+    setLoading(true);
+    const url =
+      tipoId === "all"
+        ? "/equipamentos-medicos"
+        : `/equipamentos-medicos/tipo/${tipoId}`;
+
+    const [equipmentsResponse, tiposResponse] = await Promise.all([
+      api.get(url, { withCredentials: true }),
+      api.get("/tipos-equipamento", { withCredentials: true }),
+    ]);
+
+    setAllEquipments(equipmentsResponse.data);
+    setEquipments(equipmentsResponse.data);
+    setTiposEquipamento(tiposResponse.data);
+  } catch (error) {
+    toast({
+      title: "Erro ao carregar dados",
+      description: "Não foi possível carregar equipamentos ou tipos",
+      variant: "destructive",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   const filterEquipments = () => {
     let filtered = allEquipments;
@@ -72,7 +77,7 @@ const Equipamentos = () => {
       );
     }
 
-    if (selectedTipoId) {
+    if (selectedTipoId && selectedTipoId !== "all") {
       filtered = filtered.filter((equipment: any) =>
         String(equipment.tipoEquipamentoId) === selectedTipoId
       );
@@ -82,12 +87,14 @@ const Equipamentos = () => {
   };
 
   useEffect(() => {
-    filterEquipments();
-  }, [searchTerm, selectedTipoId, allEquipments]);
+  fetchEquipments("3"); // carrega tipo 3 ao montar
+}, []);
 
-  useEffect(() => {
-    fetchEquipments();
-  }, []);
+ useEffect(() => {
+  if (selectedTipoId) {
+    fetchEquipments(selectedTipoId);
+  }
+}, [selectedTipoId]);
 
   const handleFormSubmit = (data: any) => {
     if (editingEquipment) {
@@ -113,7 +120,7 @@ const Equipamentos = () => {
       equipamento: equipment,
       preventiva: type === 'preventiva'
     });
-    
+
     if (type === 'preventiva') {
       setShowOSPreventivaForm(true);
     } else {
@@ -151,8 +158,8 @@ const Equipamentos = () => {
             Gerencie equipamentos médicos e outros dispositivos
           </p>
         </div>
-        
-        <Button 
+
+        <Button
           className="bg-gradient-brand hover:opacity-90 transition-opacity w-full sm:w-auto"
           onClick={() => setShowForm(true)}
         >
@@ -166,8 +173,8 @@ const Equipamentos = () => {
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Pesquisar equipamentos..." 
+            <Input
+              placeholder="Pesquisar equipamentos..."
               className="pl-9 w-full"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -178,7 +185,7 @@ const Equipamentos = () => {
               <SelectValue placeholder="Tipo de equipamento" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos os tipos</SelectItem>
+              <SelectItem value="all">Todos os tipos</SelectItem>
               {tiposEquipamento.map((tipo: any) => (
                 <SelectItem key={tipo.id} value={String(tipo.id)}>
                   {tipo.nome}
@@ -187,11 +194,11 @@ const Equipamentos = () => {
             </SelectContent>
           </Select>
           {(searchTerm || selectedTipoId) && (
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => {
                 setSearchTerm("");
-                setSelectedTipoId("");
+                setSelectedTipoId("all");
               }}
               className="w-full sm:w-auto"
             >
@@ -249,7 +256,7 @@ const Equipamentos = () => {
                   <div className="p-3 bg-gradient-brand rounded-lg">
                     <Settings className="h-6 w-6 text-white" />
                   </div>
-                  
+
                   <div className="flex-1">
                     <h3 className="font-semibold text-base sm:text-lg mb-1">
                       {equipment.nomeEquipamento || `Equipamento #${index + 1}`}
@@ -257,7 +264,7 @@ const Equipamentos = () => {
                     <p className="text-xs sm:text-sm text-muted-foreground mb-3">
                       {equipment.tipoEquipamento?.nome || 'Equipamento Médico'}
                     </p>
-                    
+
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs sm:text-sm">
                       <div>
                         <span className="font-medium">Setor:</span>
@@ -280,26 +287,26 @@ const Equipamentos = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     className="w-full sm:w-auto"
                     onClick={() => handleEdit(equipment)}
                   >
                     Editar
                   </Button>
-                  
-                  <Button 
-                    variant="outline" 
+
+                  <Button
+                    variant="outline"
                     size="sm"
                     className="w-full sm:w-auto"
                     onClick={() => setSelectedEquipment(equipment)}
                   >
                     Detalhes
                   </Button>
-                  
+
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" size="sm" className="w-full sm:w-auto">
@@ -308,14 +315,14 @@ const Equipamentos = () => {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         onClick={() => handleMaintenanceClick(equipment, 'preventiva')}
                         className="cursor-pointer"
                       >
                         <Calendar className="h-4 w-4 mr-2" />
                         Preventiva
                       </DropdownMenuItem>
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         onClick={() => handleMaintenanceClick(equipment, 'corretiva')}
                         className="cursor-pointer"
                       >
@@ -324,10 +331,10 @@ const Equipamentos = () => {
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                  
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+
+                  <Button
+                    variant="outline"
+                    size="sm"
                     className="w-full sm:w-auto"
                   >
                     Histórico
@@ -343,7 +350,7 @@ const Equipamentos = () => {
             <p className="text-xs sm:text-sm text-muted-foreground mb-4">
               Comece adicionando o primeiro equipamento ao sistema
             </p>
-            <Button 
+            <Button
               className="bg-gradient-brand hover:opacity-90 w-full sm:w-auto"
               onClick={() => setShowForm(true)}
             >

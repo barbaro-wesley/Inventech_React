@@ -6,10 +6,13 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import api from "@/lib/api";
 import PopupEquip from "@/components/popups/PopupEquip";
+import { FormPc } from "@/components/FormPc";
+
 const Computadores = () => {
   const [computers, setComputers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedComputer, setSelectedComputer] = useState(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -33,6 +36,22 @@ const Computadores = () => {
     fetchComputers();
   }, [toast]);
 
+  const handleAddComputer = () => {
+    setIsFormOpen(true);
+  };
+
+  const handleFormClose = () => {
+    setIsFormOpen(false);
+  };
+
+  const handleFormSubmit = (newComputer: any) => {
+    setComputers((prev) => [...prev, newComputer]);
+    toast({
+      title: "Sucesso",
+      description: "Computador cadastrado com sucesso!",
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -46,7 +65,10 @@ const Computadores = () => {
           </p>
         </div>
 
-        <Button className="bg-gradient-brand hover:opacity-90 transition-opacity">
+        <Button
+          className="bg-gradient-brand hover:opacity-90 transition-opacity"
+          onClick={handleAddComputer}
+        >
           <Plus className="h-4 w-4 mr-2" />
           Novo Computador
         </Button>
@@ -91,11 +113,11 @@ const Computadores = () => {
                 </span>
               </div>
 
-              <h3 className="font-semibold text-lg mb-2">{computer.nomePC}</h3>
+              <h3 className="font-semibold text-lg mb-2">{computer.nomeEquipamento}</h3>
 
               <div className="space-y-1 text-sm text-muted-foreground">
                 <p>Patrimônio: {computer.numeroPatrimonio}</p>
-                <p>HostName: {computer.nomeEquipamento}</p>
+                <p>Hostname: {computer.nomeEquipamento}</p>
                 <p>IP: {computer.ip}</p>
                 <p>Setor: {computer.setor?.nome || "-"}</p>
                 <p>Localização: {computer.localizacao?.nome || "-"}</p>
@@ -103,7 +125,15 @@ const Computadores = () => {
               </div>
 
               <div className="mt-4 flex gap-2">
-                <Button variant="outline" size="sm" className="flex-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => {
+                    setSelectedComputer(computer);
+                    setIsFormOpen(true);
+                  }}
+                >
                   Editar
                 </Button>
                 <Button
@@ -125,7 +155,10 @@ const Computadores = () => {
             <p className="text-muted-foreground mb-4">
               Comece adicionando o primeiro computador ao sistema
             </p>
-            <Button className="bg-gradient-brand hover:opacity-90">
+            <Button
+              className="bg-gradient-brand hover:opacity-90"
+              onClick={handleAddComputer}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Adicionar Computador
             </Button>
@@ -133,7 +166,7 @@ const Computadores = () => {
         )}
       </div>
 
-      {selectedComputer && (
+      {selectedComputer && !isFormOpen && (
         <PopupEquip
           equipamento={selectedComputer}
           onClose={() => setSelectedComputer(null)}
@@ -143,6 +176,13 @@ const Computadores = () => {
           }}
         />
       )}
+
+      <FormPc
+        isOpen={isFormOpen}
+        onClose={handleFormClose}
+        onSubmit={handleFormSubmit}
+        initialData={selectedComputer}
+      />
     </div>
   );
 };
