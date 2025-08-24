@@ -123,22 +123,26 @@ const Calendario = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={handleDateSelect}
-              className="rounded-md border w-full p-6 text-lg [&_.rdp-day]:w-12 [&_.rdp-day]:h-12 [&_.rdp-day]:text-base"
-              modifiers={{
-                hasEvents: (date) => hasEvents(date)
-              }}
-              modifiersStyles={{
-                hasEvents: {
-                  backgroundColor: 'hsl(var(--primary))',
-                  color: 'hsl(var(--primary-foreground))',
-                  fontWeight: 'bold'
-                }
-              }}
-            />
+            <div className="flex justify-center">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={handleDateSelect}
+                className="rounded-md border w-full max-w-4xl p-6 text-lg 
+                 [&_.rdp-months]:w-full [&_.rdp-table]:w-full [&_.rdp-cell]:h-16 
+                 [&_.rdp-day]:w-full [&_.rdp-day]:h-full [&_.rdp-day]:text-base"
+                modifiers={{
+                  hasEvents: (date) => hasEvents(date)
+                }}
+                modifiersStyles={{
+                  hasEvents: {
+                    backgroundColor: 'hsl(var(--primary))',
+                    color: 'hsl(var(--primary-foreground))',
+                    fontWeight: 'bold'
+                  }
+                }}
+              />
+            </div>
             <div className="mt-4 text-sm text-muted-foreground text-center">
               <p>• Datas destacadas possuem manutenções agendadas</p>
             </div>

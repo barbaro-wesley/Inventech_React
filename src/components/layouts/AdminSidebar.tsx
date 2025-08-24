@@ -70,11 +70,11 @@ const menuItems = [
     icon: Settings,
   },
   {
-    title: "Usuários e Permissões",
+    title: "Usuários",
     icon: Users,
     items: [
       { title: "Usuários", url: "/usuarios", icon: Users },
-      { title: "Papéis", url: "/papeis", icon: UserCheck },
+    
     ],
   },
   {

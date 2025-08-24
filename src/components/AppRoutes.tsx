@@ -16,128 +16,175 @@ import PesquisarDocumentos from "@/pages/PesquisarDocumentos";
 import Calendario from "@/pages/Calendario";
 import MobiliasPage from "@/pages/Mobilia";
 import PesquisarEquipamento from "@/components/PesquisarEquipamento";
+import Usuarios from "@/pages/Usuario";
+import Tecnicos from "@/pages/tecnico";
+import Categorias from "@/pages/Categorias";
+import Setores from "@/pages/Setores";
+import Localizacao from "@/pages/Localizacao";
+
 export const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<Login />} />
-      <Route 
-        path="/modules" 
+      <Route
+        path="/modules"
         element={
           <ProtectedRoute>
             <ModuleSelection />
           </ProtectedRoute>
-        } 
+        }
       />
-      
+
       {/* Inventech Module Routes - /app */}
-      <Route 
-        path="/dashboard" 
+      <Route
+        path="/dashboard"
         element={
           <ProtectedRoute>
             <Dashboard />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/computadores" 
+      <Route
+        path="/usuarios"
+        element={
+          <ProtectedRoute>
+            <Usuarios/>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/computadores"
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
             <Computadores />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/equipamentos" 
+      <Route
+        path="/equipamentos"
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
             <Equipamentos />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/condicionadores" 
+      <Route
+        path="/condicionadores"
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-            <Condicionados/>
+            <Condicionados />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/impressoras" 
+      <Route
+        path="/impressoras"
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-            <PrinterPage/>
+            <PrinterPage />
           </ProtectedRoute>
-        } 
+        }
       />
-       <Route 
-        path="/mobilias" 
+      <Route
+        path="/mobilias"
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-            <MobiliasPage/>
+            <MobiliasPage />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/pesquisar-equipamento" 
+      <Route
+        path="/pesquisar-equipamento"
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'tecnico', 'visualizador']}>
-            <PesquisarEquipamento/>
+            <PesquisarEquipamento />
           </ProtectedRoute>
-        } 
+        }
       />
 
-      <Route 
-        path="/calendario" 
+      <Route
+        path="/calendario"
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-            <Calendario/>
+            <Calendario />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/relatorios" 
+      <Route
+        path="/relatorios"
         element={
           <ProtectedRoute allowedRoles={['admin', 'visualizador']}>
             <Relatorios />
           </ProtectedRoute>
-        } 
+        }
       />
+      <Route
+        path="/tecnicos"
+        element={
+          <ProtectedRoute allowedRoles={['admin', 'visualizador']}>
+            <Tecnicos/>
+          </ProtectedRoute>
+        }
+      />
+       <Route
+        path="/tipos-equipamento"
+        element={
+          <ProtectedRoute allowedRoles={['admin', 'visualizador']}>
+            <Categorias/>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/setores"
+        element={
+          <ProtectedRoute allowedRoles={['admin', 'visualizador']}>
+            <Setores/>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/localizacoes"
+        element={
+          <ProtectedRoute allowedRoles={['admin', 'visualizador']}>
+            <Localizacao/>
+          </ProtectedRoute>
+        }
+      />
+      
 
       {/* Gestão de Documentos Module Routes - /gestao */}
-      <Route 
-        path="/funcionarios" 
+      <Route
+        path="/gestao/funcionarios"
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
             <Funcionarios />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/tipos-documentos" 
+      <Route
+        path="/tipos-documentos"
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
             <TiposDocumentos />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/gestao/registros-capacitacao" 
+      <Route
+        path="/gestao/registros-capacitacao"
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
             <RegistrosCapacitacao />
           </ProtectedRoute>
-        } 
+        }
       />
-      <Route 
-        path="/gestao/pesquisar-documentos" 
+      <Route
+        path="/gestao/pesquisar-documentos"
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
             <PesquisarDocumentos />
           </ProtectedRoute>
-        } 
+        }
       />
-      
+
       {/* Catch-all route */}
       <Route path="*" element={<NotFound />} />
     </Routes>

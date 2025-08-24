@@ -24,7 +24,8 @@ const PopupEquip = ({ equipamento, onClose, onOptionClick }) => {
 
   const handleOpenPdf = (filePath) => {
     const filename = filePath.split('\\').pop();
-    const fileUrl = `${import.meta.env.VITE_API_URL2}/${filename.startsWith('Uploads/') ? filename : `Uploads/pdfs/${filename}`}`;
+    const fileUrl = `${import.meta.env.VITE_API_URL2}/uploads/pdfs/${filename.replace(/^Uploads\/pdfs\//i, '')}`;
+
     window.open(fileUrl, '_blank');
   };
 
