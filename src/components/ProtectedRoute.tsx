@@ -5,6 +5,7 @@ import { TecnicoLayout } from '@/components/layouts/TecnicoLayout';
 import { CadastroLayout } from '@/components/layouts/CadastroLayout';
 import { VisualizadorLayout } from '@/components/layouts/VisualizadorLayout';
 import { UsuarioComumLayout } from '@/components/layouts/UsuarioComumLayout';
+import { DocumentosLayout } from '@/components/layouts/DocumentosLayout';
 import { Navigate, useLocation } from 'react-router-dom';
 
 interface ProtectedRouteProps {
@@ -46,6 +47,11 @@ export const ProtectedRoute = ({ children, allowedRoles, noLayout }: ProtectedRo
   // Se for a página de seleção de módulo, não aplica layout
   if (location.pathname === '/modules' || noLayout) {
     return <>{children}</>;
+  }
+
+  // Se for uma rota do módulo de gestão, usa o DocumentosLayout
+  if (location.pathname.startsWith('/gestao') || location.pathname.startsWith('/tipos-documentos')) {
+    return <DocumentosLayout>{children}</DocumentosLayout>;
   }
 
   // Escolhe o layout baseado no papel do usuário
