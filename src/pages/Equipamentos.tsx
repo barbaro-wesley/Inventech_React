@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { EquipamentoForm } from "@/components/EquipamentoForm";
 import { OSForm } from "@/components/OSForm";
+import { OSPreventivaForm } from "@/components/forms/OSPreventivaForm";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +22,7 @@ const Equipamentos = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingEquipment, setEditingEquipment] = useState(null);
   const [showOSForm, setShowOSForm] = useState(false);
+  const [showOSPreventivaForm, setShowOSPreventivaForm] = useState(false);
   const [selectedEquipmentForOS, setSelectedEquipmentForOS] = useState(null);
   const [selectedEquipment, setSelectedEquipment] = useState(null);
   const { toast } = useToast();
@@ -71,11 +73,21 @@ const Equipamentos = () => {
       equipamento: equipment,
       preventiva: type === 'preventiva'
     });
-    setShowOSForm(true);
+    
+    if (type === 'preventiva') {
+      setShowOSPreventivaForm(true);
+    } else {
+      setShowOSForm(true);
+    }
   };
 
   const handleCloseOSForm = () => {
     setShowOSForm(false);
+    setSelectedEquipmentForOS(null);
+  };
+
+  const handleCloseOSPreventivaForm = () => {
+    setShowOSPreventivaForm(false);
     setSelectedEquipmentForOS(null);
   };
 
@@ -286,6 +298,13 @@ const Equipamentos = () => {
       <OSForm
         isOpen={showOSForm}
         onClose={handleCloseOSForm}
+        onSubmit={handleOSSubmit}
+        initialData={selectedEquipmentForOS}
+      />
+
+      <OSPreventivaForm
+        isOpen={showOSPreventivaForm}
+        onClose={handleCloseOSPreventivaForm}
         onSubmit={handleOSSubmit}
         initialData={selectedEquipmentForOS}
       />
