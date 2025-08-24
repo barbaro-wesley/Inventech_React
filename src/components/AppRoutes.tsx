@@ -21,7 +21,7 @@ import Tecnicos from "@/pages/tecnico";
 import Categorias from "@/pages/Categorias";
 import Setores from "@/pages/Setores";
 import Localizacao from "@/pages/Localizacao";
-
+import ChamadosTecnico from "./ChamadosTecnico";
 export const AppRoutes = () => {
   return (
     <Routes>
@@ -63,7 +63,7 @@ export const AppRoutes = () => {
       <Route
         path="/equipamentos"
         element={
-          <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
+          <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador', 'tecnico']}>
             <Equipamentos />
           </ProtectedRoute>
         }
@@ -71,7 +71,7 @@ export const AppRoutes = () => {
       <Route
         path="/condicionadores"
         element={
-          <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
+          <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador', 'tecnico']}>
             <Condicionados />
           </ProtectedRoute>
         }
@@ -87,7 +87,7 @@ export const AppRoutes = () => {
       <Route
         path="/mobilias"
         element={
-          <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
+          <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador', 'tecnico']}>
             <MobiliasPage />
           </ProtectedRoute>
         }
@@ -109,6 +109,15 @@ export const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+       <Route
+        path="/minhas-os"
+        element={
+          <ProtectedRoute allowedRoles={['admin', 'cadastro', 'tecnico']}>
+            <ChamadosTecnico/>
+          </ProtectedRoute>
+        }
+      />
+      
       <Route
         path="/relatorios"
         element={

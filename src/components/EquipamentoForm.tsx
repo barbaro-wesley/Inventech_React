@@ -392,8 +392,6 @@ export function EquipamentoForm({ isOpen, onClose, onSubmit, initialData = null 
               </Select>
             </div>
           </Card>
-
-          {/* Financeiro e Garantia */}
           <Card className="p-4 sm:p-5">
             <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Financeiro e Garantia</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">

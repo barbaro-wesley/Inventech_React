@@ -9,6 +9,12 @@ import {
   Shield,
   AlertTriangle,
   Calendar,
+  Plus,
+  Monitor,
+  Printer,
+  Stethoscope,
+  Wind,
+  Package,
 } from "lucide-react";
 
 import {
@@ -21,6 +27,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
+  
 } from "@/components/ui/sidebar";
 
 const menuItems = [
@@ -34,6 +41,15 @@ const menuItems = [
     url: "/minhas-os",
     icon: ClipboardList,
   },
+  {
+      title: "Cadastros",
+      icon: Plus,
+      items: [
+        { title: "Equipamentos Médicos", url: "/equipamentos", icon: Stethoscope },
+        { title: "Ar Condicionado", url: "/condicionadores", icon: Wind },
+        { title: "Mobílias", url: "/mobilias", icon: Package },
+      ],
+    },
   {
     title: "Manutenção",
     icon: Wrench,
