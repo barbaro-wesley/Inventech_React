@@ -5,15 +5,17 @@ import { TecnicoLayout } from '@/components/layouts/TecnicoLayout';
 import { CadastroLayout } from '@/components/layouts/CadastroLayout';
 import { VisualizadorLayout } from '@/components/layouts/VisualizadorLayout';
 import { UsuarioComumLayout } from '@/components/layouts/UsuarioComumLayout';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 
 interface ProtectedRouteProps {
   children: ReactNode;
   allowedRoles?: UserRole[];
+  noLayout?: boolean;
 }
 
-export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
+export const ProtectedRoute = ({ children, allowedRoles, noLayout }: ProtectedRouteProps) => {
   const { user, isLoading } = useAuth();
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -39,6 +41,11 @@ export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) 
         </div>
       </div>
     );
+  }
+
+  // Se for a página de seleção de módulo, não aplica layout
+  if (location.pathname === '/modules' || noLayout) {
+    return <>{children}</>;
   }
 
   // Escolhe o layout baseado no papel do usuário
