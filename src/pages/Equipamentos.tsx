@@ -13,11 +13,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import api from "@/lib/api";
 import PopupEquip from "@/components/popups/PopupEquip";
 
 const Equipamentos = () => {
   const [equipments, setEquipments] = useState([]);
+  const [allEquipments, setAllEquipments] = useState([]);
+  const [tiposEquipamento, setTiposEquipamento] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingEquipment, setEditingEquipment] = useState(null);
@@ -25,25 +34,56 @@ const Equipamentos = () => {
   const [showOSPreventivaForm, setShowOSPreventivaForm] = useState(false);
   const [selectedEquipmentForOS, setSelectedEquipmentForOS] = useState(null);
   const [selectedEquipment, setSelectedEquipment] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTipoId, setSelectedTipoId] = useState("");
   const { toast } = useToast();
 
   const fetchEquipments = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/equipamentos-medicos', {
-       withCredentials: true,
-      });
-      setEquipments(response.data);
+      const [equipmentsResponse, tiposResponse] = await Promise.all([
+        api.get('/equipamentos-medicos', { withCredentials: true }),
+        api.get('/tipos-equipamento', { withCredentials: true })
+      ]);
+      
+      setAllEquipments(equipmentsResponse.data);
+      setEquipments(equipmentsResponse.data);
+      setTiposEquipamento(tiposResponse.data);
     } catch (error) {
       toast({
-        title: "Erro ao carregar equipamentos",
-        description: "Não foi possível carregar a lista de equipamentos",
+        title: "Erro ao carregar dados",
+        description: "Não foi possível carregar equipamentos ou tipos",
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
   };
+
+  const filterEquipments = () => {
+    let filtered = allEquipments;
+
+    if (searchTerm) {
+      filtered = filtered.filter((equipment: any) =>
+        equipment.nomeEquipamento?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        equipment.modelo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        equipment.numeroPatrimonio?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        equipment.tipoEquipamento?.nome?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (selectedTipoId) {
+      filtered = filtered.filter((equipment: any) =>
+        String(equipment.tipoEquipamentoId) === selectedTipoId
+      );
+    }
+
+    setEquipments(filtered);
+  };
+
+  useEffect(() => {
+    filterEquipments();
+  }, [searchTerm, selectedTipoId, allEquipments]);
 
   useEffect(() => {
     fetchEquipments();
@@ -129,9 +169,35 @@ const Equipamentos = () => {
             <Input 
               placeholder="Pesquisar equipamentos..." 
               className="pl-9 w-full"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Button variant="outline" className="w-full sm:w-auto">Filtros</Button>
+          <Select value={selectedTipoId} onValueChange={setSelectedTipoId}>
+            <SelectTrigger className="w-full sm:w-[240px]">
+              <SelectValue placeholder="Tipo de equipamento" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Todos os tipos</SelectItem>
+              {tiposEquipamento.map((tipo: any) => (
+                <SelectItem key={tipo.id} value={String(tipo.id)}>
+                  {tipo.nome}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {(searchTerm || selectedTipoId) && (
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setSearchTerm("");
+                setSelectedTipoId("");
+              }}
+              className="w-full sm:w-auto"
+            >
+              Limpar
+            </Button>
+          )}
         </div>
       </Card>
 
