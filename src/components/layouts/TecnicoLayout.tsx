@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { TecnicoSidebar } from "./TecnicoSidebar";
 import { GenericNavbar } from "../navbars/GenericNavbar";
+import ChamadosTecnico from "@/components/ChamadosTecnico";
 
 interface TecnicoLayoutProps {
   children: ReactNode;
@@ -19,6 +20,11 @@ export const TecnicoLayout = ({ children }: TecnicoLayoutProps) => {
           <main className="flex-1 p-6">
             {children}
           </main>
+        </div>
+
+        {/* Sidebar direita com os chamados do técnico */}
+        <div className="w-80 border-l bg-background overflow-y-auto">
+          <ChamadosTecnico />
         </div>
       </div>
     </SidebarProvider>
