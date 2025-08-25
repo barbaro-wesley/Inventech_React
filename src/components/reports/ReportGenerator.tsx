@@ -37,8 +37,21 @@ export const ReportGenerator: React.FC = () => {
   useEffect(() => {
     if (reportType === 'condicionadores') {
       fetchCondicionadores();
+      return;
     }
-  }, [reportType]);
+    if (reportType === 'equipamentos-por-setor') {
+      if (filters.setores && filters.tipos) {
+        fetchEquipamentosPorSetor();
+      }
+      return;
+    }
+    if (reportType === 'os-por-tecnico') {
+      if (filters.tecnicos && filters.inicio && filters.fim) {
+        fetchOsPorTecnico();
+      }
+      return;
+    }
+  }, [reportType, filters.setores, filters.tipos, filters.tecnicos, filters.inicio, filters.fim, filters.campoData, filters.status]);
 
   const fetchCondicionadores = async () => {
     try {
@@ -51,6 +64,45 @@ export const ReportGenerator: React.FC = () => {
       setLoading(false);
     }
   };
+  const fetchEquipamentosPorSetor = async () => {
+    try {
+      if (!filters.setores || !filters.tipos) return;
+      setLoading(true);
+      const response = await api.get('/relatorios/equipamentos-por-setor', {
+        params: {
+          setores: filters.setores,
+          tipos: filters.tipos,
+        },
+      });
+      setEquipamentosPorSetor(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar equipamentos por setor:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchOsPorTecnico = async () => {
+    try {
+      if (!filters.tecnicos || !filters.inicio || !filters.fim) return;
+      setLoading(true);
+      const response = await api.get('/api/reports/os-por-tecnico', {
+        params: {
+          tecnicos: filters.tecnicos,
+          inicio: filters.inicio,
+          fim: filters.fim,
+          campoData: filters.campoData || 'criadoEm',
+          status: filters.status || undefined,
+        },
+      });
+      setOsPorTecnico(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar OS por técnico:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const mockEquipamentos = [
     {
       id: 'EQ001',
@@ -112,6 +164,10 @@ export const ReportGenerator: React.FC = () => {
         return `relatorio-equipamentos-${now}.pdf`;
       case 'condicionadores':
         return `relatorio-condicionadores-${now}.pdf`;
+      case 'equipamentos-por-setor':
+        return `relatorio-equip-por-setor-${now}.pdf`;
+      case 'os-por-tecnico':
+        return `relatorio-os-por-tecnico-${now}.pdf`;
       default:
         return `relatorio-${now}.pdf`;
     }
@@ -142,6 +198,8 @@ export const ReportGenerator: React.FC = () => {
                   <SelectContent>
                     <SelectItem value="condicionadores">Relatório de Condicionadores de Ar</SelectItem>
                     <SelectItem value="equipamentos">Relatório de Equipamentos</SelectItem>
+                    <SelectItem value="equipamentos-por-setor">Relatório de Equipamentos por Setor</SelectItem>
+                    <SelectItem value="os-por-tecnico">Relatório de OS por Técnico</SelectItem>
                     <SelectItem value="usuarios">Relatório de Usuários</SelectItem>
                     <SelectItem value="manutencao">Relatório de Manutenção</SelectItem>
                   </SelectContent>
@@ -195,6 +253,87 @@ export const ReportGenerator: React.FC = () => {
                   </SelectContent>
                 </Select>
               </div>
+
+              {reportType === 'equipamentos-por-setor' && (
+                <div className="grid grid-cols-1 gap-2">
+                  <div>
+                    <Label htmlFor="setores">Setores (IDs, separados por vírgula)</Label>
+                    <Input
+                      id="setores"
+                      placeholder="Ex: 1,2,3"
+                      value={filters.setores}
+                      onChange={(e) => setFilters((prev) => ({ ...prev, setores: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="tipos">Tipos (IDs, separados por vírgula)</Label>
+                    <Input
+                      id="tipos"
+                      placeholder="Ex: 3,4,5"
+                      value={filters.tipos}
+                      onChange={(e) => setFilters((prev) => ({ ...prev, tipos: e.target.value }))}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {reportType === 'os-por-tecnico' && (
+                <div className="grid grid-cols-1 gap-2">
+                  <div>
+                    <Label htmlFor="tecnicos">Técnicos (IDs, separados por vírgula)</Label>
+                    <Input
+                      id="tecnicos"
+                      placeholder="Ex: 18,23"
+                      value={filters.tecnicos}
+                      onChange={(e) => setFilters((prev) => ({ ...prev, tecnicos: e.target.value }))}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label htmlFor="inicio">Início</Label>
+                      <Input
+                        id="inicio"
+                        type="date"
+                        value={filters.inicio}
+                        onChange={(e) => setFilters((prev) => ({ ...prev, inicio: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="fim">Fim</Label>
+                      <Input
+                        id="fim"
+                        type="date"
+                        value={filters.fim}
+                        onChange={(e) => setFilters((prev) => ({ ...prev, fim: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="campoData">Campo de Data</Label>
+                    <Select
+                      value={filters.campoData}
+                      onValueChange={(value) => setFilters((prev) => ({ ...prev, campoData: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="criadoEm">Criado em</SelectItem>
+                        <SelectItem value="finalizadoEm">Finalizado em</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="status">Status (opcional, separados por vírgula)</Label>
+                    <Input
+                      id="status"
+                      placeholder="Ex: ABERTA,EM_ANDAMENTO,CONCLUIDA,CANCELADA"
+                      value={filters.status}
+                      onChange={(e) => setFilters((prev) => ({ ...prev, status: e.target.value }))}
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="flex gap-2">
                 <Button
