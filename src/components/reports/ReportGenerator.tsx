@@ -11,6 +11,8 @@ import { EquipamentosReport } from './EquipamentosReport';
 import { CondicionadoresReport } from './CondicionadoresReport';
 import { EquipamentosPorSetorReport } from './EquipamentosPorSetorReport';
 import { OsPorTecnicoReport } from './OsPorTecnicoReport';
+import { ReportConfigEquipamentosPorSetor } from './configs/ReportConfigEquipamentosPorSetor';
+import { ReportConfigOsPorTecnico } from './configs/ReportConfigOsPorTecnico';
 import api from '@/lib/api';
 
 export const ReportGenerator: React.FC = () => {
@@ -33,6 +35,7 @@ export const ReportGenerator: React.FC = () => {
   const [equipamentosPorSetor, setEquipamentosPorSetor] = useState<any[]>([]);
   const [osPorTecnico, setOsPorTecnico] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [reportConfig, setReportConfig] = useState<any>({});
 
   useEffect(() => {
     if (reportType === 'condicionadores') {
@@ -64,14 +67,15 @@ export const ReportGenerator: React.FC = () => {
       setLoading(false);
     }
   };
-  const fetchEquipamentosPorSetor = async () => {
+  const fetchEquipamentosPorSetor = async (config?: any) => {
     try {
-      if (!filters.setores || !filters.tipos) return;
+      const configToUse = config || reportConfig;
+      if (!configToUse.setores || !configToUse.tipos) return;
       setLoading(true);
       const response = await api.get('/relatorios/equipamentos-por-setor', {
         params: {
-          setores: filters.setores,
-          tipos: filters.tipos,
+          setores: configToUse.setores,
+          tipos: configToUse.tipos,
         },
       });
       setEquipamentosPorSetor(response.data);
@@ -82,17 +86,18 @@ export const ReportGenerator: React.FC = () => {
     }
   };
 
-  const fetchOsPorTecnico = async () => {
+  const fetchOsPorTecnico = async (config?: any) => {
     try {
-      if (!filters.tecnicos || !filters.inicio || !filters.fim) return;
+      const configToUse = config || reportConfig;
+      if (!configToUse.tecnicos || !configToUse.inicio || !configToUse.fim) return;
       setLoading(true);
       const response = await api.get('/api/reports/os-por-tecnico', {
         params: {
-          tecnicos: filters.tecnicos,
-          inicio: filters.inicio,
-          fim: filters.fim,
-          campoData: filters.campoData || 'criadoEm',
-          status: filters.status || undefined,
+          tecnicos: configToUse.tecnicos,
+          inicio: configToUse.inicio,
+          fim: configToUse.fim,
+          campoData: configToUse.campoData || 'criadoEm',
+          status: configToUse.status || undefined,
         },
       });
       setOsPorTecnico(response.data);
@@ -142,14 +147,14 @@ export const ReportGenerator: React.FC = () => {
         return (
           <EquipamentosPorSetorReport
             data={equipamentosPorSetor}
-            filtros={filters}
+            filtros={reportConfig}
           />
         );
       case 'os-por-tecnico':
         return (
           <OsPorTecnicoReport
             data={osPorTecnico}
-            filtros={filters}
+            filtros={reportConfig}
           />
         );
       default:
@@ -173,11 +178,32 @@ export const ReportGenerator: React.FC = () => {
     }
   };
 
-  return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Configurações do Relatório */}
-        <div className="lg:col-span-1">
+  const renderConfigComponent = () => {
+    switch (reportType) {
+      case 'equipamentos-por-setor':
+        return (
+          <ReportConfigEquipamentosPorSetor
+            onConfigChange={(config) => {
+              setReportConfig(config);
+              fetchEquipamentosPorSetor(config);
+            }}
+            onGenerate={() => setShowPreview(true)}
+            loading={loading}
+          />
+        );
+      case 'os-por-tecnico':
+        return (
+          <ReportConfigOsPorTecnico
+            onConfigChange={(config) => {
+              setReportConfig(config);
+              fetchOsPorTecnico(config);
+            }}
+            onGenerate={() => setShowPreview(true)}
+            loading={loading}
+          />
+        );
+      default:
+        return (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -231,110 +257,6 @@ export const ReportGenerator: React.FC = () => {
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="setor">Setor</Label>
-                <Select
-                  value={filters.setor || "all"}
-                  onValueChange={(value) =>
-                    setFilters(prev => ({
-                      ...prev,
-                      setor: value === "all" ? "" : value, // mantém "" internamente se quiser
-                    }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Todos os setores" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os setores</SelectItem>
-                    <SelectItem value="TI">TI</SelectItem>
-                    <SelectItem value="Administrativo">Administrativo</SelectItem>
-                    <SelectItem value="Vendas">Vendas</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {reportType === 'equipamentos-por-setor' && (
-                <div className="grid grid-cols-1 gap-2">
-                  <div>
-                    <Label htmlFor="setores">Setores (IDs, separados por vírgula)</Label>
-                    <Input
-                      id="setores"
-                      placeholder="Ex: 1,2,3"
-                      value={filters.setores}
-                      onChange={(e) => setFilters((prev) => ({ ...prev, setores: e.target.value }))}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="tipos">Tipos (IDs, separados por vírgula)</Label>
-                    <Input
-                      id="tipos"
-                      placeholder="Ex: 3,4,5"
-                      value={filters.tipos}
-                      onChange={(e) => setFilters((prev) => ({ ...prev, tipos: e.target.value }))}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {reportType === 'os-por-tecnico' && (
-                <div className="grid grid-cols-1 gap-2">
-                  <div>
-                    <Label htmlFor="tecnicos">Técnicos (IDs, separados por vírgula)</Label>
-                    <Input
-                      id="tecnicos"
-                      placeholder="Ex: 18,23"
-                      value={filters.tecnicos}
-                      onChange={(e) => setFilters((prev) => ({ ...prev, tecnicos: e.target.value }))}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <Label htmlFor="inicio">Início</Label>
-                      <Input
-                        id="inicio"
-                        type="date"
-                        value={filters.inicio}
-                        onChange={(e) => setFilters((prev) => ({ ...prev, inicio: e.target.value }))}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="fim">Fim</Label>
-                      <Input
-                        id="fim"
-                        type="date"
-                        value={filters.fim}
-                        onChange={(e) => setFilters((prev) => ({ ...prev, fim: e.target.value }))}
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="campoData">Campo de Data</Label>
-                    <Select
-                      value={filters.campoData}
-                      onValueChange={(value) => setFilters((prev) => ({ ...prev, campoData: value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="criadoEm">Criado em</SelectItem>
-                        <SelectItem value="finalizadoEm">Finalizado em</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="status">Status (opcional, separados por vírgula)</Label>
-                    <Input
-                      id="status"
-                      placeholder="Ex: ABERTA,EM_ANDAMENTO,CONCLUIDA,CANCELADA"
-                      value={filters.status}
-                      onChange={(e) => setFilters((prev) => ({ ...prev, status: e.target.value }))}
-                    />
-                  </div>
-                </div>
-              )}
-
               <div className="flex gap-2">
                 <Button
                   onClick={() => setShowPreview(!showPreview)}
@@ -361,6 +283,16 @@ export const ReportGenerator: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+        );
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Configurações do Relatório */}
+        <div className="lg:col-span-1">
+          {renderConfigComponent()}
         </div>
 
         {/* Preview */}
