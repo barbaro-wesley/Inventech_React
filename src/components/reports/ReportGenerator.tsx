@@ -72,7 +72,7 @@ export const ReportGenerator: React.FC = () => {
       const configToUse = config || reportConfig;
       if (!configToUse.setores || !configToUse.tipos) return;
       setLoading(true);
-      const response = await api.get('/relatorios/equipamentos-por-setor', {
+      const response = await api.get('/reports/equipamentos-por-setor', {
         params: {
           setores: configToUse.setores,
           tipos: configToUse.tipos,
@@ -91,7 +91,7 @@ export const ReportGenerator: React.FC = () => {
       const configToUse = config || reportConfig;
       if (!configToUse.tecnicos || !configToUse.inicio || !configToUse.fim) return;
       setLoading(true);
-      const response = await api.get('/api/reports/os-por-tecnico', {
+      const response = await api.get('/reports/os-por-tecnico', {
         params: {
           tecnicos: configToUse.tecnicos,
           inicio: configToUse.inicio,
