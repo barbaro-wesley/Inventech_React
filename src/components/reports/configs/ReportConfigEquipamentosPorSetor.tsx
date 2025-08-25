@@ -125,7 +125,7 @@ export function ReportConfigEquipamentosPorSetor({ onConfigChange, onGenerate, l
                     onCheckedChange={(checked) => handleTipoChange(tipo.id, checked as boolean)}
                   />
                   <Label htmlFor={`tipo-${tipo.id}`} className="text-sm">
-                    {tipo.nome} ({tipo.grupo.nome})
+                    {tipo.nome || '-'} ({tipo.grupo?.nome || '-'})
                   </Label>
                 </div>
               ))
@@ -133,8 +133,8 @@ export function ReportConfigEquipamentosPorSetor({ onConfigChange, onGenerate, l
           </div>
         </div>
 
-        <Button 
-          onClick={onGenerate} 
+        <Button
+          onClick={onGenerate}
           disabled={!canGenerate || loading}
           className="w-full"
         >

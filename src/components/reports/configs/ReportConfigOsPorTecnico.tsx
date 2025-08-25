@@ -11,6 +11,11 @@ interface Tecnico {
   id: number;
   nome: string;
   email: string;
+  grupo?: {
+    id: number;
+    nome: string;
+    descricao: string;
+  };
 }
 
 interface Props {
@@ -58,11 +63,9 @@ export function ReportConfigOsPorTecnico({ onConfigChange, onGenerate, loading }
   const fetchTecnicos = async () => {
     try {
       setLoadingData(true);
-      const response = await api.get('/funcionarios');
-      // Filtrar apenas técnicos (assumindo que existe um campo ou role)
-      const tecnicosData = response.data.filter((func: any) => 
-        func.role === 'TECNICO' || func.cargo?.toLowerCase().includes('técnico')
-      );
+      const response = await api.get('/tecnicos');
+      // Pega todos técnicos ativos
+      const tecnicosData = response.data.filter((func: any) => func.ativo);
       setTecnicos(tecnicosData);
     } catch (error) {
       console.error('Erro ao buscar técnicos:', error);
@@ -146,7 +149,7 @@ export function ReportConfigOsPorTecnico({ onConfigChange, onGenerate, loading }
                     onCheckedChange={(checked) => handleTecnicoChange(tecnico.id, checked as boolean)}
                   />
                   <Label htmlFor={`tecnico-${tecnico.id}`} className="text-sm">
-                    {tecnico.nome}
+                    {tecnico.nome} {tecnico.grupo ? `(${tecnico.grupo.nome})` : ''}
                   </Label>
                 </div>
               ))
