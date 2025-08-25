@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -15,11 +14,11 @@ interface TipoEquipamento {
   id: number;
   nome: string;
   grupoId: number;
-  grupo: {
+  grupo?: {
     id: number;
     nome: string;
     descricao: string;
-  };
+  } | null;
 }
 
 interface Props {
@@ -38,13 +37,6 @@ export function ReportConfigEquipamentosPorSetor({ onConfigChange, onGenerate, l
   useEffect(() => {
     fetchData();
   }, []);
-
-  useEffect(() => {
-    onConfigChange({
-      setores: selectedSetores.join(','),
-      tipos: selectedTipos.join(',')
-    });
-  }, [selectedSetores, selectedTipos, onConfigChange]);
 
   const fetchData = async () => {
     try {
@@ -76,6 +68,15 @@ export function ReportConfigEquipamentosPorSetor({ onConfigChange, onGenerate, l
     } else {
       setSelectedTipos(prev => prev.filter(id => id !== tipoId));
     }
+  };
+
+  // ✅ só dispara quando clicar no botão
+  const handleGenerate = () => {
+    onConfigChange({
+      setores: selectedSetores.join(','),
+      tipos: selectedTipos.join(',')
+    });
+    onGenerate();
   };
 
   const canGenerate = selectedSetores.length > 0 && selectedTipos.length > 0;

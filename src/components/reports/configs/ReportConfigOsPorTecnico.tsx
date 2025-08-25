@@ -16,6 +16,11 @@ interface Tecnico {
     nome: string;
     descricao: string;
   };
+  grupo?: {
+    id: number;
+    nome: string;
+    descricao: string;
+  };
 }
 
 interface Props {
@@ -50,16 +55,6 @@ export function ReportConfigOsPorTecnico({ onConfigChange, onGenerate, loading }
     fetchTecnicos();
   }, []);
 
-  useEffect(() => {
-    onConfigChange({
-      tecnicos: selectedTecnicos.join(','),
-      inicio,
-      fim,
-      campoData,
-      status: selectedStatus.join(',')
-    });
-  }, [selectedTecnicos, inicio, fim, campoData, selectedStatus, onConfigChange]);
-
   const fetchTecnicos = async () => {
     try {
       setLoadingData(true);
@@ -88,6 +83,18 @@ export function ReportConfigOsPorTecnico({ onConfigChange, onGenerate, loading }
     } else {
       setSelectedStatus(prev => prev.filter(s => s !== status));
     }
+  };
+
+  // ✅ Função para só gerar quando clicar
+  const handleGenerate = () => {
+    onConfigChange({
+      tecnicos: selectedTecnicos.join(','),
+      inicio,
+      fim,
+      campoData,
+      status: selectedStatus.join(',')
+    });
+    onGenerate();
   };
 
   const canGenerate = selectedTecnicos.length > 0 && inicio && fim;
@@ -150,6 +157,7 @@ export function ReportConfigOsPorTecnico({ onConfigChange, onGenerate, loading }
                   />
                   <Label htmlFor={`tecnico-${tecnico.id}`} className="text-sm">
                     {tecnico.nome} {tecnico.grupo ? `(${tecnico.grupo.nome})` : ''}
+                    {tecnico.nome} {tecnico.grupo ? `(${tecnico.grupo.nome})` : ''}
                   </Label>
                 </div>
               ))
@@ -178,7 +186,7 @@ export function ReportConfigOsPorTecnico({ onConfigChange, onGenerate, loading }
         </div>
 
         <Button 
-          onClick={onGenerate} 
+          onClick={handleGenerate} 
           disabled={!canGenerate || loading}
           className="w-full"
         >
@@ -188,3 +196,4 @@ export function ReportConfigOsPorTecnico({ onConfigChange, onGenerate, loading }
     </Card>
   );
 }
+
