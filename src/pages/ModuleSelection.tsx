@@ -49,7 +49,7 @@ export const ModuleSelection = () => {
       if (moduleId === "inventory") {
         navigate("/dashboard");
       } else if (moduleId === "documents") {
-        navigate("/gestao/funcionarios");
+        navigate("/dashboard");
       }
     }, 500);
   };

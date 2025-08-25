@@ -12,6 +12,11 @@ import {
   Shield,
   AlertTriangle,
   Calendar,
+  FileText,
+  BarChart3,
+  Settings,
+  Building,
+  MapPin
 } from "lucide-react";
 
 import {
@@ -24,6 +29,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
+  
 } from "@/components/ui/sidebar";
 
 const menuItems = [
@@ -37,7 +43,7 @@ const menuItems = [
     icon: Plus,
     items: [
       { title: "Equipamentos", url: "/equipamentos", icon: Monitor },
-      { title: "Ar Condicionado", url: "/ar-condicionado", icon: Wind },
+      { title: "Ar Condicionado", url: "/condicionadores", icon: Wind },
       { title: "Mobílias", url: "/mobilias", icon: Package },
     ],
   },
@@ -45,11 +51,27 @@ const menuItems = [
     title: "Manutenção",
     icon: Wrench,
     items: [
-      { title: "Preventiva", url: "/manutencao/preventiva", icon: Shield },
-      { title: "Corretiva", url: "/manutencao/corretiva", icon: AlertTriangle },
       { title: "Calendário", url: "/manutencao/calendario", icon: Calendar },
     ],
   },
+  {
+    title: "Configurações",
+    icon: Settings,
+    items: [
+      { title: "Setores", url: "/setores", icon: Building },
+      { title: "Localizações", url: "/localizacoes", icon: MapPin },
+      { title: "Tipos de Equipamento", url: "/tipos-equipamento", icon: Settings },
+      { title: "Técnicos", url: "/tecnicos", icon: Wrench },
+    ],
+  },
+{
+    title: "Relatórios",
+    icon: FileText,
+    items: [
+      { title: "Relatórios", icon: BarChart3,url: "/relatorios"},
+    ],
+  },
+  
 ];
 
 export function CadastroSidebar() {

@@ -121,7 +121,7 @@ export const AppRoutes = () => {
       <Route
         path="/relatorios"
         element={
-          <ProtectedRoute allowedRoles={['admin', 'visualizador']}>
+          <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
             <Relatorios />
           </ProtectedRoute>
         }
@@ -129,7 +129,7 @@ export const AppRoutes = () => {
       <Route
         path="/tecnicos"
         element={
-          <ProtectedRoute allowedRoles={['admin', 'visualizador']}>
+          <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
             <Tecnicos/>
           </ProtectedRoute>
         }
@@ -137,7 +137,7 @@ export const AppRoutes = () => {
        <Route
         path="/tipos-equipamento"
         element={
-          <ProtectedRoute allowedRoles={['admin', 'visualizador']}>
+          <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
             <Categorias/>
           </ProtectedRoute>
         }
@@ -145,7 +145,7 @@ export const AppRoutes = () => {
       <Route
         path="/setores"
         element={
-          <ProtectedRoute allowedRoles={['admin', 'visualizador']}>
+          <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
             <Setores/>
           </ProtectedRoute>
         }
@@ -153,7 +153,7 @@ export const AppRoutes = () => {
       <Route
         path="/localizacoes"
         element={
-          <ProtectedRoute allowedRoles={['admin', 'visualizador']}>
+          <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
             <Localizacao/>
           </ProtectedRoute>
         }
