@@ -91,14 +91,7 @@ const menuItems = [
     title: "Relatórios",
     icon: FileText,
     items: [
-      { title: "Relatório de Equipamentos", url: "/relatorios/equipamentos", icon: FileText },
-      { title: "Pesquisar Equipamentos", url: "/pesquisar-equipamento", icon: FileText },
-      { title: "Relatório de Usuários", url: "/relatorios/usuarios", icon: FileText },
-      {
-    title: "Relatórios",
-    icon: BarChart3,
-    url: "/relatorios"
-  },
+      { title: "Relatórios", icon: BarChart3,url: "/relatorios"},
     ],
   },
 ];

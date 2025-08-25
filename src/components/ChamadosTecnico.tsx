@@ -31,6 +31,10 @@ interface OS {
   Setor?: {
     nome: string;
   };
+  equipamento?: {
+    nomeEquipamento?: string;
+    numeroSerie?: string;
+  };
 }
 
 const ChamadosTecnico = () => {
@@ -121,7 +125,7 @@ const ChamadosTecnico = () => {
       setArquivos([]);
       setFileNames([]);
       setValorManutencao('');
-      
+
       // Refresh chamados
       const { data } = await api.get('/os/tecnico', { withCredentials: true });
       setChamados(data);
@@ -206,10 +210,10 @@ const ChamadosTecnico = () => {
                             </Badge>
                           )}
                         </div>
-                        
+
                         <div className="space-y-1">
                           <p className="text-sm text-foreground font-medium">{os.descricao}</p>
-                          
+
                           <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
                             {os.tipoEquipamento && (
                               <div>
@@ -229,10 +233,21 @@ const ChamadosTecnico = () => {
                             <div>
                               <span className="font-medium">Criado:</span> {formatDate(os.criadoEm)}
                             </div>
+
+                            {os.equipamento && (
+                              <>
+                                <div>
+                                  <span className="font-medium">Equipamento:</span> {os.equipamento.nomeEquipamento || "N/I"}
+                                </div>
+                                <div>
+                                  <span className="font-medium">SN:</span> {os.equipamento.numeroSerie || "N/I"}
+                                </div>
+                              </>
+                            )}
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center gap-2 ml-4">
                         <CheckCircle className="h-4 w-4" />
                         {aberto === os.id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -289,7 +304,7 @@ const ChamadosTecnico = () => {
                           </div>
                         </label>
                       </div>
-                      
+
                       {fileNames.length > 0 && (
                         <div className="space-y-1">
                           {fileNames.map((name, idx) => (
