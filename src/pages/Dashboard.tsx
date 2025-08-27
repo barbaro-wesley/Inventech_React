@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Monitor, Wrench, FileText, Users, TrendingUp, AlertTriangle } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const stats = [
@@ -32,7 +33,7 @@ const Dashboard = () => {
       color: "text-brand-secondary"
     }
   ];
-
+const navigate = useNavigate();
   return (
     <div className="space-y-4 md:space-y-6">
       <div>
@@ -69,25 +70,36 @@ const Dashboard = () => {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         <Card className="p-4 md:p-6">
-          <h3 className="text-base md:text-lg font-semibold mb-4 flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 md:h-5 md:w-5 text-brand-primary" />
-            Ações Rápidas
-          </h3>
-          <div className="space-y-2 md:space-y-3">
-            <button className="w-full text-left p-2 md:p-3 rounded-lg hover:bg-accent transition-colors">
-              <div className="font-medium text-sm md:text-base">Cadastrar Novo Equipamento</div>
-              <div className="text-xs md:text-sm text-muted-foreground">Adicionar equipamento ao inventário</div>
-            </button>
-            <button className="w-full text-left p-2 md:p-3 rounded-lg hover:bg-accent transition-colors">
-              <div className="font-medium text-sm md:text-base">Abrir Chamado</div>
-              <div className="text-xs md:text-sm text-muted-foreground">Registrar nova solicitação de manutenção</div>
-            </button>
-            <button className="w-full text-left p-2 md:p-3 rounded-lg hover:bg-accent transition-colors">
-              <div className="font-medium text-sm md:text-base">Agendar Manutenção</div>
-              <div className="text-xs md:text-sm text-muted-foreground">Programar manutenção preventiva</div>
-            </button>
-          </div>
-        </Card>
+        <h3 className="text-base md:text-lg font-semibold mb-4 flex items-center gap-2">
+          <TrendingUp className="h-4 w-4 md:h-5 md:w-5 text-brand-primary" />
+          Ações Rápidas
+        </h3>
+        <div className="space-y-2 md:space-y-3">
+          <button
+            className="w-full text-left p-2 md:p-3 rounded-lg hover:bg-accent transition-colors"
+            onClick={() => navigate('/equipamentos')}
+          >
+            <div className="font-medium text-sm md:text-base">Cadastrar Novo Equipamento</div>
+            <div className="text-xs md:text-sm text-muted-foreground">Adicionar equipamento ao inventário</div>
+          </button>
+
+          <button
+            className="w-full text-left p-2 md:p-3 rounded-lg hover:bg-accent transition-colors"
+            onClick={() => navigate('/pesquisar-equipamento')}
+          >
+            <div className="font-medium text-sm md:text-base">Pesquisar Equipamento</div>
+            <div className="text-xs md:text-sm text-muted-foreground">Pesquisar equipamento no inventário</div>
+          </button>
+
+          <button
+            className="w-full text-left p-2 md:p-3 rounded-lg hover:bg-accent transition-colors"
+            onClick={() => navigate('/calendario')}
+          >
+            <div className="font-medium text-sm md:text-base">Agendar Manutenção</div>
+            <div className="text-xs md:text-sm text-muted-foreground">Programar manutenção preventiva</div>
+          </button>
+        </div>
+      </Card>
 
         <Card className="p-4 md:p-6">
           <h3 className="text-base md:text-lg font-semibold mb-4 flex items-center gap-2">

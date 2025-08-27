@@ -16,11 +16,6 @@ interface Tecnico {
     nome: string;
     descricao: string;
   };
-  grupo?: {
-    id: number;
-    nome: string;
-    descricao: string;
-  };
 }
 
 interface Props {
@@ -59,7 +54,6 @@ export function ReportConfigOsPorTecnico({ onConfigChange, onGenerate, loading }
     try {
       setLoadingData(true);
       const response = await api.get('/tecnicos');
-      // Pega todos técnicos ativos
       const tecnicosData = response.data.filter((func: any) => func.ativo);
       setTecnicos(tecnicosData);
     } catch (error) {
@@ -157,7 +151,6 @@ export function ReportConfigOsPorTecnico({ onConfigChange, onGenerate, loading }
                   />
                   <Label htmlFor={`tecnico-${tecnico.id}`} className="text-sm">
                     {tecnico.nome} {tecnico.grupo ? `(${tecnico.grupo.nome})` : ''}
-                    {tecnico.nome} {tecnico.grupo ? `(${tecnico.grupo.nome})` : ''}
                   </Label>
                 </div>
               ))
@@ -196,4 +189,3 @@ export function ReportConfigOsPorTecnico({ onConfigChange, onGenerate, loading }
     </Card>
   );
 }
-

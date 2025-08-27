@@ -155,7 +155,7 @@ const Equipamentos = () => {
             Equipamentos
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground mt-1">
-            Gerencie equipamentos médicos e outros dispositivos
+            Gerencie equipamentos e outros dispositivos
           </p>
         </div>
 

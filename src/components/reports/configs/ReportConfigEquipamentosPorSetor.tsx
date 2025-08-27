@@ -135,7 +135,7 @@ export function ReportConfigEquipamentosPorSetor({ onConfigChange, onGenerate, l
         </div>
 
         <Button
-          onClick={onGenerate}
+          onClick={handleGenerate} // <-- chama a função que combina filtros e generate
           disabled={!canGenerate || loading}
           className="w-full"
         >

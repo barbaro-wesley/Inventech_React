@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Settings, Plus, Search, Wrench, Calendar, Hammer } from "lucide-react";
+import { Settings, Plus, Search, Wrench, Calendar, Hammer, Eye } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { AirForm } from "@/components/AirForm";
@@ -14,16 +14,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 import api from "@/lib/api";
 import PopupEquip from "@/components/popups/PopupEquip";
-import { Eye } from "lucide-react";
+
+interface Condicionado {
+  id: number;
+  marca?: string;
+  modelo?: string;
+  BTUS?: string;
+  numeroPatrimonio?: string;
+  setor?: { nome: string };
+}
 
 const Condicionados = () => {
-  const [condicionados, setCondicionados] = useState([]);
+  const [condicionados, setCondicionados] = useState<Condicionado[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [editingCondicionado, setEditingCondicionado] = useState(null);
+  const [editingCondicionado, setEditingCondicionado] = useState<Condicionado | null>(null);
   const [showOSForm, setShowOSForm] = useState(false);
-  const [selectedCondicionadoForOS, setSelectedCondicionadoForOS] = useState(null);
-  const [selectedCondicionado, setSelectedCondicionado] = useState(null);
+  const [selectedCondicionadoForOS, setSelectedCondicionadoForOS] = useState<any>(null);
+  const [selectedCondicionado, setSelectedCondicionado] = useState<Condicionado | null>(null);
   const { toast } = useToast();
 
   const fetchCondicionados = async () => {
@@ -48,10 +56,10 @@ const Condicionados = () => {
     fetchCondicionados();
   }, []);
 
-  const handleFormSubmit = (data: any) => {
+  const handleFormSubmit = (data: Condicionado) => {
     if (editingCondicionado) {
       setCondicionados((prev) =>
-        prev.map((eq: any) => (eq.id === data.id ? data : eq))
+        prev.map((eq) => (eq.id === data.id ? data : eq))
       );
     } else {
       setCondicionados((prev) => [...prev, data]);
@@ -59,7 +67,7 @@ const Condicionados = () => {
     setEditingCondicionado(null);
   };
 
-  const handleEdit = (condicionado: any) => {
+  const handleEdit = (condicionado: Condicionado) => {
     setEditingCondicionado(condicionado);
     setShowForm(true);
   };
@@ -70,7 +78,7 @@ const Condicionados = () => {
   };
 
   const handleMaintenanceClick = (
-    condicionado: any,
+    condicionado: Condicionado,
     type: "preventiva" | "corretiva"
   ) => {
     setSelectedCondicionadoForOS({
@@ -94,19 +102,19 @@ const Condicionados = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-0">
         <div>
-          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-            <Settings className="h-8 w-8 text-brand-secondary" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-3">
+            <Settings className="h-6 sm:h-8 w-6 sm:w-8 text-brand-secondary" />
             Condicionados
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
             Gerencie aparelhos de ar-condicionado
           </p>
         </div>
 
         <Button
-          className="bg-gradient-brand hover:opacity-90 transition-opacity"
+          className="bg-gradient-brand hover:opacity-90 transition-opacity w-full sm:w-auto"
           onClick={() => setShowForm(true)}
         >
           <Plus className="h-4 w-4 mr-2" />
@@ -114,10 +122,9 @@ const Condicionados = () => {
         </Button>
       </div>
 
-      {/* Search and Filters */}
       <Card className="p-4">
-        <div className="flex gap-4">
-          <div className="relative flex-1">
+        <div className="flex flex-wrap gap-4">
+          <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Pesquisar condicionadores..." className="pl-9" />
           </div>
@@ -125,48 +132,45 @@ const Condicionados = () => {
         </div>
       </Card>
 
-      {/* Condicionados List */}
       <div className="space-y-4">
         {loading ? (
           Array.from({ length: 5 }).map((_, i) => (
-            <Card key={i} className="p-6 animate-pulse">
-              <div className="flex justify-between items-start">
+            <Card key={i} className="p-4 sm:p-6 animate-pulse">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 sm:gap-0">
                 <div className="flex-1">
                   <div className="h-5 bg-muted rounded w-1/3 mb-2"></div>
                   <div className="h-4 bg-muted rounded w-1/2 mb-4"></div>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="h-3 bg-muted rounded"></div>
                     <div className="h-3 bg-muted rounded"></div>
                     <div className="h-3 bg-muted rounded"></div>
                   </div>
                 </div>
-                <div className="h-8 w-20 bg-muted rounded"></div>
+                <div className="h-8 w-20 bg-muted rounded self-start"></div>
               </div>
             </Card>
           ))
         ) : condicionados.length > 0 ? (
-          condicionados.map((condicionado: any, index) => (
+          condicionados.map((condicionado) => (
             <Card
-              key={index}
-              className="p-6 hover:shadow-soft transition-shadow"
+              key={condicionado.id}
+              className="p-4 sm:p-6 hover:shadow-soft transition-shadow"
             >
-              <div className="flex justify-between items-start">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 sm:gap-0">
                 <div className="flex gap-4 flex-1">
-                  <div className="p-3 bg-gradient-brand rounded-lg">
-                    <Settings className="h-6 w-6 text-white" />
+                  <div className="p-2 sm:p-3 bg-gradient-brand rounded-lg flex-shrink-0">
+                    <Settings className="h-5 sm:h-6 w-5 sm:w-6 text-white" />
                   </div>
 
                   <div className="flex-1">
-                    <h3 className="font-semibold text-lg mb-1">
-                      {condicionado.marca ||
-                        `Condicionado #${index + 1}`}
+                    <h3 className="font-semibold text-base sm:text-lg mb-1">
+                      {condicionado.marca || `Condicionado #${condicionado.id}`}
                     </h3>
-                    <p className="text-muted-foreground mb-3">
-                      {condicionado.modelo ||
-                        "Ar-condicionado"}
+                    <p className="text-muted-foreground mb-3 text-sm sm:text-base">
+                      {condicionado.modelo || "Ar-condicionado"}
                     </p>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
                       <div>
                         <span className="font-medium">Setor:</span>
                         <span className="text-muted-foreground ml-1">
@@ -189,45 +193,45 @@ const Condicionados = () => {
                   </div>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex flex-wrap sm:flex-row gap-2 self-start">
                   <Button
                     variant="outline"
                     size="sm"
+                    className="min-w-[80px] rounded-md hover:bg-gray-100"
                     onClick={() => handleEdit(condicionado)}
                   >
                     Editar
                   </Button>
-
                   <Button
                     variant="outline"
                     size="sm"
+                    className="min-w-[80px] rounded-md hover:bg-gray-100"
                     onClick={() => setSelectedCondicionado(condicionado)}
                   >
                     <Eye className="h-4 w-4 mr-1" />
                     Detalhes
                   </Button>
-
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="min-w-[80px] rounded-md hover:bg-gray-100"
+                      >
                         <Wrench className="h-4 w-4 mr-1" />
                         Manutenção
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                       <DropdownMenuItem
-                        onClick={() =>
-                          handleMaintenanceClick(condicionado, "preventiva")
-                        }
+                        onClick={() => handleMaintenanceClick(condicionado, "preventiva")}
                         className="cursor-pointer"
                       >
                         <Calendar className="h-4 w-4 mr-2" />
                         Preventiva
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() =>
-                          handleMaintenanceClick(condicionado, "corretiva")
-                        }
+                        onClick={() => handleMaintenanceClick(condicionado, "corretiva")}
                         className="cursor-pointer"
                       >
                         <Hammer className="h-4 w-4 mr-2" />
@@ -235,8 +239,11 @@ const Condicionados = () => {
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-
-                  <Button variant="outline" size="sm">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="min-w-[80px] rounded-md hover:bg-gray-100"
+                  >
                     Histórico
                   </Button>
                 </div>
@@ -244,7 +251,7 @@ const Condicionados = () => {
             </Card>
           ))
         ) : (
-          <Card className="p-12 text-center">
+          <Card className="p-8 sm:p-12 text-center">
             <Settings className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">
               Nenhum condicionado encontrado
@@ -253,7 +260,7 @@ const Condicionados = () => {
               Comece adicionando o primeiro ar-condicionado ao sistema
             </p>
             <Button
-              className="bg-gradient-brand hover:opacity-90"
+              className="bg-gradient-brand hover:opacity-90 w-full sm:w-auto"
               onClick={() => setShowForm(true)}
             >
               <Plus className="h-4 w-4 mr-2" />

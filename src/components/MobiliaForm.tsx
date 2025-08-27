@@ -61,6 +61,8 @@ export const MobiliaForm = ({ isOpen, onClose, onSubmit, initialData }: MobiliaF
         numeroPatrimonio: initialData.numeroPatrimonio ?? "",
         nomeEquipamento: initialData.nomeEquipamento ?? "",
         estado: initialData.estado ?? "",
+        setor: initialData.setorId ? initialData.setorId.toString() : "",
+        localizacao: initialData.localizacaoId ? initialData.localizacaoId.toString() : "",
         valorCompra: initialData.valorCompra ?? "",
         dataCompra: initialData.dataCompra ? initialData.dataCompra.slice(0, 10) : "",
         inicioGarantia: initialData.inicioGarantia ? initialData.inicioGarantia.slice(0, 10) : "",
@@ -72,6 +74,8 @@ export const MobiliaForm = ({ isOpen, onClose, onSubmit, initialData }: MobiliaF
         numeroPatrimonio: "",
         nomeEquipamento: "",
         estado: "",
+        setor: "",
+        localizacao: "",
         valorCompra: "",
         dataCompra: "",
         inicioGarantia: "",
@@ -80,6 +84,7 @@ export const MobiliaForm = ({ isOpen, onClose, onSubmit, initialData }: MobiliaF
       });
     }
   }, [initialData, isOpen]);
+
 
   useEffect(() => {
     if (isOpen) {
@@ -107,57 +112,69 @@ export const MobiliaForm = ({ isOpen, onClose, onSubmit, initialData }: MobiliaF
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.numeroPatrimonio || !formData.nomeEquipamento) {
-      toast({
-        title: "Erro",
-        description: "Preencha todos os campos obrigatórios",
-        variant: "destructive",
+  e.preventDefault();
+
+  if (!formData.numeroPatrimonio || !formData.nomeEquipamento) {
+    toast({
+      title: "Erro",
+      description: "Preencha todos os campos obrigatórios",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    // monta payload somente com o que o backend precisa
+    const submitData = {
+      numeroPatrimonio: formData.numeroPatrimonio,
+      nomeEquipamento: formData.nomeEquipamento,
+      estado: formData.estado,
+      setorId: formData.setor ? parseInt(formData.setor) : undefined,
+      localizacaoId: formData.localizacao ? parseInt(formData.localizacao) : undefined,
+      tipoEquipamentoId: 6, // fixo pra mobilia
+      valorCompra: formData.valorCompra || null,
+      dataCompra: formData.dataCompra || null,
+      inicioGarantia: formData.inicioGarantia || null,
+      terminoGarantia: formData.terminoGarantia || null,
+      notaFiscal: formData.notaFiscal || null,
+    };
+
+    let response;
+    if (initialData?.id) {
+      response = await api.put(`/equipamentos-medicos/${initialData.id}`, submitData, {
+        withCredentials: true,
       });
-      return;
+      toast({
+        title: "Sucesso",
+        description: "Mobilia atualizada com sucesso!",
+      });
+    } else {
+      response = await api.post("/equipamentos-medicos", submitData, {
+        withCredentials: true,
+      });
+      toast({
+        title: "Sucesso",
+        description: "Mobilia criada com sucesso!",
+      });
     }
 
-    try {
-      setLoading(true);
-      
-      const submitData = {
-        ...formData,
-        tipoEquipamentoId: 6,
-        setorId: formData.setor ? parseInt(formData.setor) : undefined,
-        localizacaoId: formData.localizacao ? parseInt(formData.localizacao) : undefined,
-      };
+    onSubmit(response.data);
+    onClose();
+  } catch (error: any) {
+    console.error("Erro ao salvar mobilia:", error.response?.data || error.message);
+    toast({
+      title: "Erro",
+      description: error.response?.data?.message || error.message || "Erro ao salvar mobilia",
+      variant: "destructive",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
-      if (initialData?.id) {
-        await api.put(`/equipamentos-medicos/${initialData.id}`, submitData, {
-          withCredentials: true,
-        });
-        toast({
-          title: "Sucesso",
-          description: "Mobilia atualizada com sucesso!",
-        });
-      } else {
-        const response = await api.post("/equipamentos-medicos", submitData, {
-          withCredentials: true,
-        });
-        toast({
-          title: "Sucesso",
-          description: "Mobilia criada com sucesso!",
-        });
-      }
-      
-      onSubmit(formData);
-      onClose();
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao salvar mobilia",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   const handleInputChange = (field: keyof Mobilia, value: string) => {
     setFormData(prev => ({
@@ -168,17 +185,17 @@ export const MobiliaForm = ({ isOpen, onClose, onSubmit, initialData }: MobiliaF
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="w-full sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {initialData ? "Editar Mobilia" : "Nova Mobilia"}
           </DialogTitle>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <h3 className="font-semibold text-base sm:text-lg">Identificação</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="numeroPatrimonio">Número de Patrimônio *</Label>
                 <Input
@@ -189,7 +206,7 @@ export const MobiliaForm = ({ isOpen, onClose, onSubmit, initialData }: MobiliaF
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="nomeEquipamento">Nome do Mobiliário *</Label>
                 <Input
@@ -221,10 +238,13 @@ export const MobiliaForm = ({ isOpen, onClose, onSubmit, initialData }: MobiliaF
 
           <div className="space-y-2">
             <h3 className="font-semibold text-base sm:text-lg">Localização</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="setor">Setor</Label>
-                <Select onValueChange={(value) => handleInputChange("setor", value)}>
+                <Select
+                  value={formData.setor}
+                  onValueChange={(value) => handleInputChange("setor", value)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o setor" />
                   </SelectTrigger>
@@ -237,10 +257,12 @@ export const MobiliaForm = ({ isOpen, onClose, onSubmit, initialData }: MobiliaF
                   </SelectContent>
                 </Select>
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="localizacao">Localização</Label>
-                <Select onValueChange={(value) => handleInputChange("localizacao", value)}>
+                <Select
+                  value={formData.localizacao}
+                  onValueChange={(value) => handleInputChange("localizacao", value)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione a localização" />
                   </SelectTrigger>
@@ -258,7 +280,7 @@ export const MobiliaForm = ({ isOpen, onClose, onSubmit, initialData }: MobiliaF
 
           <div className="space-y-2">
             <h3 className="font-semibold text-base sm:text-lg">Financeiro e Garantia</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="valorCompra">Valor da Compra</Label>
                 <Input

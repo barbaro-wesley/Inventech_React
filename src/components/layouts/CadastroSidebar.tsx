@@ -16,7 +16,8 @@ import {
   BarChart3,
   Settings,
   Building,
-  MapPin
+  MapPin,
+  Printer
 } from "lucide-react";
 
 import {
@@ -29,7 +30,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-  
+
 } from "@/components/ui/sidebar";
 
 const menuItems = [
@@ -42,6 +43,8 @@ const menuItems = [
     title: "Cadastros",
     icon: Plus,
     items: [
+      { title: "Computadores", url: "/computadores", icon: Monitor },
+      { title: "Impressoras", url: "/impressoras", icon: Printer },
       { title: "Equipamentos", url: "/equipamentos", icon: Monitor },
       { title: "Ar Condicionado", url: "/condicionadores", icon: Wind },
       { title: "Mobílias", url: "/mobilias", icon: Package },
@@ -51,7 +54,7 @@ const menuItems = [
     title: "Manutenção",
     icon: Wrench,
     items: [
-      { title: "Calendário", url: "/manutencao/calendario", icon: Calendar },
+      { title: "Calendário", url: "/calendario", icon: Calendar },
     ],
   },
   {
@@ -64,14 +67,16 @@ const menuItems = [
       { title: "Técnicos", url: "/tecnicos", icon: Wrench },
     ],
   },
-{
+  {
     title: "Relatórios",
     icon: FileText,
     items: [
-      { title: "Relatórios", icon: BarChart3,url: "/relatorios"},
+      { title: "Relatórios", icon: BarChart3, url: "/relatorios" },
+      { title: "Pesquisar Equipamentos", icon: BarChart3, url: "/pesquisar-equipamento" },
+
     ],
   },
-  
+
 ];
 
 export function CadastroSidebar() {

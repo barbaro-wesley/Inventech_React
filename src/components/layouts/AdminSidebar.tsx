@@ -50,7 +50,7 @@ const menuItems = [
     items: [
       { title: "Computadores", url: "/computadores", icon: Monitor },
       { title: "Impressoras", url: "/impressoras", icon: Printer },
-      { title: "Equipamentos Médicos", url: "/equipamentos", icon: Stethoscope },
+      { title: "Equipamentos ", url: "/equipamentos", icon: Stethoscope },
       { title: "Ar Condicionado", url: "/condicionadores", icon: Wind },
       { title: "Mobílias", url: "/mobilias", icon: Package },
     ],
@@ -59,16 +59,19 @@ const menuItems = [
     title: "Manutenção",
     icon: Wrench,
     items: [
-      { title: "Preventiva", url: "/preventiva", icon: Shield },
-      { title: "Corretiva", url: "/corretiva", icon: AlertTriangle },
       { title: "Calendário", url: "/calendario", icon: Calendar },
+       {
+    title: "Minhas OS",
+    url: "/minhas-os",
+    icon: ClipboardList,
+  },
     ],
   },
-  {
+   /* {
     title: "Registro TI",
     url: "/registro-ti",
     icon: Settings,
-  },
+  }, */
   {
     title: "Usuários",
     icon: Users,
@@ -92,6 +95,8 @@ const menuItems = [
     icon: FileText,
     items: [
       { title: "Relatórios", icon: BarChart3,url: "/relatorios"},
+      { title: "Pesquisar Equipamentos", icon: BarChart3,url: "/pesquisar-equipamento"},
+
     ],
   },
 ];

@@ -71,20 +71,20 @@ const PrinterPage = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-            <Settings className="h-8 w-8 text-brand-secondary" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-2">
+            <Settings className="h-6 sm:h-8 w-6 sm:w-8 text-brand-secondary" />
             Impressoras
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
             Gerencie impressoras do sistema
           </p>
         </div>
 
         <Button
-          className="bg-gradient-brand hover:opacity-90 transition-opacity"
+          className="bg-gradient-brand hover:opacity-90 transition-opacity w-full sm:w-auto"
           onClick={() => setShowForm(true)}
         >
           <Plus className="h-4 w-4 mr-2" />
@@ -92,33 +92,33 @@ const PrinterPage = () => {
         </Button>
       </div>
 
-      {/* Search and Filters */}
-      <Card className="p-4">
-        <div className="flex gap-4">
+      <Card className="p-3 sm:p-4">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Pesquisar impressoras..." className="pl-9" />
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Pesquisar impressoras..." className="pl-8 text-sm" />
           </div>
-          <Button variant="outline">Filtros</Button>
+          <Button variant="outline" size="sm" className="w-full sm:w-auto">
+            Filtros
+          </Button>
         </div>
       </Card>
 
-      {/* Printers List */}
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-4">
         {loading ? (
           Array.from({ length: 5 }).map((_, i) => (
-            <Card key={i} className="p-6 animate-pulse">
-              <div className="flex justify-between items-start">
+            <Card key={i} className="p-4 animate-pulse">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                 <div className="flex-1">
                   <div className="h-5 bg-muted rounded w-1/3 mb-2"></div>
                   <div className="h-4 bg-muted rounded w-1/2 mb-4"></div>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="h-3 bg-muted rounded"></div>
                     <div className="h-3 bg-muted rounded"></div>
                     <div className="h-3 bg-muted rounded"></div>
                   </div>
                 </div>
-                <div className="h-8 w-20 bg-muted rounded"></div>
+                <div className="h-8 w-20 bg-muted rounded self-start"></div>
               </div>
             </Card>
           ))
@@ -126,23 +126,23 @@ const PrinterPage = () => {
           printers.map((printer) => (
             <Card
               key={printer.id}
-              className="p-6 hover:shadow-soft transition-shadow"
+              className="p-4 sm:p-6 hover:shadow-soft transition-shadow"
             >
-              <div className="flex justify-between items-start">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                 <div className="flex gap-4 flex-1">
-                  <div className="p-3 bg-gradient-brand rounded-lg">
-                    <Settings className="h-6 w-6 text-white" />
+                  <div className="p-2 sm:p-3 bg-gradient-brand rounded-lg">
+                    <Settings className="h-5 sm:h-6 w-5 sm:w-6 text-white" />
                   </div>
 
                   <div className="flex-1">
-                    <h3 className="font-semibold text-lg mb-1">
+                    <h3 className="font-semibold text-base sm:text-lg mb-1">
                       {printer.modelo || `Impressora #${printer.id}`}
                     </h3>
-                    <p className="text-muted-foreground mb-3">
-                      {printer.marca|| "Impressora"}
+                    <p className="text-muted-foreground mb-3 text-sm sm:text-base">
+                      {printer.marca || "Impressora"}
                     </p>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs sm:text-sm">
                       <div>
                         <span className="font-medium">Nº Patrimônio:</span>
                         <span className="text-muted-foreground ml-1">
@@ -167,15 +167,15 @@ const PrinterPage = () => {
                           {printer.localizacao?.nome || "Não informado"}
                         </span>
                       </div>
-                      
                     </div>
                   </div>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2 self-start">
                   <Button
                     variant="outline"
                     size="sm"
+                    className="min-w-[70px] px-2 rounded-md hover:bg-gray-100 text-sm"
                     onClick={() => handleEdit(printer)}
                   >
                     <Edit2 className="h-4 w-4 mr-1" />
@@ -186,16 +186,16 @@ const PrinterPage = () => {
             </Card>
           ))
         ) : (
-          <Card className="p-12 text-center">
-            <Settings className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">
+          <Card className="p-8 sm:p-12 text-center">
+            <Settings className="h-10 sm:h-12 w-10 sm:w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-base sm:text-lg font-semibold mb-2">
               Nenhuma impressora encontrada
             </h3>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-muted-foreground mb-4 text-sm sm:text-base">
               Comece adicionando a primeira impressora ao sistema
             </p>
             <Button
-              className="bg-gradient-brand hover:opacity-90"
+              className="bg-gradient-brand hover:opacity-90 w-full sm:w-auto"
               onClick={() => setShowForm(true)}
             >
               <Plus className="h-4 w-4 mr-2" />

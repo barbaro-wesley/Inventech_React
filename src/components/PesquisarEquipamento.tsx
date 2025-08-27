@@ -1,21 +1,86 @@
-import { useState, useCallback, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Scan, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useState, useCallback, useRef } from "react";
 import api from "@/lib/api";
 import PopupEquip from "@/components/popups/PopupEquip";
 import BarcodeScannerComponent from "react-qr-barcode-scanner";
 
+interface Setor {
+  id: number;
+  nome: string;
+}
+
+interface Localizacao {
+  id: number;
+  nome: string;
+  setorId: number;
+}
+
+interface TipoEquipamento {
+  id: number;
+  nome: string;
+  grupoId: number;
+  taxaDepreciacao: number | null;
+}
+
+interface OrdemServico {
+  id: number;
+  descricao: string;
+  tipoEquipamentoId: number;
+  equipamentoId: number;
+  tecnicoId: number;
+  solicitanteId: number;
+  status: string;
+  criadoEm: string;
+  finalizadoEm: string | null;
+  iniciadaEm: string | null;
+  canceladaEm: string | null;
+  valorManutencao: number | null;
+  resolucao: string | null;
+  arquivos: string[];
+  preventiva: boolean;
+  dataAgendada: string | null;
+  recorrencia: string;
+  intervaloDias: number | null;
+  setorId: number;
+}
+
 interface Equipamento {
   id: number;
   numeroPatrimonio: string;
+  numeroSerie: string;
+  numeroAnvisa: string;
   nomeEquipamento: string;
+  marca: string | null;
   modelo: string;
-  setor?: { nome: string };
-  localizacao?: { nome: string };
-  tipoEquipamento?: { nome: string };
+  fabricante: string;
+  identificacao: string;
+  ip: string | null;
+  sistemaOperacional: string | null;
+  nControle: string | null;
+  BTUS: string | null;
+  estado: string | null;
+  taxaDepreciacao: number | null;
+  valorAtual: number | null;
+  valorCompra: number;
+  dataCompra: string;
+  inicioGarantia: string;
+  terminoGarantia: string;
+  notaFiscal: string;
+  obs: string;
+  setorId: number;
+  localizacaoId: number;
+  tipoEquipamentoId: number;
+  createdAt: string;
+  updatedAt: string;
+  arquivos: string[];
+  setor: Setor;
+  localizacao: Localizacao;
+  tipoEquipamento: TipoEquipamento;
+  ordensServico: OrdemServico[];
 }
 
 const PesquisarEquipamento = () => {
@@ -39,16 +104,18 @@ const PesquisarEquipamento = () => {
 
     try {
       setLoading(true);
-      const response = await api.get(`/equipamentos-medicos/patrimonio/${patrimonio}`, {
+      const response = await api.get<Equipamento[]>(`/equipamentos-medicos/equipamentos-medicos/patrimonio/${patrimonio}`, {
         withCredentials: true,
       });
 
-      if (response.data) {
-        setEquipamento(response.data);
+      if (response.data && response.data.length > 0) {
+        setEquipamento(response.data[0]);
         toast({
           title: "Equipamento encontrado!",
-          description: `${response.data.nomeEquipamento}`,
+          description: `${response.data[0].nomeEquipamento}`,
         });
+      } else {
+        throw new Error("No data");
       }
     } catch (error: any) {
       if (error.response?.status === 404) {

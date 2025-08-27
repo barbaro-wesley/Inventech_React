@@ -7,8 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, Download, FileText, Eye } from 'lucide-react';
-import { EquipamentosReport } from './EquipamentosReport';
-import { CondicionadoresReport } from './CondicionadoresReport';
 import { EquipamentosPorSetorReport } from './EquipamentosPorSetorReport';
 import { OsPorTecnicoReport } from './OsPorTecnicoReport';
 import { ReportConfigEquipamentosPorSetor } from './configs/ReportConfigEquipamentosPorSetor';
@@ -38,10 +36,6 @@ export const ReportGenerator: React.FC = () => {
   const [reportConfig, setReportConfig] = useState<any>({});
 
   useEffect(() => {
-    if (reportType === 'condicionadores') {
-      fetchCondicionadores();
-      return;
-    }
     if (reportType === 'equipamentos-por-setor') {
       if (filters.setores && filters.tipos) {
         fetchEquipamentosPorSetor();
@@ -56,17 +50,6 @@ export const ReportGenerator: React.FC = () => {
     }
   }, [reportType, filters.setores, filters.tipos, filters.tecnicos, filters.inicio, filters.fim, filters.campoData, filters.status]);
 
-  const fetchCondicionadores = async () => {
-    try {
-      setLoading(true);
-      const response = await api.get('/condicionadores');
-      setCondicionadores(response.data);
-    } catch (error) {
-      console.error('Erro ao buscar condicionadores:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
   const fetchEquipamentosPorSetor = async (config?: any) => {
     try {
       const configToUse = config || reportConfig;
@@ -108,41 +91,10 @@ export const ReportGenerator: React.FC = () => {
     }
   };
 
-  const mockEquipamentos = [
-    {
-      id: 'EQ001',
-      nome: 'Computador Desktop Dell',
-      tipo: 'Computador',
-      setor: 'TI',
-      status: 'Ativo',
-      dataAquisicao: '2023-01-15',
-    },
-    {
-      id: 'EQ002',
-      nome: 'Impressora HP LaserJet',
-      tipo: 'Impressora',
-      setor: 'Administrativo',
-      status: 'Ativo',
-      dataAquisicao: '2023-02-20',
-    },
-  ];
+
 
   const getReportComponent = () => {
     switch (reportType) {
-      case 'equipamentos':
-        return (
-          <EquipamentosReport
-            equipamentos={mockEquipamentos}
-            filtros={filters}
-          />
-        );
-      case 'condicionadores':
-        return (
-          <CondicionadoresReport
-            condicionadores={condicionadores}
-            filtros={filters}
-          />
-        );
       case 'equipamentos-por-setor':
         return (
           <EquipamentosPorSetorReport
@@ -222,12 +174,8 @@ export const ReportGenerator: React.FC = () => {
                     <SelectValue placeholder="Selecione o tipo" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="condicionadores">Relatório de Condicionadores de Ar</SelectItem>
-                    <SelectItem value="equipamentos">Relatório de Equipamentos</SelectItem>
                     <SelectItem value="equipamentos-por-setor">Relatório de Equipamentos por Setor</SelectItem>
                     <SelectItem value="os-por-tecnico">Relatório de OS por Técnico</SelectItem>
-                    <SelectItem value="usuarios">Relatório de Usuários</SelectItem>
-                    <SelectItem value="manutencao">Relatório de Manutenção</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

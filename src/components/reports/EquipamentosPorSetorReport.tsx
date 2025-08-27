@@ -67,7 +67,6 @@ export function EquipamentosPorSetorReport({ data, filtros }: Props) {
                     <Text style={[styles.cellSmall]}>Patrimônio</Text>
                     <Text style={[styles.cell]}>Nome</Text>
                     <Text style={[styles.cellSmall]}>Série</Text>
-                    <Text style={[styles.cellSmall]}>Status</Text>
                   </View>
 
                   {grupo.equipamentos?.map((eq, eidx) => (
@@ -75,7 +74,6 @@ export function EquipamentosPorSetorReport({ data, filtros }: Props) {
                       <Text style={[styles.cellSmall]}>{eq.patrimonio || '-'}</Text>
                       <Text style={[styles.cell]}>{eq.nome || '-'}</Text>
                       <Text style={[styles.cellSmall]}>{eq.serie || '-'}</Text>
-                      <Text style={[styles.cellSmall]}>{eq.status || '-'}</Text>
                     </View>
                   ))}
                 </View>

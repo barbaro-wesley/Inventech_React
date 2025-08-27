@@ -13,7 +13,7 @@ interface OrdemServico {
 
 interface TecnicoGrupo {
   tecnicoId: number | string;
-  tecnicoNome?: string;
+  tecnico?: string;
   quantidade?: number;
   ordens: OrdemServico[];
 }
@@ -52,7 +52,7 @@ export function OsPorTecnicoReport({ data, filtros }: Props) {
           data.map((tec, idx) => (
             <View key={idx} style={styles.section}>
               <Text style={styles.tecnicoHeader}>
-                Técnico: {tec.tecnicoNome || tec.tecnicoId} • Total: {tec.quantidade ?? tec.ordens?.length ?? 0}
+                Técnico: {tec.tecnico} • Total: {tec.quantidade ?? tec.ordens?.length ?? 0}
               </Text>
 
               <View style={styles.headerRow}>
@@ -66,7 +66,7 @@ export function OsPorTecnicoReport({ data, filtros }: Props) {
 
               {tec.ordens?.map((os, oidx) => (
                 <View key={oidx} style={styles.row}>
-                  <Text style={[styles.cellSmall]}>{String(os.id || '-') }</Text>
+                  <Text style={[styles.cellSmall]}>{String(os.id || '-')}</Text>
                   <Text style={[styles.cell]}>{os.descricao || '-'}</Text>
                   <Text style={[styles.cell]}>{os.equipamento || '-'}</Text>
                   <Text style={[styles.cellSmall]}>{os.status || '-'}</Text>

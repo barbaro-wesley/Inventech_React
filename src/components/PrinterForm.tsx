@@ -46,7 +46,7 @@ export function PrinterForm({ isOpen, onClose, onSubmit, initialData = null }: P
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
-    nPatrimonio: initialData?.nPatrimonio || '',
+    numeroPatrimonio: initialData?.nPatrimonio || '',
     ip: initialData?.ip || '',
     modelo: initialData?.modelo || '',
     marca: initialData?.marca || '',
@@ -107,7 +107,7 @@ export function PrinterForm({ isOpen, onClose, onSubmit, initialData = null }: P
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.nPatrimonio || !formData.ip || !formData.modelo || !formData.marca) {
+    if (!formData.numeroPatrimonio|| !formData.ip || !formData.modelo || !formData.marca) {
       toast({
         title: "Erro",
         description: "Por favor, preencha todos os campos obrigatórios.",
@@ -117,7 +117,7 @@ export function PrinterForm({ isOpen, onClose, onSubmit, initialData = null }: P
     }
 
     const payload = {
-      nPatrimonio: formData.nPatrimonio,
+      numeroPatrimonio: formData.numeroPatrimonio,
       ip: formData.ip,
       modelo: formData.modelo,
       marca: formData.marca,
@@ -131,7 +131,7 @@ export function PrinterForm({ isOpen, onClose, onSubmit, initialData = null }: P
       let printerData;
 
       if (initialData?.id) {
-        response = await api.put(`/printers/${initialData.id}`, payload, {
+        response = await api.put(`/equipamentos-medicos/${initialData.id}`, payload, {
           withCredentials: true,
         });
         printerData = response.data;
@@ -140,7 +140,7 @@ export function PrinterForm({ isOpen, onClose, onSubmit, initialData = null }: P
           description: "Impressora atualizada com sucesso!",
         });
       } else {
-        response = await api.post('/printers', payload, {
+        response = await api.post('/equipamentos-medicos/', payload, {
           withCredentials: true,
         });
         printerData = response.data;
@@ -149,7 +149,6 @@ export function PrinterForm({ isOpen, onClose, onSubmit, initialData = null }: P
           description: "Impressora cadastrada com sucesso!",
         });
       }
-
       const selectedLoc = localizacoes.find((loc) => loc.id === Number(formData.localizacaoId));
       const selectedTipo = tiposImpressora.find((tipo) => tipo.id === Number(formData.tipoEquipamentoId));
 
@@ -164,7 +163,7 @@ export function PrinterForm({ isOpen, onClose, onSubmit, initialData = null }: P
       onClose();
 
       setFormData({
-        nPatrimonio: '',
+        numeroPatrimonio: '',
         ip: '',
         modelo: '',
         marca: '',
@@ -185,72 +184,76 @@ export function PrinterForm({ isOpen, onClose, onSubmit, initialData = null }: P
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="w-[600px] sm:max-w-[600px] overflow-y-auto">
+      <SheetContent className="w-full max-w-[90vw] sm:max-w-[600px] overflow-y-auto p-4 sm:p-6">
         <SheetHeader>
-          <SheetTitle>
+          <SheetTitle className="text-base sm:text-lg">
             {initialData ? 'Editar Impressora' : 'Nova Impressora'}
           </SheetTitle>
         </SheetHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6 mt-6">
-          <Card className="p-4">
-            <h3 className="font-semibold mb-4">Informações da Impressora</h3>
-            <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
+          <Card className="p-3 sm:p-4">
+            <h3 className="font-semibold text-sm sm:text-base mb-3 sm:mb-4">Informações da Impressora</h3>
+            <div className="space-y-3 sm:space-y-4">
               <div>
-                <Label htmlFor="nPatrimonio">Número Patrimônio *</Label>
+                <Label htmlFor="numeroPatrimonio" className="text-xs sm:text-sm">Número Patrimônio *</Label>
                 <Input
-                  id="nPatrimonio"
-                  value={formData.nPatrimonio}
-                  onChange={(e) => handleChange('nPatrimonio', e.target.value)}
+                  id="numeroPatrimonio"
+                  value={formData.numeroPatrimonio}
+                  onChange={(e) => handleChange('numeroPatrimonio', e.target.value)}
                   required
+                  className="text-sm"
                 />
               </div>
               <div>
-                <Label htmlFor="ip">IP *</Label>
+                <Label htmlFor="ip" className="text-xs sm:text-sm">IP *</Label>
                 <Input
                   id="ip"
                   value={formData.ip}
                   onChange={(e) => handleChange('ip', e.target.value)}
                   required
+                  className="text-sm"
                 />
               </div>
               <div>
-                <Label htmlFor="modelo">Modelo *</Label>
+                <Label htmlFor="modelo" className="text-xs sm:text-sm">Modelo *</Label>
                 <Input
                   id="modelo"
                   value={formData.modelo}
                   onChange={(e) => handleChange('modelo', e.target.value)}
                   required
+                  className="text-sm"
                 />
               </div>
               <div>
-                <Label htmlFor="marca">Marca *</Label>
+                <Label htmlFor="marca" className="text-xs sm:text-sm">Marca *</Label>
                 <Input
                   id="marca"
                   value={formData.marca}
                   onChange={(e) => handleChange('marca', e.target.value)}
                   required
+                  className="text-sm"
                 />
               </div>
             </div>
           </Card>
 
-          <Card className="p-4">
-            <h3 className="font-semibold mb-4">Localização</h3>
-            <div className="space-y-4">
+          <Card className="p-3 sm:p-4">
+            <h3 className="font-semibold text-sm sm:text-base mb-3 sm:mb-4">Localização</h3>
+            <div className="space-y-3 sm:space-y-4">
               <div>
-                <Label htmlFor="localizacaoId">Localização *</Label>
+                <Label htmlFor="localizacaoId" className="text-xs sm:text-sm">Localização *</Label>
                 <Select
                   value={formData.localizacaoId}
                   onValueChange={(value) => handleChange('localizacaoId', value)}
                   required
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="text-sm">
                     <SelectValue placeholder="Selecione a localização" />
                   </SelectTrigger>
                   <SelectContent>
                     {localizacoes.map((loc) => (
-                      <SelectItem key={loc.id} value={String(loc.id)}>
+                      <SelectItem key={loc.id} value={String(loc.id)} className="text-sm">
                         {loc.nome}
                       </SelectItem>
                     ))}
@@ -258,26 +261,27 @@ export function PrinterForm({ isOpen, onClose, onSubmit, initialData = null }: P
                 </Select>
               </div>
               <div>
-                <Label htmlFor="setorId">Setor</Label>
+                <Label htmlFor="setorId" className="text-xs sm:text-sm">Setor</Label>
                 <Input
                   id="setorId"
                   value={setorNome}
                   disabled
+                  className="text-sm"
                 />
               </div>
               <div>
-                <Label htmlFor="tipoEquipamentoId">Tipo de Equipamento *</Label>
+                <Label htmlFor="tipoEquipamentoId" className="text-xs sm:text-sm">Tipo de Equipamento *</Label>
                 <Select
                   value={formData.tipoEquipamentoId}
                   onValueChange={(value) => handleChange('tipoEquipamentoId', value)}
                   required
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="text-sm">
                     <SelectValue placeholder="Selecione o tipo" />
                   </SelectTrigger>
                   <SelectContent>
                     {tiposImpressora.map((tipo) => (
-                      <SelectItem key={tipo.id} value={String(tipo.id)}>
+                      <SelectItem key={tipo.id} value={String(tipo.id)} className="text-sm">
                         {tipo.nome}
                       </SelectItem>
                     ))}
@@ -287,11 +291,21 @@ export function PrinterForm({ isOpen, onClose, onSubmit, initialData = null }: P
             </div>
           </Card>
 
-          <div className="flex gap-2 justify-end">
-            <Button type="button" variant="outline" onClick={onClose}>
+          <div className="flex flex-col sm:flex-row gap-2 justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="min-w-[70px] px-2 rounded-md hover:bg-gray-100 text-sm"
+              onClick={onClose}
+            >
               Cancelar
             </Button>
-            <Button type="submit" className="bg-gradient-brand hover:opacity-90">
+            <Button
+              type="submit"
+              size="sm"
+              className="min-w-[70px] px-2 rounded-md bg-gradient-brand hover:opacity-90 text-sm"
+            >
               {initialData ? 'Atualizar' : 'Cadastrar'}
             </Button>
           </div>
