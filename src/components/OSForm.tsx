@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -83,6 +84,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
         setFilteredTecnicos(tecnicosRes.data);
         setDataLoaded(true);
       } catch (error) {
+        console.error('Erro ao buscar dados:', error);
         toast({
           title: "Erro",
           description: "Erro ao carregar opções do formulário",
@@ -90,11 +92,10 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
         });
       }
     }
+    fetchOptions();
+  }, [toast]);
 
-    if (!dataLoaded) {
-      fetchOptions();
-    }
-
+  useEffect(() => {
     if (isOpen && initialData && initialData.equipamento && dataLoaded) {
       const eq = initialData.equipamento;
       const tipoId = String(eq.tipoEquipamentoId || '4');
@@ -123,6 +124,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
             return Array.from(new Map(allEquipamentos.map(e => [e.id, e])).values());
           });
         } catch (error) {
+          console.error('Erro ao buscar equipamentos:', error);
           toast({
             title: "Erro",
             description: "Erro ao carregar equipamentos",
@@ -142,7 +144,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
         setFilteredTecnicos(tecnicos);
       }
     }
-  }, [isOpen, initialData, dataLoaded, toast]);
+  }, [isOpen, initialData, dataLoaded, tiposEquipamento, tecnicos, toast]);
 
   const handleChange = async (name: string, value: any) => {
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -174,6 +176,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
         setEquipamentos(filteredEquipamentos);
         setFormData(prev => ({ ...prev, equipamentoId: '', setorId: '' }));
       } catch (error) {
+        console.error('Erro ao buscar equipamentos:', error);
         setEquipamentos([]);
         toast({
           title: "Erro",
@@ -253,6 +256,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
       setFileNames([]);
       onClose();
     } catch (error) {
+      console.error('Erro ao cadastrar OS:', error);
       toast({
         title: "Erro",
         description: "Erro ao cadastrar Ordem de Serviço",
