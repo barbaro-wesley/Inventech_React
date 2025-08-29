@@ -96,53 +96,56 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
   }, [toast]);
 
   useEffect(() => {
-    if (isOpen && initialData && initialData.equipamento && dataLoaded) {
-      const eq = initialData.equipamento;
-      const tipoId = String(eq.tipoEquipamentoId || '4');
-      setFormData({
-        arquivos: [],
-        descricao: '',
-        tipoEquipamentoId: tipoId,
-        tecnicoId: '',
-        status: 'ABERTA',
-        preventiva: !!initialData.preventiva,
-        setorId: eq.setor?.id ? String(eq.setor.id) : '',
-        equipamentoId: String(eq.id || ''),
-      });
-      setEquipamentos([eq]);
+    if (isOpen && initialData && initialData.equipamento && dataLoaded && tiposEquipamento.length > 0 && tecnicos.length > 0) {
+      // Adicionar um pequeno delay para garantir que todos os dados estejam carregados
+      setTimeout(() => {
+        const eq = initialData.equipamento;
+        const tipoId = String(eq.tipoEquipamentoId || '4');
+        setFormData({
+          arquivos: [],
+          descricao: '',
+          tipoEquipamentoId: tipoId,
+          tecnicoId: '',
+          status: 'ABERTA',
+          preventiva: !!initialData.preventiva,
+          setorId: eq.setor?.id ? String(eq.setor.id) : '',
+          equipamentoId: String(eq.id || ''),
+        });
+        setEquipamentos([eq]);
 
-      (async () => {
-        try {
-          setLoadingEquipamentos(true);
-          const res = await api.get('/equipamentos-medicos', {
-            withCredentials: true,
-            params: { tipoEquipamentoId: tipoId },
-          });
-          const filteredEquipamentos = res.data.filter((e: Equipamento) => String(e.tipoEquipamentoId) === tipoId);
-          setEquipamentos(prev => {
-            const allEquipamentos = [...prev, ...filteredEquipamentos];
-            return Array.from(new Map(allEquipamentos.map(e => [e.id, e])).values());
-          });
-        } catch (error) {
-          console.error('Erro ao buscar equipamentos:', error);
-          toast({
-            title: "Erro",
-            description: "Erro ao carregar equipamentos",
-            variant: "destructive",
-          });
-        } finally {
-          setLoadingEquipamentos(false);
+        (async () => {
+          try {
+            setLoadingEquipamentos(true);
+            const res = await api.get('/equipamentos-medicos', {
+              withCredentials: true,
+              params: { tipoEquipamentoId: tipoId },
+            });
+            const filteredEquipamentos = res.data.filter((e: Equipamento) => String(e.tipoEquipamentoId) === tipoId);
+            setEquipamentos(prev => {
+              const allEquipamentos = [...prev, ...filteredEquipamentos];
+              return Array.from(new Map(allEquipamentos.map(e => [e.id, e])).values());
+            });
+          } catch (error) {
+            console.error('Erro ao buscar equipamentos:', error);
+            toast({
+              title: "Erro",
+              description: "Erro ao carregar equipamentos",
+              variant: "destructive",
+            });
+          } finally {
+            setLoadingEquipamentos(false);
+          }
+        })();
+
+        const selectedTipo = tiposEquipamento.find(t => t.id === parseInt(tipoId));
+        setGrupo(selectedTipo?.grupo?.nome || '');
+        if (selectedTipo?.grupo?.id) {
+          const filtered = tecnicos.filter(t => t.grupo?.id === selectedTipo.grupo.id);
+          setFilteredTecnicos(filtered);
+        } else {
+          setFilteredTecnicos(tecnicos);
         }
-      })();
-
-      const selectedTipo = tiposEquipamento.find(t => t.id === parseInt(tipoId));
-      setGrupo(selectedTipo?.grupo?.nome || '');
-      if (selectedTipo?.grupo?.id) {
-        const filtered = tecnicos.filter(t => t.grupo?.id === selectedTipo.grupo.id);
-        setFilteredTecnicos(filtered);
-      } else {
-        setFilteredTecnicos(tecnicos);
-      }
+      }, 100); // Delay de 100ms para garantir que os dados estejam carregados
     }
   }, [isOpen, initialData, dataLoaded, tiposEquipamento, tecnicos, toast]);
 
