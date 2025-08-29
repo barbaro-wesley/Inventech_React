@@ -304,7 +304,12 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
                 onValueChange={(value) => handleChange('tipoEquipamentoId', value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
+                  <SelectValue placeholder="Selecione">
+                    {formData.tipoEquipamentoId && tiposEquipamento.length > 0 
+                      ? tiposEquipamento.find(t => t.id.toString() === formData.tipoEquipamentoId)?.nome 
+                      : "Selecione"
+                    }
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="bg-background border z-50">
                   {tiposEquipamento.map((t) => (
