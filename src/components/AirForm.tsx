@@ -8,7 +8,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import api from "@/lib/api";
-
+import { OSPreventivaForm } from "./forms/OSPreventivaForm";
 interface EquipamentoFormProps {
   isOpen: boolean;
   onClose: () => void;

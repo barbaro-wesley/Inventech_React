@@ -21,23 +21,24 @@ interface OS {
   dataAgendada?: string | null;
   tipoEquipamento?: {
     nome: string;
-  };
+  } | null;
   tecnico: {
     id: number;
     nome: string;
   };
   solicitante?: {
     nome: string;
-  };
+  } | null;
   Setor?: {
     nome: string;
-  };
+  } | null;
   equipamento?: {
-    nomeEquipamento?: string;
-    numeroSerie?: string;
-  };
+    nomeEquipamento: string | null;
+    numeroSerie: string | null;
+    marca?: string | null;
+    modelo?: string | null;
+  } | null;
 }
-
 const ChamadosTecnico = () => {
   const [chamados, setChamados] = useState<OS[]>([]);
   const [aberto, setAberto] = useState<number | null>(null);
@@ -288,11 +289,21 @@ const ChamadosTecnico = () => {
                               </div>
                             )}
 
-                            {os.equipamento && (
+                            {os.equipamento ? (
                               <>
-                                <div><span className="font-medium">Equipamento:</span> {os.equipamento.nomeEquipamento || "N/I"}</div>
-                                <div><span className="font-medium">SN:</span> {os.equipamento.numeroSerie || "N/I"}</div>
+                                <div>
+                                  <span className="font-medium">Equipamento:</span>{" "}
+                                  {os.equipamento.nomeEquipamento?.trim() || "N/I"}
+                                </div>
+                                <div>
+                                  <span className="font-medium">SN:</span>{" "}
+                                  {os.equipamento.numeroSerie?.trim() || "N/I"}
+                                </div>
                               </>
+                            ) : (
+                              <div>
+                                <span className="font-medium">Equipamento:</span> N/I
+                              </div>
                             )}
                           </div>
                         </div>

@@ -39,31 +39,31 @@ const Equipamentos = () => {
   const { toast } = useToast();
 
   const fetchEquipments = async (tipoId: string = "all") => {
-  try {
-    setLoading(true);
-    const url =
-      tipoId === "all"
-        ? "/equipamentos-medicos"
-        : `/equipamentos-medicos/tipo/${tipoId}`;
+    try {
+      setLoading(true);
+      const url =
+        tipoId === "all"
+          ? "/equipamentos-medicos"
+          : `/equipamentos-medicos/tipo/${tipoId}`;
 
-    const [equipmentsResponse, tiposResponse] = await Promise.all([
-      api.get(url, { withCredentials: true }),
-      api.get("/tipos-equipamento", { withCredentials: true }),
-    ]);
+      const [equipmentsResponse, tiposResponse] = await Promise.all([
+        api.get(url, { withCredentials: true }),
+        api.get("/tipos-equipamento", { withCredentials: true }),
+      ]);
 
-    setAllEquipments(equipmentsResponse.data);
-    setEquipments(equipmentsResponse.data);
-    setTiposEquipamento(tiposResponse.data);
-  } catch (error) {
-    toast({
-      title: "Erro ao carregar dados",
-      description: "Não foi possível carregar equipamentos ou tipos",
-      variant: "destructive",
-    });
-  } finally {
-    setLoading(false);
-  }
-};
+      setAllEquipments(equipmentsResponse.data);
+      setEquipments(equipmentsResponse.data);
+      setTiposEquipamento(tiposResponse.data);
+    } catch (error) {
+      toast({
+        title: "Erro ao carregar dados",
+        description: "Não foi possível carregar equipamentos ou tipos",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filterEquipments = () => {
     let filtered = allEquipments;
@@ -73,6 +73,7 @@ const Equipamentos = () => {
         equipment.nomeEquipamento?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         equipment.modelo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         equipment.numeroPatrimonio?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        equipment.numeroSerie?.toLowerCase().includes(searchTerm.toLowerCase()) || // 🔑 aqui
         equipment.tipoEquipamento?.nome?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
@@ -87,14 +88,26 @@ const Equipamentos = () => {
   };
 
   useEffect(() => {
-  fetchEquipments("3"); // carrega tipo 3 ao montar
-}, []);
+    fetchEquipments("3"); // carrega tipo 3 ao montar
+  }, []);
 
- useEffect(() => {
-  if (selectedTipoId) {
-    fetchEquipments(selectedTipoId);
+  useEffect(() => {
+    if (selectedTipoId) {
+      fetchEquipments(selectedTipoId);
+    }
+  }, [selectedTipoId]);
+  useEffect(() => {
+  filterEquipments();
+}, [searchTerm, selectedTipoId, allEquipments]);
+useEffect(() => {
+  if (selectedEquipmentForOS) {
+    if (selectedEquipmentForOS.preventiva) {
+      setShowOSPreventivaForm(true);
+    } else {
+      setShowOSForm(true);
+    }
   }
-}, [selectedTipoId]);
+}, [selectedEquipmentForOS]);
 
   const handleFormSubmit = (data: any) => {
     if (editingEquipment) {
@@ -115,18 +128,12 @@ const Equipamentos = () => {
     setEditingEquipment(null);
   };
 
-  const handleMaintenanceClick = (equipment: any, type: 'preventiva' | 'corretiva') => {
-    setSelectedEquipmentForOS({
-      equipamento: equipment,
-      preventiva: type === 'preventiva'
-    });
-
-    if (type === 'preventiva') {
-      setShowOSPreventivaForm(true);
-    } else {
-      setShowOSForm(true);
-    }
-  };
+ const handleMaintenanceClick = (equipment: any, type: 'preventiva' | 'corretiva') => {
+  setSelectedEquipmentForOS({
+    equipamento: equipment,
+    preventiva: type === 'preventiva'
+  });
+};
 
   const handleCloseOSForm = () => {
     setShowOSForm(false);

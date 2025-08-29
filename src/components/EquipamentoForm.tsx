@@ -86,32 +86,37 @@ export function EquipamentoForm({ isOpen, onClose, onSubmit, initialData = null 
   }, [isOpen]);
 
   useEffect(() => {
-    if (initialData) {
-      setFormData({
-        numeroPatrimonio: initialData.numeroPatrimonio ?? '',
-        identificacao: initialData.identificacao ?? '',
-        numeroSerie: initialData.numeroSerie ?? '',
-        numeroAnvisa: initialData.numeroAnvisa ?? '',
-        nomeEquipamento: initialData.nomeEquipamento ?? '',
-        modelo: initialData.modelo ?? '',
-        fabricante: initialData.fabricante ?? '',
-        valorCompra: initialData.valorCompra ? String(initialData.valorCompra) : '',
-        dataCompra: initialData.dataCompra ? initialData.dataCompra.slice(0, 10) : '',
-        inicioGarantia: initialData.inicioGarantia ? initialData.inicioGarantia.slice(0, 10) : '',
-        terminoGarantia: initialData.terminoGarantia ? initialData.terminoGarantia.slice(0, 10) : '',
-        notaFiscal: initialData.notaFiscal ?? '',
-        obs: initialData.obs ?? '',
-        setorId: initialData.setorId ? String(initialData.setorId) : '',
-        localizacaoId: initialData.localizacaoId ?? initialData.localizacao?.id ?? '',
-        tipoEquipamentoId: initialData.tipoEquipamentoId ? String(initialData.tipoEquipamentoId) : '',
-        arquivos: initialData.arquivos ?? [],
-      });
-      if (Array.isArray(initialData.arquivos)) {
-        const nomes = initialData.arquivos.map((a: string) => a.split('/').pop());
-        setFileNames(nomes);
-      }
+  if (initialData && setores.length > 0) {
+    setFormData({
+      numeroPatrimonio: initialData.numeroPatrimonio ?? '',
+      identificacao: initialData.identificacao ?? '',
+      numeroSerie: initialData.numeroSerie ?? '',
+      numeroAnvisa: initialData.numeroAnvisa ?? '',
+      nomeEquipamento: initialData.nomeEquipamento ?? '',
+      modelo: initialData.modelo ?? '',
+      fabricante: initialData.fabricante ?? '',
+      valorCompra: initialData.valorCompra ? String(initialData.valorCompra) : '',
+      dataCompra: initialData.dataCompra ? initialData.dataCompra.slice(0, 10) : '',
+      inicioGarantia: initialData.inicioGarantia ? initialData.inicioGarantia.slice(0, 10) : '',
+      terminoGarantia: initialData.terminoGarantia ? initialData.terminoGarantia.slice(0, 10) : '',
+      notaFiscal: initialData.notaFiscal ?? '',
+      obs: initialData.obs ?? '',
+      setorId: initialData.setorId ? String(initialData.setorId) : '',
+      localizacaoId: initialData.localizacaoId 
+        ? String(initialData.localizacaoId) 
+        : initialData.localizacao?.id 
+          ? String(initialData.localizacao.id) 
+          : '',
+      tipoEquipamentoId: initialData.tipoEquipamentoId ? String(initialData.tipoEquipamentoId) : '',
+      arquivos: initialData.arquivos ?? [],
+    });
+
+    if (Array.isArray(initialData.arquivos)) {
+      const nomes = initialData.arquivos.map((a: string) => a.split('/').pop());
+      setFileNames(nomes);
     }
-  }, [initialData]);
+  }
+}, [initialData, setores]);
 
   useEffect(() => {
     if (formData.setorId && setores.length > 0) {

@@ -112,7 +112,6 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
 
       setEquipamentos([eq]);
 
-      // Fetch additional equipment for the same tipoEquipamentoId
       const tipoId = String(eq.tipoEquipamentoId || '');
       (async () => {
         try {

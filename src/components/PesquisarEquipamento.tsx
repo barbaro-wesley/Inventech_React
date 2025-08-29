@@ -149,14 +149,23 @@ const PesquisarEquipamento = () => {
     }
   }, []);
 
-  const handleScanError = useCallback((error: any) => {
-    console.error("Scanner error:", error);
+ const handleScanError = useCallback((error: any) => {
+  if (error?.name === "NotAllowedError") {
     toast({
-      title: "Erro no scanner",
-      description: "Não foi possível acessar a câmera",
+      title: "Permissão negada",
+      description: "Habilite o acesso à câmera no navegador.",
       variant: "destructive",
     });
-  }, [toast]);
+  } else if (error?.name === "NotReadableError") {
+    toast({
+      title: "Erro",
+      description: "Outro app pode estar usando a câmera.",
+      variant: "destructive",
+    });
+  } else {
+    console.error("Scanner error:", error);
+  }
+}, [toast]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
@@ -228,12 +237,13 @@ const PesquisarEquipamento = () => {
               <div ref={scannerRef} className="w-full max-w-[90vw] sm:max-w-md mx-auto">
                 <BarcodeScannerComponent
                   width="100%"
-                  height={window.innerWidth < 640 ? 200 : 300} // Smaller height on mobile
+                  height={window.innerWidth < 640 ? 300 : 400}
+                  facingMode="environment"
                   onUpdate={(err: any, result: any) => {
                     if (result) {
                       handleScanResult(result.getText());
                     }
-                    if (err) {
+                    if (err && err.name !== "NotFoundException") {
                       handleScanError(err);
                     }
                   }}

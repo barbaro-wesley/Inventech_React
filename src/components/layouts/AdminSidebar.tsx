@@ -67,11 +67,13 @@ const menuItems = [
   },
     ],
   },
-   /* {
+    {
     title: "Registro TI",
-    url: "/registro-ti",
     icon: Settings,
-  }, */
+    items:[
+      {title:'Registro de Trabalho Externo', url:'/sobre-aviso',icon:Calendar}
+    ]
+  },
   {
     title: "Usuários",
     icon: Users,

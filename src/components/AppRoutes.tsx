@@ -22,6 +22,7 @@ import Categorias from "@/pages/Categorias";
 import Setores from "@/pages/Setores";
 import Localizacao from "@/pages/Localizacao";
 import ChamadosTecnico from "./ChamadosTecnico";
+import SobreAvisoPage from "@/pages/SobreAvisoPage";
 export const AppRoutes = () => {
   return (
     <Routes>
@@ -121,7 +122,7 @@ export const AppRoutes = () => {
       <Route
         path="/relatorios"
         element={
-          <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
+          <ProtectedRoute allowedRoles={['admin', 'cadastro','visualizador']}>
             <Relatorios />
           </ProtectedRoute>
         }
@@ -155,6 +156,14 @@ export const AppRoutes = () => {
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
             <Localizacao/>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/sobre-aviso"
+        element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <SobreAvisoPage/>
           </ProtectedRoute>
         }
       />

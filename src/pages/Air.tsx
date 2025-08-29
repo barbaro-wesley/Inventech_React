@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { AirForm } from "@/components/AirForm";
 import { OSForm } from "@/components/OSForm";
+import { OSPreventivaForm } from "@/components/forms/OSPreventivaForm";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +31,7 @@ const Condicionados = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingCondicionado, setEditingCondicionado] = useState<Condicionado | null>(null);
   const [showOSForm, setShowOSForm] = useState(false);
+  const [osType, setOsType] = useState<"preventiva" | "corretiva" | null>(null);
   const [selectedCondicionadoForOS, setSelectedCondicionadoForOS] = useState<any>(null);
   const [selectedCondicionado, setSelectedCondicionado] = useState<Condicionado | null>(null);
   const { toast } = useToast();
@@ -85,12 +87,14 @@ const Condicionados = () => {
       equipamento: condicionado,
       preventiva: type === "preventiva",
     });
+    setOsType(type);
     setShowOSForm(true);
   };
 
   const handleCloseOSForm = () => {
     setShowOSForm(false);
     setSelectedCondicionadoForOS(null);
+    setOsType(null);
   };
 
   const handleOSSubmit = (data: any) => {
@@ -277,13 +281,18 @@ const Condicionados = () => {
         initialData={editingCondicionado}
       />
 
+      <OSPreventivaForm
+        isOpen={showOSForm && osType === 'preventiva'}
+        onClose={handleCloseOSForm}
+        onSubmit={handleOSSubmit}
+        initialData={selectedCondicionadoForOS} // corrigido
+      />
       <OSForm
-        isOpen={showOSForm}
+        isOpen={showOSForm && osType === 'corretiva'}
         onClose={handleCloseOSForm}
         onSubmit={handleOSSubmit}
         initialData={selectedCondicionadoForOS}
       />
-
       {selectedCondicionado && (
         <PopupEquip
           equipamento={selectedCondicionado}

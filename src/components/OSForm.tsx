@@ -16,6 +16,33 @@ interface OSFormProps {
   initialData?: any;
 }
 
+interface TipoEquipamento {
+  id: number;
+  nome: string;
+  grupo?: { id: number; nome: string };
+}
+
+interface Tecnico {
+  id: number;
+  nome: string;
+  grupo?: { id: number; nome: string };
+}
+
+interface Equipamento {
+  id: number;
+  tipoEquipamentoId: number;
+  setor?: { id: number; nome: string };
+  nomeEquipamento?: string;
+  numeroPatrimonio?: string;
+  marca?: string;
+  modelo?: string;
+  nPatrimonio?: string;
+  nomePC?: string;
+  ip?: string;
+  numeroSerie?: string;
+  nome?: string;
+}
+
 export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) => {
   const [formData, setFormData] = useState({
     arquivos: [] as File[],
@@ -28,10 +55,10 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
     equipamentoId: '',
   });
 
-  const [tiposEquipamento, setTiposEquipamento] = useState<any[]>([]);
-  const [tecnicos, setTecnicos] = useState<any[]>([]);
-  const [filteredTecnicos, setFilteredTecnicos] = useState<any[]>([]);
-  const [equipamentos, setEquipamentos] = useState<any[]>([]);
+  const [tiposEquipamento, setTiposEquipamento] = useState<TipoEquipamento[]>([]);
+  const [tecnicos, setTecnicos] = useState<Tecnico[]>([]);
+  const [filteredTecnicos, setFilteredTecnicos] = useState<Tecnico[]>([]);
+  const [equipamentos, setEquipamentos] = useState<Equipamento[]>([]);
   const [grupo, setGrupo] = useState('');
   const [fileNames, setFileNames] = useState<string[]>([]);
   const [loadingEquipamentos, setLoadingEquipamentos] = useState(false);
@@ -42,15 +69,6 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
     { value: 'EM_ANDAMENTO', label: 'Em Andamento' },
     { value: 'CONCLUIDA', label: 'Concluída' },
   ];
-
-  const endpointPorTipo: { [key: string]: string } = {
-    '1': '/hcr-computers',
-    '2': '/printers',
-    '3': '/equipamentos-medicos',
-    '4': '/condicionadores',
-    '5': '/equipamentos-medicos',
-    '6': '/hcr-mobilia',
-  };
 
   useEffect(() => {
     async function fetchOptions() {
@@ -70,51 +88,49 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
         });
       }
     }
-    if (isOpen) {
+
+    if (tiposEquipamento.length === 0 && tecnicos.length === 0) {
       fetchOptions();
     }
-  }, [isOpen, toast]);
 
-  useEffect(() => {
-    if (initialData && initialData.equipamento) {
+    if (isOpen && initialData && initialData.equipamento && tiposEquipamento.length > 0 && tecnicos.length > 0) {
       const eq = initialData.equipamento;
+      const tipoId = String(eq.tipoEquipamentoId || '4');
       setFormData({
         arquivos: [],
         descricao: '',
-        tipoEquipamentoId: String(eq.tipoEquipamentoId || ''),
+        tipoEquipamentoId: tipoId,
         tecnicoId: '',
         status: 'ABERTA',
         preventiva: !!initialData.preventiva,
-        setorId: eq.setor?.id || '',
+        setorId: eq.setor?.id ? String(eq.setor.id) : '',
         equipamentoId: String(eq.id || ''),
       });
       setEquipamentos([eq]);
-      const tipoId = String(eq.tipoEquipamentoId || '');
-      const endpoint = endpointPorTipo[tipoId];
-      if (endpoint) {
-        (async () => {
-          try {
-            setLoadingEquipamentos(true);
-            const res = await api.get(endpoint, {
-              withCredentials: true,
-              params: { tipoEquipamentoId: tipoId },
-            });
-            const filteredEquipamentos = res.data.filter((e: any) => String(e.tipoEquipamentoId) === tipoId);
-            setEquipamentos(prev => {
-              const allEquipamentos = [...prev, ...filteredEquipamentos];
-              return Array.from(new Map(allEquipamentos.map((e: any) => [e.id, e])).values());
-            });
-          } catch (error) {
-            toast({
-              title: "Erro",
-              description: "Erro ao carregar equipamentos",
-              variant: "destructive",
-            });
-          } finally {
-            setLoadingEquipamentos(false);
-          }
-        })();
-      }
+
+      (async () => {
+        try {
+          setLoadingEquipamentos(true);
+          const res = await api.get('/equipamentos-medicos', {
+            withCredentials: true,
+            params: { tipoEquipamentoId: tipoId },
+          });
+          const filteredEquipamentos = res.data.filter((e: Equipamento) => String(e.tipoEquipamentoId) === tipoId);
+          setEquipamentos(prev => {
+            const allEquipamentos = [...prev, ...filteredEquipamentos];
+            return Array.from(new Map(allEquipamentos.map(e => [e.id, e])).values());
+          });
+        } catch (error) {
+          toast({
+            title: "Erro",
+            description: "Erro ao carregar equipamentos",
+            variant: "destructive",
+          });
+        } finally {
+          setLoadingEquipamentos(false);
+        }
+      })();
+
       const selectedTipo = tiposEquipamento.find(t => t.id === parseInt(tipoId));
       setGrupo(selectedTipo?.grupo?.nome || '');
       if (selectedTipo?.grupo?.id) {
@@ -124,45 +140,37 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
         setFilteredTecnicos(tecnicos);
       }
     }
-  }, [initialData, tiposEquipamento, tecnicos, toast]);
+  }, [isOpen, initialData, tiposEquipamento, tecnicos, toast]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      const filesArray = Array.from(files);
-      setFormData({ ...formData, arquivos: filesArray });
-      setFileNames(filesArray.map((file) => file.name));
-    }
-  };
+  const handleChange = async (name: string, value: any) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
 
-  const handleTipoEquipamentoChange = async (value: string) => {
-    const tipoId = String(value);
-    const selectedTipo = tiposEquipamento.find((t) => t.id === parseInt(value));
-    setGrupo(selectedTipo?.grupo?.nome || '');
+    if (name === 'tipoEquipamentoId') {
+      const tipoId = String(value);
+      const tipo = tiposEquipamento.find((t) => t.id === parseInt(tipoId));
+      setGrupo(tipo?.grupo?.nome || '');
 
-    if (selectedTipo?.grupo?.id) {
-      const filtered = tecnicos.filter(t => t.grupo?.id === selectedTipo.grupo.id);
-      setFilteredTecnicos(filtered);
-      if (!filtered.some(t => t.id === parseInt(formData.tecnicoId))) {
+      if (tipo?.grupo?.id) {
+        const filtered = tecnicos.filter(t => t.grupo?.id === tipo.grupo.id);
+        setFilteredTecnicos(filtered);
+        if (!filtered.some(t => t.id === parseInt(formData.tecnicoId))) {
+          setFormData(prev => ({ ...prev, tecnicoId: '' });
+        }
+      } else {
+        setFilteredTecnicos(tecnicos);
         setFormData(prev => ({ ...prev, tecnicoId: '' }));
       }
-    } else {
-      setFilteredTecnicos(tecnicos);
-      setFormData(prev => ({ ...prev, tecnicoId: '' }));
-    }
 
-    const endpoint = endpointPorTipo[tipoId];
-    if (endpoint) {
       try {
         setLoadingEquipamentos(true);
         setEquipamentos([]);
-        const res = await api.get(endpoint, {
+        const res = await api.get('/equipamentos-medicos', {
           withCredentials: true,
-          params: { tipoEquipamentoId: tipoId }
+          params: { tipoEquipamentoId: tipoId },
         });
-        const filteredEquipamentos = res.data.filter((e: any) => String(e.tipoEquipamentoId) === tipoId);
+        const filteredEquipamentos = res.data.filter((e: Equipamento) => String(e.tipoEquipamentoId) === tipoId);
         setEquipamentos(filteredEquipamentos);
-        setFormData((prev) => ({ ...prev, tipoEquipamentoId: value, equipamentoId: '', setorId: '' }));
+        setFormData(prev => ({ ...prev, equipamentoId: '', setorId: '' }));
       } catch (error) {
         setEquipamentos([]);
         toast({
@@ -173,24 +181,31 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
       } finally {
         setLoadingEquipamentos(false);
       }
-    } else {
-      setEquipamentos([]);
-      setFormData((prev) => ({ ...prev, tipoEquipamentoId: value, equipamentoId: '', setorId: '' }));
-      toast({
-        title: "Aviso",
-        description: "Nenhum endpoint configurado para este tipo de equipamento",
-        variant: "destructive",
-      });
+    }
+
+    if (name === 'equipamentoId') {
+      const equipamento = equipamentos.find((e) => e.id === parseInt(value));
+      setFormData(prev => ({
+        ...prev,
+        setorId: equipamento?.setor?.id ? String(equipamento.setor.id) : '',
+      }));
     }
   };
 
-  const handleEquipamentoChange = (value: string) => {
-    const selectedEquipamento = equipamentos.find((e) => e.id === parseInt(value));
-    setFormData({
-      ...formData,
-      equipamentoId: value,
-      setorId: selectedEquipamento?.setor?.id || '',
-    });
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const filesArray = Array.from(files);
+      setFormData(prev => ({ ...prev, arquivos: filesArray }));
+      setFileNames(filesArray.map(file => file.name));
+    }
+  };
+
+  const removeFile = (index: number) => {
+    const newFiles = formData.arquivos.filter((_, i) => i !== index);
+    const newFileNames = fileNames.filter((_, i) => i !== index);
+    setFormData(prev => ({ ...prev, arquivos: newFiles }));
+    setFileNames(newFileNames);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -199,12 +214,12 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
       const formDataToSend = new FormData();
       formData.arquivos.forEach((file) => formDataToSend.append('arquivos', file));
       formDataToSend.append('descricao', formData.descricao);
-      formDataToSend.append('tipoEquipamentoId', formData.tipoEquipamentoId);
-      formDataToSend.append('tecnicoId', formData.tecnicoId);
+      formDataToSend.append('tipoEquipamentoId', Number(formData.tipoEquipamentoId).toString());
+      formDataToSend.append('equipamentoId', Number(formData.equipamentoId).toString());
+      formDataToSend.append('tecnicoId', Number(formData.tecnicoId).toString());
       formDataToSend.append('status', formData.status);
       formDataToSend.append('preventiva', formData.preventiva ? 'true' : 'false');
-      if (formData.setorId) formDataToSend.append('setorId', formData.setorId);
-      formDataToSend.append('equipamentoId', formData.equipamentoId);
+      if (formData.setorId) formDataToSend.append('setorId', Number(formData.setorId).toString());
 
       const response = await api.post('/os', formDataToSend, {
         withCredentials: true,
@@ -244,7 +259,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
     }
   };
 
-  const getEquipamentoNome = (equipamento: any, tipoEquipamentoId: string) => {
+  const getEquipamentoNome = (equipamento: Equipamento, tipoEquipamentoId: string) => {
     switch (tipoEquipamentoId) {
       case '1':
         return `${equipamento.nomePC || 'Sem Nome'} - ${equipamento.ip || 'Sem IP'}`;
@@ -254,21 +269,14 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
       case '5':
         return `${equipamento.numeroSerie || 'Sem Nº de Série'} - ${equipamento.nomeEquipamento || 'Sem Modelo'}`;
       case '4':
-        return `${equipamento.marca || 'Sem Marca'} - ${equipamento.nPatrimonio || 'Sem Patrimônio'}`;
+        return `${equipamento.marca || 'Sem Marca'} - ${equipamento.numeroPatrimonio || equipamento.nPatrimonio || 'Sem Patrimônio'}`;
       case '6':
-        return `${equipamento.nPatrimonio || 'Sem Marca'} - ${equipamento.nome || 'Sem Patrimônio'}`;
+        return `${equipamento.numeroPatrimonio || equipamento.nPatrimonio || 'Sem Marca'} - ${equipamento.nome || 'Sem Patrimônio'}`;
       case '7':
-        return `${equipamento.nPatrimonio || 'Sem Marca'} - ${equipamento.nome || 'Sem Patrimônio'}`;
+        return `${equipamento.numeroPatrimonio || equipamento.nPatrimonio || 'Sem Marca'} - ${equipamento.nome || 'Sem Patrimônio'}`;
       default:
-        return 'Equipamento não identificado';
+        return `${equipamento.numeroPatrimonio || 'Sem Nº de Patrimônio'} - ${equipamento.nomeEquipamento || equipamento.modelo || equipamento.marca || 'Sem Nome'}`;
     }
-  };
-
-  const removeFile = (index: number) => {
-    const newFiles = formData.arquivos.filter((_, i) => i !== index);
-    const newFileNames = fileNames.filter((_, i) => i !== index);
-    setFormData(prev => ({ ...prev, arquivos: newFiles }));
-    setFileNames(newFileNames);
   };
 
   return (
@@ -280,19 +288,18 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Tipo de Equipamento */}
             <div className="space-y-2">
               <Label htmlFor="tipoEquipamento">Tipo de Equipamento *</Label>
               <Select
                 value={formData.tipoEquipamentoId}
-                onValueChange={handleTipoEquipamentoChange}
+                onValueChange={(value) => handleChange('tipoEquipamentoId', value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent className="bg-background border z-50">
                   {tiposEquipamento.map((t) => (
-                    <SelectItem key={t.id} value={String(t.id)}>
+                    <SelectItem key={t.id} value={t.id.toString()}>
                       {t.nome}
                     </SelectItem>
                   ))}
@@ -300,12 +307,11 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
               </Select>
             </div>
 
-            {/* Equipamento */}
             <div className="space-y-2">
               <Label htmlFor="equipamento">Equipamento *</Label>
               <Select
                 value={formData.equipamentoId}
-                onValueChange={handleEquipamentoChange}
+                onValueChange={(value) => handleChange('equipamentoId', value)}
                 disabled={loadingEquipamentos || !formData.tipoEquipamentoId}
               >
                 <SelectTrigger>
@@ -313,7 +319,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
                 </SelectTrigger>
                 <SelectContent className="bg-background border z-50">
                   {equipamentos.map((e) => (
-                    <SelectItem key={e.id} value={String(e.id)}>
+                    <SelectItem key={e.id} value={e.id.toString()}>
                       {getEquipamentoNome(e, formData.tipoEquipamentoId)}
                     </SelectItem>
                   ))}
@@ -321,19 +327,18 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
               </Select>
             </div>
 
-            {/* Técnico Responsável */}
             <div className="space-y-2">
               <Label htmlFor="tecnico">Técnico Responsável *</Label>
               <Select
                 value={formData.tecnicoId}
-                onValueChange={(value) => setFormData({ ...formData, tecnicoId: value })}
+                onValueChange={(value) => handleChange('tecnicoId', value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent className="bg-background border z-50">
                   {filteredTecnicos.map((t) => (
-                    <SelectItem key={t.id} value={String(t.id)}>
+                    <SelectItem key={t.id} value={t.id.toString()}>
                       {t.nome} {t.matricula ? `(${t.matricula})` : ""}
                     </SelectItem>
                   ))}
@@ -341,23 +346,21 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
               </Select>
             </div>
 
-            {/* Grupo */}
             <div className="space-y-2">
               <Label htmlFor="grupo">Grupo</Label>
               <Input
                 id="grupo"
-                value={filteredTecnicos.find((t) => t.id === parseInt(formData.tecnicoId))?.grupo?.nome || ""}
+                value={filteredTecnicos.find((t) => t.id === parseInt(formData.tecnicoId))?.grupo?.nome || grupo}
                 readOnly
                 className="bg-muted"
               />
             </div>
 
-            {/* Status */}
             <div className="space-y-2">
               <Label htmlFor="status">Status *</Label>
               <Select
                 value={formData.status}
-                onValueChange={(value) => setFormData({ ...formData, status: value })}
+                onValueChange={(value) => handleChange('status', value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione" />
@@ -372,33 +375,29 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
               </Select>
             </div>
 
-            {/* Grupo do Equipamento */}
             <div className="space-y-2">
               <Label htmlFor="grupoEquipamento">Grupo do Equipamento</Label>
-              <Input 
+              <Input
                 id="grupoEquipamento"
-                value={grupo} 
-                readOnly 
+                value={grupo}
+                readOnly
                 className="bg-muted"
               />
             </div>
           </div>
 
-          {/* Descrição */}
           <div className="space-y-2">
             <Label htmlFor="descricao">Descrição *</Label>
             <Textarea
               id="descricao"
-              name="descricao"
               value={formData.descricao}
-              onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
+              onChange={(e) => handleChange('descricao', e.target.value)}
               rows={4}
               required
               placeholder="Descreva o problema ou manutenção necessária..."
             />
           </div>
 
-          {/* Upload de Arquivos */}
           <div className="space-y-2">
             <Label htmlFor="arquivos">
               <Paperclip className="w-4 h-4 inline mr-2" />
@@ -408,7 +407,6 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
               <input
                 type="file"
                 id="arquivos"
-                name="arquivos"
                 multiple
                 accept="image/*"
                 onChange={handleFileChange}
@@ -423,7 +421,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
                 </div>
               </label>
             </div>
-            
+
             {fileNames.length > 0 && (
               <div className="space-y-2">
                 <p className="text-sm font-medium">Arquivos selecionados:</p>
@@ -447,7 +445,6 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
             )}
           </div>
 
-          {/* Botões */}
           <div className="flex gap-3 pt-4">
             <Button type="submit" className="flex-1">
               Salvar

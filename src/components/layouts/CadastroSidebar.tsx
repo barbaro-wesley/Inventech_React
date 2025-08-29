@@ -17,7 +17,8 @@ import {
   Settings,
   Building,
   MapPin,
-  Printer
+  Printer,
+  ClipboardList
 } from "lucide-react";
 
 import {
@@ -38,6 +39,11 @@ const menuItems = [
     title: "Dashboard",
     url: "/dashboard",
     icon: Home,
+  },
+  {
+    title: "Minhas OS",
+    url: "/minhas-os",
+    icon: ClipboardList,
   },
   {
     title: "Cadastros",

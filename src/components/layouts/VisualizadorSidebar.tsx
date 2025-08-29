@@ -34,21 +34,13 @@ const menuItems = [
     title: "Equipamentos",
     icon: Monitor,
     items: [
-      { title: "Computadores", url: "/computadores", icon: Monitor },
-      { title: "Impressoras", url: "/impressoras", icon: Printer },
       { title: "Equipamentos Médicos", url: "/equipamentos", icon: Stethoscope },
-      { title: "Condicionadores", url: "/condicionadores", icon: Wind },
     ],
   },
   {
     title: "Relatórios",
     url: "/relatorios",
     icon: BarChart3,
-  },
-  {
-    title: "Visualizações",
-    url: "/visualizacoes",
-    icon: Eye,
   },
 ];
 
