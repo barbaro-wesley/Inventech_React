@@ -91,7 +91,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
       }
     }
 
-    if (tiposEquipamento.length === 0 && tecnicos.length === 0) {
+    if (!dataLoaded) {
       fetchOptions();
     }
 
