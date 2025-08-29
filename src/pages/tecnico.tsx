@@ -35,7 +35,7 @@ interface Tecnico {
     telefone: string;
     grupoId?: string;
     grupoNome?: string;
-    cpf: Herr;
+    cpf: string;
     matricula: string;
     admissao: string;
     telegramChatId?: string;
@@ -296,7 +296,7 @@ export default function Tecnicos() {
                                         </TableCell>
                                         <TableCell className="text-xs sm:text-sm">
                                             <span className="sm:hidden font-bold">Grupo: </span>
-                                            <Badge variant="outline">{tecnico.grupo?.nome || "Nenhum"}</Badge>
+                                            <Badge variant="outline">{tecnico.grupoNome || "Nenhum"}</Badge>
                                         </TableCell>
                                         <TableCell className="text-right text-xs sm:text-sm block sm:table-cell">
                                             <span className="sm:hidden font-bold block mb-1">Ações: </span>

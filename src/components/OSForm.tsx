@@ -154,7 +154,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
         const filtered = tecnicos.filter(t => t.grupo?.id === tipo.grupo.id);
         setFilteredTecnicos(filtered);
         if (!filtered.some(t => t.id === parseInt(formData.tecnicoId))) {
-          setFormData(prev => ({ ...prev, tecnicoId: '' });
+          setFormData(prev => ({ ...prev, tecnicoId: '' }));
         }
       } else {
         setFilteredTecnicos(tecnicos);
@@ -339,7 +339,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
                 <SelectContent className="bg-background border z-50">
                   {filteredTecnicos.map((t) => (
                     <SelectItem key={t.id} value={t.id.toString()}>
-                      {t.nome} {t.matricula ? `(${t.matricula})` : ""}
+                      {t.nome}
                     </SelectItem>
                   ))}
                 </SelectContent>

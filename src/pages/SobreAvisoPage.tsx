@@ -256,7 +256,6 @@ export default function SobreAvisoPage() {
                     setSelectedSobreAviso(null);
                 }}
                 onSubmit={handleFormSubmit}
-                initialData={selectedSobreAviso}
             />
         </div>
     );
