@@ -75,6 +75,7 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
   const [grupo, setGrupo] = useState('');
   const [fileNames, setFileNames] = useState<string[]>([]);
   const [loadingEquipamentos, setLoadingEquipamentos] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -87,6 +88,7 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
         setTiposEquipamento(tiposRes.data);
         setTecnicos(tecnicosRes.data);
         setFilteredTecnicos(tecnicosRes.data);
+        setDataLoaded(true);
       } catch (error) {
         console.error('Erro ao buscar dados:', error);
         toast({
@@ -100,7 +102,7 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
   }, [toast]);
 
   useEffect(() => {
-    if (initialData && initialData.equipamento) {
+    if (initialData && initialData.equipamento && dataLoaded) {
       const eq = initialData.equipamento;
       setFormData(prev => ({
         ...prev,
@@ -147,7 +149,7 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
         setFilteredTecnicos(tecnicos);
       }
     }
-  }, [initialData, tiposEquipamento, tecnicos, toast]);
+  }, [initialData, dataLoaded, toast]);
 
   const handleChange = async (name: string, value: any) => {
     setFormData(prev => ({ ...prev, [name]: value }));

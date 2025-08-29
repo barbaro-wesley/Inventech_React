@@ -62,6 +62,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
   const [grupo, setGrupo] = useState('');
   const [fileNames, setFileNames] = useState<string[]>([]);
   const [loadingEquipamentos, setLoadingEquipamentos] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
   const { toast } = useToast();
 
   const statusOptions = [
@@ -80,6 +81,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
         setTiposEquipamento(tiposRes.data);
         setTecnicos(tecnicosRes.data);
         setFilteredTecnicos(tecnicosRes.data);
+        setDataLoaded(true);
       } catch (error) {
         toast({
           title: "Erro",
@@ -93,7 +95,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
       fetchOptions();
     }
 
-    if (isOpen && initialData && initialData.equipamento && tiposEquipamento.length > 0 && tecnicos.length > 0) {
+    if (isOpen && initialData && initialData.equipamento && dataLoaded) {
       const eq = initialData.equipamento;
       const tipoId = String(eq.tipoEquipamentoId || '4');
       setFormData({
@@ -140,7 +142,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
         setFilteredTecnicos(tecnicos);
       }
     }
-  }, [isOpen, initialData, tiposEquipamento, tecnicos, toast]);
+  }, [isOpen, initialData, dataLoaded, toast]);
 
   const handleChange = async (name: string, value: any) => {
     setFormData(prev => ({ ...prev, [name]: value }));
