@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -69,7 +68,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
   const statusOptions = [
     { value: 'ABERTA', label: 'Aberta' },
     { value: 'EM_ANDAMENTO', label: 'Em Andamento' },
-    { value: 'CONCLUIDA', label: 'Concluída' },
+    { value: 'CONCLUIDA', label: 'ConcluÃ­da' },
   ];
 
   useEffect(() => {
@@ -87,7 +86,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
         console.error('Erro ao buscar dados:', error);
         toast({
           title: "Erro",
-          description: "Erro ao carregar opções do formulário",
+          description: "Erro ao carregar opÃ§Ãµes do formulÃ¡rio",
           variant: "destructive",
         });
       }
@@ -95,13 +94,32 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
     fetchOptions();
   }, [toast]);
 
+  // Novo useEffect para sincronizar equipamento selecionado quando equipamentos mudam
   useEffect(() => {
-    if (isOpen && initialData && initialData.equipamento) {
-      const eq = initialData.equipamento;
-      const tipoId = String(eq.tipoEquipamentoId || '4');
+    if (formData.equipamentoId && equipamentos.length > 0) {
+      const equipamentoExists = equipamentos.find(e => e.id.toString() === formData.equipamentoId);
+     
+    }
+  }, [equipamentos, formData.equipamentoId]);
+
+  // Separar o useEffect para pré-preenchimento
+  useEffect(() => {
+    if (isOpen && initialData && dataLoaded) {
+      // Extrair equipamento de diferentes estruturas possíveis
+      const eq = initialData.equipamento || initialData;
       
-      // Preenche imediatamente com os dados iniciais
-      setFormData({
+      // Verificar se temos um equipamento válido
+      if (!eq || !eq.id) {
+        console.log('Nenhum equipamento válido encontrado:', { initialData });
+        return;
+      }
+
+      const tipoId = String(eq.tipoEquipamentoId || '4');
+
+
+      // Pre-fill form data ANTES de definir equipamentos
+      const newFormData = {
+        ...formData,
         arquivos: [],
         descricao: '',
         tipoEquipamentoId: tipoId,
@@ -109,14 +127,22 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
         status: 'ABERTA',
         preventiva: !!initialData.preventiva,
         setorId: eq.setor?.id ? String(eq.setor.id) : '',
-        equipamentoId: String(eq.id || ''),
-      });
+        equipamentoId: String(eq.id),
+      };
       
-      // Adiciona o equipamento atual à lista imediatamente
-      setEquipamentos([eq]);
+      setFormData(newFormData);
 
-      // Carrega equipamentos do mesmo tipo em background
-      (async () => {
+      // DEPOIS definir equipamentos
+      setEquipamentos([eq]);
+      
+      console.log('Estados definidos:', { 
+        equipamentoId: String(eq.id), 
+        formData: newFormData,
+        equipamento: eq 
+      });
+
+      // Background fetch para equipamentos adicionais
+      const fetchAdditionalEquipamentos = async () => {
         try {
           setLoadingEquipamentos(true);
           const res = await api.get('/equipamentos-medicos', {
@@ -124,12 +150,16 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
             params: { tipoEquipamentoId: tipoId },
           });
           const filteredEquipamentos = res.data.filter((e: Equipamento) => String(e.tipoEquipamentoId) === tipoId);
-          setEquipamentos(prev => {
-            const allEquipamentos = [...prev, ...filteredEquipamentos];
-            return Array.from(new Map(allEquipamentos.map(e => [e.id, e])).values());
-          });
+          
+          // Garantir que o equipamento inicial esteja incluído
+          const equipamentoInicial = eq;
+          const todosEquipamentos = [equipamentoInicial, ...filteredEquipamentos.filter((e: Equipamento) => e.id !== equipamentoInicial.id)];
+          
+          setEquipamentos(todosEquipamentos);
         } catch (error) {
           console.error('Erro ao buscar equipamentos:', error);
+          // Manter pelo menos o equipamento inicial em caso de erro
+          setEquipamentos([eq]);
           toast({
             title: "Erro",
             description: "Erro ao carregar equipamentos",
@@ -138,21 +168,43 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
         } finally {
           setLoadingEquipamentos(false);
         }
-      })();
+      };
 
-      // Configura grupo e técnicos filtrados
-      if (tiposEquipamento.length > 0) {
-        const selectedTipo = tiposEquipamento.find(t => t.id === parseInt(tipoId));
-        setGrupo(selectedTipo?.grupo?.nome || '');
-        if (selectedTipo?.grupo?.id && tecnicos.length > 0) {
+      fetchAdditionalEquipamentos();
+
+      // Definir grupo e filtrar técnicos
+      const selectedTipo = tiposEquipamento.find(t => t.id === parseInt(tipoId));
+      if (selectedTipo) {
+        setGrupo(selectedTipo.grupo?.nome || '');
+        if (selectedTipo.grupo?.id) {
           const filtered = tecnicos.filter(t => t.grupo?.id === selectedTipo.grupo.id);
           setFilteredTecnicos(filtered);
-        } else if (tecnicos.length > 0) {
+        } else {
           setFilteredTecnicos(tecnicos);
         }
       }
     }
-  }, [isOpen, initialData, tiposEquipamento, tecnicos, toast]);
+  }, [isOpen, initialData, dataLoaded, tiposEquipamento, tecnicos, toast]);
+
+  // Reset form quando fechar
+  useEffect(() => {
+    if (!isOpen) {
+      setFormData({
+        arquivos: [],
+        descricao: '',
+        tipoEquipamentoId: '',
+        tecnicoId: '',
+        status: 'ABERTA',
+        preventiva: false,
+        setorId: '',
+        equipamentoId: '',
+      });
+      setGrupo('');
+      setFilteredTecnicos(tecnicos);
+      setEquipamentos([]);
+      setFileNames([]);
+    }
+  }, [isOpen, tecnicos]);
 
   const handleChange = async (name: string, value: any) => {
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -241,63 +293,36 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
 
       toast({
         title: "Sucesso",
-        description: "Ordem de Serviço cadastrada com sucesso!",
+        description: "Ordem de ServiÃ§o cadastrada com sucesso!",
       });
 
       if (onSubmit) {
         onSubmit(response.data);
       }
 
-      setFormData({
-        arquivos: [],
-        descricao: '',
-        tipoEquipamentoId: '',
-        tecnicoId: '',
-        status: 'ABERTA',
-        preventiva: false,
-        setorId: '',
-        equipamentoId: '',
-      });
-      setGrupo('');
-      setFilteredTecnicos(tecnicos);
-      setEquipamentos([]);
-      setFileNames([]);
       onClose();
     } catch (error) {
       console.error('Erro ao cadastrar OS:', error);
       toast({
         title: "Erro",
-        description: "Erro ao cadastrar Ordem de Serviço",
+        description: "Erro ao cadastrar Ordem de ServiÃ§o",
         variant: "destructive",
       });
     }
   };
 
-  const getEquipamentoNome = (equipamento: Equipamento, tipoEquipamentoId: string) => {
-    switch (tipoEquipamentoId) {
-      case '1':
-        return `${equipamento.nomePC || 'Sem Nome'} - ${equipamento.ip || 'Sem IP'}`;
-      case '2':
-        return `${equipamento.ip || 'Sem Nome'} - ${equipamento.marca || 'Sem Marca'}`;
-      case '3':
-      case '5':
-        return `${equipamento.numeroSerie || 'Sem Nº de Série'} - ${equipamento.nomeEquipamento || 'Sem Modelo'}`;
-      case '4':
-        return `${equipamento.marca || 'Sem Marca'} - ${equipamento.numeroPatrimonio || equipamento.nPatrimonio || 'Sem Patrimônio'}`;
-      case '6':
-        return `${equipamento.numeroPatrimonio || equipamento.nPatrimonio || 'Sem Marca'} - ${equipamento.nome || 'Sem Patrimônio'}`;
-      case '7':
-        return `${equipamento.numeroPatrimonio || equipamento.nPatrimonio || 'Sem Marca'} - ${equipamento.nome || 'Sem Patrimônio'}`;
-      default:
-        return `${equipamento.numeroPatrimonio || 'Sem Nº de Patrimônio'} - ${equipamento.nomeEquipamento || equipamento.modelo || equipamento.marca || 'Sem Nome'}`;
-    }
+  const getEquipamentoNome = (equipamento: Equipamento) => {
+    return `${equipamento.numeroPatrimonio || 'Sem NÂº de PatrimÃ´nio'} - ${equipamento.nomeEquipamento || equipamento.marca || 'Sem Nome'}`;
   };
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
+      <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto" aria-describedby="os-form-description">
         <SheetHeader className="mb-6">
-          <SheetTitle>Cadastro de Ordem de Serviço Corretiva</SheetTitle>
+          <SheetTitle>Cadastro de Ordem de ServiÃ§o Corretiva</SheetTitle>
+          <div id="os-form-description" className="sr-only">
+            FormulÃ¡rio para registrar uma ordem de serviÃ§o corretiva, incluindo detalhes do equipamento e descriÃ§Ã£o do problema.
+          </div>
         </SheetHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -310,8 +335,8 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione">
-                    {formData.tipoEquipamentoId && tiposEquipamento.length > 0 
-                      ? tiposEquipamento.find(t => t.id.toString() === formData.tipoEquipamentoId)?.nome 
+                    {formData.tipoEquipamentoId && tiposEquipamento.length > 0
+                      ? tiposEquipamento.find(t => t.id.toString() === formData.tipoEquipamentoId)?.nome
                       : "Selecione"
                     }
                   </SelectValue>
@@ -328,34 +353,37 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
 
             <div className="space-y-2">
               <Label htmlFor="equipamento">Equipamento *</Label>
-              <Select
-                value={formData.equipamentoId}
-                onValueChange={(value) => handleChange('equipamentoId', value)}
-                disabled={loadingEquipamentos || !formData.tipoEquipamentoId}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={loadingEquipamentos ? 'Carregando...' : 'Selecione'}>
-                    {formData.equipamentoId && equipamentos.length > 0 
-                      ? (() => {
-                          const selectedEquipamento = equipamentos.find(e => e.id.toString() === formData.equipamentoId);
-                          return selectedEquipamento ? getEquipamentoNome(selectedEquipamento, formData.tipoEquipamentoId) : "Selecione";
-                        })()
-                      : (loadingEquipamentos ? 'Carregando...' : 'Selecione')
-                    }
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent className="bg-background border z-50">
-                  {equipamentos.map((e) => (
-                    <SelectItem key={e.id} value={e.id.toString()}>
-                      {getEquipamentoNome(e, formData.tipoEquipamentoId)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {formData.tipoEquipamentoId && equipamentos.length > 0 ? (
+                <Select
+                  key={`equipamento-${formData.equipamentoId}-${equipamentos.length}`} // Force re-render
+                  value={formData.equipamentoId}
+                  onValueChange={(value) => handleChange('equipamentoId', value)}
+                  disabled={loadingEquipamentos}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border z-50">
+                    {equipamentos.map((e) => (
+                      <SelectItem key={e.id} value={e.id.toString()}>
+                        {getEquipamentoNome(e)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Select disabled>
+                  <SelectTrigger>
+                    <SelectValue placeholder={loadingEquipamentos ? 'Carregando...' : 'Selecione o tipo primeiro'} />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border z-50">
+                  </SelectContent>
+                </Select>
+              )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="tecnico">Técnico Responsável *</Label>
+              <Label htmlFor="tecnico">TÃ©cnico ResponsÃ¡vel *</Label>
               <Select
                 value={formData.tecnicoId}
                 onValueChange={(value) => handleChange('tecnicoId', value)}
@@ -414,14 +442,14 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="descricao">Descrição *</Label>
+            <Label htmlFor="descricao">DescriÃ§Ã£o *</Label>
             <Textarea
               id="descricao"
               value={formData.descricao}
               onChange={(e) => handleChange('descricao', e.target.value)}
               rows={4}
               required
-              placeholder="Descreva o problema ou manutenção necessária..."
+              placeholder="Descreva o problema ou manutenÃ§Ã£o necessÃ¡ria..."
             />
           </div>
 
