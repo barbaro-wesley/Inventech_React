@@ -334,7 +334,15 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
                 disabled={loadingEquipamentos || !formData.tipoEquipamentoId}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={loadingEquipamentos ? 'Carregando...' : 'Selecione'} />
+                  <SelectValue placeholder={loadingEquipamentos ? 'Carregando...' : 'Selecione'}>
+                    {formData.equipamentoId && equipamentos.length > 0 
+                      ? (() => {
+                          const selectedEquipamento = equipamentos.find(e => e.id.toString() === formData.equipamentoId);
+                          return selectedEquipamento ? getEquipamentoNome(selectedEquipamento, formData.tipoEquipamentoId) : "Selecione";
+                        })()
+                      : (loadingEquipamentos ? 'Carregando...' : 'Selecione')
+                    }
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="bg-background border z-50">
                   {equipamentos.map((e) => (
