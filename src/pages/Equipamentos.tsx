@@ -27,6 +27,7 @@ const Equipamentos = () => {
   const [equipments, setEquipments] = useState([]);
   const [allEquipments, setAllEquipments] = useState([]);
   const [tiposEquipamento, setTiposEquipamento] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingEquipment, setEditingEquipment] = useState(null);
@@ -38,6 +39,16 @@ const Equipamentos = () => {
   const [selectedTipoId, setSelectedTipoId] = useState("3");
   const { toast } = useToast();
 
+  const colors = [
+    "text-red-600",
+    "text-blue-600",
+    "text-green-600",
+    "text-purple-600",
+    "text-yellow-600",
+    "text-pink-600",
+    "text-indigo-600",
+  ];
+
   const fetchEquipments = async (tipoId: string = "all") => {
     try {
       setLoading(true);
@@ -46,14 +57,24 @@ const Equipamentos = () => {
           ? "/equipamentos-medicos"
           : `/equipamentos-medicos/tipo/${tipoId}`;
 
-      const [equipmentsResponse, tiposResponse] = await Promise.all([
+      const [equipmentsResponse, tiposResponse, contagemResponse] = await Promise.all([
         api.get(url, { withCredentials: true }),
         api.get("/tipos-equipamento", { withCredentials: true }),
+        api.get("/tipos-equipamento/contagem", { withCredentials: true }),
       ]);
 
       setAllEquipments(equipmentsResponse.data);
       setEquipments(equipmentsResponse.data);
       setTiposEquipamento(tiposResponse.data);
+
+      if (contagemResponse.data.success) {
+        const formattedCategories = contagemResponse.data.data.map((item, index) => ({
+          name: item.tipoNome.trim(),
+          count: item.quantidade,
+          color: colors[index % colors.length],
+        }));
+        setCategories(formattedCategories);
+      }
     } catch (error) {
       toast({
         title: "Erro ao carregar dados",
@@ -217,12 +238,7 @@ useEffect(() => {
 
       {/* Category Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {[
-          { name: "Médicos", count: 45, color: "text-red-600" },
-          { name: "Laboratorio", count: 23, color: "text-blue-600" },
-          { name: "Diagnóstico", count: 12, color: "text-green-600" },
-          { name: "Outros", count: 8, color: "text-purple-600" }
-        ].map((category, index) => (
+        {categories.map((category, index) => (
           <Card key={index} className="p-4 hover:shadow-soft transition-shadow cursor-pointer">
             <div className="text-center">
               <div className={`text-xl sm:text-2xl font-bold ${category.color}`}>

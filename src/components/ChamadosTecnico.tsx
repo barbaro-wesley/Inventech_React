@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { CheckCircle, ChevronDown, ChevronUp, Upload, X } from 'lucide-react';
+import { CheckCircle, ChevronDown, ChevronUp, Upload, X, FileText, Download } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import api from '@/lib/api';
 
@@ -19,6 +19,7 @@ interface OS {
   iniciadaEm?: string | null;
   preventiva: boolean;
   dataAgendada?: string | null;
+  arquivos?: string[]; // Adicionado campo de arquivos
   tipoEquipamento?: {
     nome: string;
   } | null;
@@ -39,6 +40,7 @@ interface OS {
     modelo?: string | null;
   } | null;
 }
+
 const ChamadosTecnico = () => {
   const [chamados, setChamados] = useState<OS[]>([]);
   const [aberto, setAberto] = useState<number | null>(null);
@@ -47,7 +49,7 @@ const ChamadosTecnico = () => {
   const [valorManutencao, setValorManutencao] = useState('');
   const [fileNames, setFileNames] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statusFiltro, setStatusFiltro] = useState<string>("ABERTA"); // 🔹 padrão abertas
+  const [statusFiltro, setStatusFiltro] = useState<string>("ABERTA");
   const { toast } = useToast();
 
   const endpointMap: Record<string, string> = {
@@ -105,10 +107,43 @@ const ChamadosTecnico = () => {
     setFileNames(newFileNames);
   };
 
+  // Função para extrair nome do arquivo do caminho
+  const getFileNameFromPath = (filePath: string) => {
+    return filePath.split(/[\\/]/).pop() || filePath;
+  };
+
+  // Função para fazer download do arquivo
+  const handleDownloadFile = (filePath: string) => {
+    try {
+      const filename = getFileNameFromPath(filePath);
+      const isPdf = filename.toLowerCase().endsWith('.pdf');
+      
+      // Define a URL baseado no tipo de arquivo
+      const fileUrl = isPdf 
+        ? `${import.meta.env.VITE_API_URL2}/uploads/pdfs/${filename.replace(/^uploads[\/\\]pdfs[\/\\]/i, '')}`
+        : `${import.meta.env.VITE_API_URL2}/uploads/${filename.replace(/^uploads[\/\\]pdfs[\/\\]/i, '')}`;
+      
+      // Abre o arquivo em nova aba para download
+      const link = document.createElement('a');
+      link.href = fileUrl;
+      link.target = '_blank';
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('Erro ao fazer download do arquivo:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao fazer download do arquivo",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Mudar status sem resolver (EM_ANDAMENTO ou CANCELADA)
   const handleMudarStatus = async (osId: number, status: string) => {
     try {
-      // Mapeamento do status para o endpoint do backend
       const statusMap: Record<string, string> = {
         "EM_ANDAMENTO": "iniciar",
         "CONCLUIDA": "concluir",
@@ -129,11 +164,10 @@ const ChamadosTecnico = () => {
       toast({
         title: "Sucesso",
         description: `OS alterada para ${status} com sucesso!`,
-        // variant: "success" // Use if your toast supports it; otherwise omit or use "default"
       });
 
       // Atualiza lista de chamados
-      const { data } = await api.get('/os/tecnico/em-andamento', { withCredentials: true });
+      const { data } = await api.get(endpointMap[statusFiltro], { withCredentials: true });
       setChamados(data);
 
     } catch (error) {
@@ -182,7 +216,7 @@ const ChamadosTecnico = () => {
       setValorManutencao('');
 
       // Atualiza lista de chamados
-      const { data } = await api.get('/os/tecnico/em-andamento', { withCredentials: true });
+      const { data } = await api.get(endpointMap[statusFiltro], { withCredentials: true });
       setChamados(data);
     } catch (error) {
       console.error('Erro ao finalizar chamado:', error);
@@ -266,6 +300,11 @@ const ChamadosTecnico = () => {
                           {os.preventiva && (
                             <Badge variant="outline" className="text-xs">Preventiva</Badge>
                           )}
+                          {os.arquivos && os.arquivos.length > 0 && (
+                            <Badge variant="secondary" className="text-xs">
+                              {os.arquivos.length} arquivo{os.arquivos.length > 1 ? 's' : ''}
+                            </Badge>
+                          )}
                         </div>
                         <div className="space-y-1">
                           <p className="text-sm text-foreground font-medium">{os.descricao}</p>
@@ -318,6 +357,32 @@ const ChamadosTecnico = () => {
 
                 <CollapsibleContent>
                   <CardContent className="space-y-4">
+                    {/* Seção de arquivos existentes */}
+                    {os.arquivos && os.arquivos.length > 0 && (
+                      <div className="space-y-2">
+                        <Label className="font-medium">Arquivos anexados:</Label>
+                        <div className="space-y-2">
+                          {os.arquivos.map((arquivo, idx) => (
+                            <div key={idx} className="flex items-center justify-between bg-muted p-2 rounded text-sm">
+                              <div className="flex items-center gap-2">
+                                <FileText className="w-4 h-4 text-muted-foreground" />
+                                <span className="truncate">{getFileNameFromPath(arquivo)}</span>
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDownloadFile(arquivo)}
+                                className="h-6 w-6 p-0"
+                              >
+                                <Download className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Só mostra resolução e arquivos se OS não estiver concluída */}
                     {os.status !== 'CONCLUIDA' && (
                       <>
@@ -351,7 +416,7 @@ const ChamadosTecnico = () => {
                             <div className="space-y-2">
                               <Label htmlFor="arquivos">
                                 <Upload className="w-4 h-4 inline mr-2" />
-                                Anexar arquivos
+                                Anexar novos arquivos
                               </Label>
                               <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 text-center hover:border-muted-foreground/50 transition-colors">
                                 <input
@@ -398,7 +463,7 @@ const ChamadosTecnico = () => {
                         {os.status === 'ABERTA' && (
                           <Button
                             onClick={() => handleMudarStatus(os.id, 'EM_ANDAMENTO')}
-                            className="w-full bg-blue-600 hover:bg-blue-70"
+                            className="w-full bg-blue-600 hover:bg-blue-700"
                           >
                             Iniciar OS
                           </Button>

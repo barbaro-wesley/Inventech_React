@@ -16,9 +16,9 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e5e7eb',
   },
   logo: {
-    width: 50,
-    height: 50,
-    marginBottom: 5,
+    width: 75,
+    height: 75,
+    marginBottom: 2,
   },
   companyInfo: {
     alignItems: 'center',
@@ -88,7 +88,7 @@ export const BaseReport: React.FC<BaseReportProps> = ({
   title,
   subtitle,
   companyName = "Inventech",
-  companyAddress = "Rua Exemplo, 123 - Cidade, Estado",
+  companyAddress = "Rua Bento Gonçalves, 10 - Centro",
   logoUrl,
   children,
   footerText = "Relatório gerado automaticamente pelo sistema",
