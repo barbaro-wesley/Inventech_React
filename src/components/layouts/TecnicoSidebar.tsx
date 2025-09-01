@@ -54,8 +54,6 @@ const menuItems = [
     title: "Manutenção",
     icon: Wrench,
     items: [
-      { title: "Preventiva", url: "/manutencao/preventiva", icon: Shield },
-      { title: "Corretiva", url: "/manutencao/corretiva", icon: AlertTriangle },
       { title: "Calendário", url: "/calendario", icon: Calendar },
     ],
   },

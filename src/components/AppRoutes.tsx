@@ -23,6 +23,7 @@ import Setores from "@/pages/Setores";
 import Localizacao from "@/pages/Localizacao";
 import ChamadosTecnico from "./ChamadosTecnico";
 import SobreAvisoPage from "@/pages/SobreAvisoPage";
+import OSViewer from "./OSViewer";
 export const AppRoutes = () => {
   return (
     <Routes>
@@ -156,6 +157,14 @@ export const AppRoutes = () => {
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
             <Localizacao/>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/osviewer"
+        element={
+          <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
+            <OSViewer/>
           </ProtectedRoute>
         }
       />

@@ -60,6 +60,8 @@ const menuItems = [
     icon: Wrench,
     items: [
       { title: "Calendário", url: "/calendario", icon: Calendar },
+      { title: "Acompanhar OS", url: "/osviewer", icon: Monitor },
+
        {
     title: "Minhas OS",
     url: "/minhas-os",

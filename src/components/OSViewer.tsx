@@ -6,9 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Eye, Search, Filter } from 'lucide-react';
-import { useToast } from "@/hooks/use-toast";
 import api from '@/lib/api';
 
 interface OS {
@@ -40,15 +38,15 @@ const OSViewer = () => {
   const [filteredOrdens, setFilteredOrdens] = useState<OS[]>([]);
   const [activeTab, setActiveTab] = useState('corretivas');
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('');
+  const [filterStatus, setFilterStatus] = useState('todos');
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+  const [error, setError] = useState<string | null>(null);
 
   const itemsPerPage = 10;
 
   const statusOptions = [
-    { value: '', label: 'Todos os Status' },
+    { value: 'todos', label: 'Todos os Status' },
     { value: 'ABERTA', label: 'Aberta' },
     { value: 'EM_ANDAMENTO', label: 'Em Andamento' },
     { value: 'CONCLUIDA', label: 'Concluída' },
@@ -60,26 +58,39 @@ const OSViewer = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        setError(null);
+        
         const response = await api.get('/os', { withCredentials: true });
-
-        const prevList = Array.isArray(response.data.preventivas) ? response.data.preventivas : [];
-        const corrList = Array.isArray(response.data.corretivas) ? response.data.corretivas : [];
-
-        setPreventivas(prevList);
-        setCorretivas(corrList);
-      } catch (error) {
+        
+        // Verifica se a resposta tem a estrutura esperada
+        if (response.data) {
+          const prevList = Array.isArray(response.data.preventivas) ? response.data.preventivas : [];
+          const corrList = Array.isArray(response.data.corretivas) ? response.data.corretivas : [];
+          
+          setPreventivas(prevList);
+          setCorretivas(corrList);
+        } else {
+          // Caso a API retorne um array único, separamos por tipo
+          const allOrdens = Array.isArray(response.data) ? response.data : [];
+          const prevList = allOrdens.filter((os: OS) => os.preventiva === true);
+          const corrList = allOrdens.filter((os: OS) => os.preventiva === false);
+          
+          setPreventivas(prevList);
+          setCorretivas(corrList);
+        }
+        
+      } catch (error: any) {
         console.error('Erro ao buscar ordens de serviço:', error);
-        toast({
-          title: "Erro",
-          description: "Erro ao carregar ordens de serviço",
-          variant: "destructive",
-        });
+        setError(error.response?.data?.message || 'Erro ao carregar dados');
+        setPreventivas([]);
+        setCorretivas([]);
       } finally {
         setLoading(false);
       }
     };
+    
     fetchData();
-  }, [toast]);
+  }, []);
 
   // Atualiza lista filtrada ao trocar filtros ou aba
   useEffect(() => {
@@ -89,7 +100,7 @@ const OSViewer = () => {
       const matchesSearch = ordem.descricao
         ?.toLowerCase()
         .includes(searchTerm.toLowerCase());
-      const matchesStatus = filterStatus ? ordem.status === filterStatus : true;
+      const matchesStatus = filterStatus === 'todos' ? true : ordem.status === filterStatus;
       return matchesSearch && matchesStatus;
     });
 
@@ -108,13 +119,18 @@ const OSViewer = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    if (!dateString) return '-';
+    try {
+      return new Date(dateString).toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return dateString;
+    }
   };
 
   const totalPages = Math.ceil(filteredOrdens.length / itemsPerPage) || 1;
@@ -128,6 +144,10 @@ const OSViewer = () => {
 
   const goToPrevPage = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const handleRefresh = () => {
+    window.location.reload();
   };
 
   if (loading) {
@@ -148,10 +168,34 @@ const OSViewer = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="space-y-4 p-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-foreground">Ordens de Serviço</h1>
+        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-red-600">Erro ao carregar dados</CardTitle>
+            <CardDescription>{error}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={handleRefresh} variant="outline">
+              Tentar novamente
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">Ordens de Serviço</h1>
+        <Button onClick={handleRefresh} variant="outline" size="sm">
+          Atualizar
+        </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -218,55 +262,58 @@ const OSViewer = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>N° Ordem</TableHead>
-                      <TableHead>Descrição</TableHead>
-                      <TableHead>Tipo Equipamento</TableHead>
-                      <TableHead>Técnico</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Setor</TableHead>
-                      <TableHead>Solicitante</TableHead>
-                      <TableHead>Criado em</TableHead>
-                      <TableHead>Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
+              <div className="rounded-md border overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead className="border-b bg-muted/50">
+                    <tr>
+                      <th className="p-3 text-left font-medium text-foreground">N° Ordem</th>
+                      <th className="p-3 text-left font-medium text-foreground">Descrição</th>
+                      <th className="p-3 text-left font-medium text-foreground">Tipo Equipamento</th>
+                      <th className="p-3 text-left font-medium text-foreground">Técnico</th>
+                      <th className="p-3 text-left font-medium text-foreground">Status</th>
+                      <th className="p-3 text-left font-medium text-foreground">Setor</th>
+                      <th className="p-3 text-left font-medium text-foreground">Solicitante</th>
+                      <th className="p-3 text-left font-medium text-foreground">Criado em</th>
+                      <th className="p-3 text-left font-medium text-foreground">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
                     {currentItems.length > 0 ? (
                       currentItems.map((item) => (
-                        <TableRow key={item.id}>
-                          <TableCell className="font-medium">#{item.id}</TableCell>
-                          <TableCell className="max-w-[200px] truncate">
-                            {item.descricao}
-                          </TableCell>
-                          <TableCell>{item.tipoEquipamento?.nome || '-'}</TableCell>
-                          <TableCell>{item.tecnico?.nome || '-'}</TableCell>
-                          <TableCell>
+                        <tr key={item.id} className="border-b hover:bg-muted/30 transition-colors">
+                          <td className="p-3 font-medium">#{item.id}</td>
+                          <td className="p-3 max-w-[200px] truncate" title={item.descricao}>
+                            {item.descricao || '-'}
+                          </td>
+                          <td className="p-3">{item.tipoEquipamento?.nome || '-'}</td>
+                          <td className="p-3">{item.tecnico?.nome || '-'}</td>
+                          <td className="p-3">
                             <Badge className={`text-white ${getStatusColor(item.status)}`}>
                               {item.status}
                             </Badge>
-                          </TableCell>
-                          <TableCell>{item.Setor?.nome || '-'}</TableCell>
-                          <TableCell>{item.solicitante?.nome || '-'}</TableCell>
-                          <TableCell>{formatDate(item.criadoEm)}</TableCell>
-                          <TableCell>
+                          </td>
+                          <td className="p-3">{item.Setor?.nome || '-'}</td>
+                          <td className="p-3">{item.solicitante?.nome || '-'}</td>
+                          <td className="p-3">{formatDate(item.criadoEm)}</td>
+                          <td className="p-3">
                             <Button variant="ghost" size="sm">
                               <Eye className="h-4 w-4" />
                             </Button>
-                          </TableCell>
-                        </TableRow>
+                          </td>
+                        </tr>
                       ))
                     ) : (
-                      <TableRow>
-                        <TableCell colSpan={9} className="text-center py-4">
-                          Nenhuma ordem de serviço encontrada.
-                        </TableCell>
-                      </TableRow>
+                      <tr>
+                        <td colSpan={9} className="text-center py-8 text-muted-foreground">
+                          {searchTerm || filterStatus !== 'todos' 
+                            ? 'Nenhuma ordem de serviço encontrada com os filtros aplicados.' 
+                            : 'Nenhuma ordem de serviço encontrada.'
+                          }
+                        </td>
+                      </tr>
                     )}
-                  </TableBody>
-                </Table>
+                  </tbody>
+                </table>
               </div>
 
               {/* Paginação */}

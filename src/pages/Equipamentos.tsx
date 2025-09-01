@@ -296,6 +296,12 @@ useEffect(() => {
                         </span>
                       </div>
                       <div>
+                        <span className="font-medium">Localizacao:</span>
+                        <span className="text-muted-foreground ml-1">
+                          {equipment.localizacao?.nome || 'Não informado'}
+                        </span>
+                      </div>
+                      <div>
                         <span className="font-medium">Modelo:</span>
                         <span className="text-muted-foreground ml-1">
                           {equipment.modelo || 'Não informado'}
