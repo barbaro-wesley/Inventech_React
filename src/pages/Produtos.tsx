@@ -15,7 +15,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import api from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
-import { InventechLayout } from '@/components/layouts/InventechLayout';
+
 
 const productSchema = z.object({
   nome: z.string().min(1, 'Nome é obrigatório'),
@@ -208,8 +208,7 @@ export default function Produtos() {
   const currentItems = filteredProducts.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <InventechLayout>
-      <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Produtos</h1>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -475,6 +474,6 @@ export default function Produtos() {
           </CardContent>
         </Card>
       </div>
-    </InventechLayout>
+    </div>
   );
 }
