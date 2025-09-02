@@ -61,12 +61,7 @@ const menuItems = [
     items: [
       { title: "Calendário", url: "/calendario", icon: Calendar },
       { title: "Acompanhar OS", url: "/osviewer", icon: Monitor },
-
-       {
-    title: "Minhas OS",
-    url: "/minhas-os",
-    icon: ClipboardList,
-  },
+      { title: "Minhas OS", url: "/minhas-os", icon: ClipboardList },
     ],
   },
     {
