@@ -103,6 +103,17 @@ const menuItems = [
 
     ],
   },
+  {
+    title: "Estoque",
+    icon: FileText,
+    items: [
+      { title: "Categorias", icon: BarChart3,url: "/categorias-produtos"},
+      { title: "Produtos", icon: BarChart3,url: "/produtos"},
+      { title: "Movimentação", icon: BarChart3,url: "/movimentacoes-estoque"},
+
+
+    ],
+  },
 ];
 
 export function AdminSidebar() {
