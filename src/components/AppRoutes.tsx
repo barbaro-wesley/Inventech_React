@@ -24,6 +24,9 @@ import Localizacao from "@/pages/Localizacao";
 import ChamadosTecnico from "./ChamadosTecnico";
 import SobreAvisoPage from "@/pages/SobreAvisoPage";
 import OSViewer from "./OSViewer";
+import CategoriasProdutos from "@/pages/CategoriasProdutos";
+import Produtos from "@/pages/Produtos";
+import MovimentacoesEstoque from "@/pages/MovimentacoesEstoque";
 export const AppRoutes = () => {
   return (
     <Routes>
@@ -173,6 +176,32 @@ export const AppRoutes = () => {
         element={
           <ProtectedRoute allowedRoles={['admin']}>
             <SobreAvisoPage/>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Inventory Management Routes */}
+      <Route
+        path="/categorias-produtos"
+        element={
+          <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
+            <CategoriasProdutos/>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/produtos"
+        element={
+          <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
+            <Produtos/>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/movimentacoes-estoque"
+        element={
+          <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
+            <MovimentacoesEstoque/>
           </ProtectedRoute>
         }
       />
