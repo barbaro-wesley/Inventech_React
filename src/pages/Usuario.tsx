@@ -63,6 +63,7 @@ export default function Usuarios() {
     email: "",
     papel: "",
     tecnicoId: "",
+    senha: "",
   });
 
   const papelOptions = [
@@ -142,6 +143,7 @@ export default function Usuarios() {
       email: usuario.email,
       papel: usuario.papel,
       tecnicoId: usuario.tecnicoId || "",
+      senha: "",
     });
     setIsEditModalOpen(true);
   };
@@ -156,12 +158,19 @@ export default function Usuarios() {
     if (!editingUser) return;
 
     try {
-      const response = await api.put(`/usuarios/${editingUser.id}`, {
+      const updateData: any = {
         nome: editFormData.nome,
         email: editFormData.email,
         papel: editFormData.papel,
         tecnicoId: editFormData.tecnicoId || null,
-      });
+      };
+      
+      // Só inclui a senha se foi preenchida
+      if (editFormData.senha.trim() !== "") {
+        updateData.senha = editFormData.senha;
+      }
+
+      const response = await api.put(`/usuarios/${editingUser.id}`, updateData);
       setUsuarios(usuarios.map(user => 
         user.id === editingUser.id ? response.data : user
       ));
@@ -346,7 +355,6 @@ export default function Usuarios() {
             <div>
               <label className="text-sm font-medium">Técnico</label>
               <Select
-                name="tecnicoId"
                 value={formData.tecnicoId || "none"}
                 onValueChange={(value) =>
                   setFormData({ ...formData, tecnicoId: value === "none" ? "" : value })
@@ -398,6 +406,16 @@ export default function Usuarios() {
               />
             </div>
             <div>
+              <label className="text-sm font-medium">Nova Senha (opcional)</label>
+              <Input
+                type="password"
+                name="senha"
+                value={editFormData.senha}
+                onChange={handleEditChange}
+                placeholder="Deixe em branco para manter a atual"
+              />
+            </div>
+            <div>
               <label className="text-sm font-medium">Email</label>
               <Input
                 type="email"
@@ -429,7 +447,6 @@ export default function Usuarios() {
             <div>
               <label className="text-sm font-medium">Técnico</label>
               <Select
-                name="tecnicoId"
                 value={editFormData.tecnicoId || "none"}
                 onValueChange={(value) =>
                   setEditFormData({ ...editFormData, tecnicoId: value === "none" ? "" : value })
