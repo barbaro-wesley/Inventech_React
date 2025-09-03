@@ -47,8 +47,8 @@ const PopupEquip = ({ equipamento, onClose, onOptionClick }) => {
   const handleOpenFile = (filePath) => {
     const filename = filePath.split('\\').pop();
     const isPdf = isPdfFile(filename);
-    
-    const fileUrl = isPdf 
+
+    const fileUrl = isPdf
       ? `${import.meta.env.VITE_API_URL2}/uploads/pdfs/${filename.replace(/^Uploads\/pdfs\//i, '')}`
       : `${import.meta.env.VITE_API_URL2}/uploads/${filename.replace(/^uploads[\/\\]pdfs[\/\\]/i, '')}`;
 
@@ -68,9 +68,9 @@ const PopupEquip = ({ equipamento, onClose, onOptionClick }) => {
       'CONCLUIDA': { color: 'bg-green-100 text-green-800', text: 'Concluída' },
       'CANCELADA': { color: 'bg-red-100 text-red-800', text: 'Cancelada' },
     };
-    
+
     const config = statusConfig[status] || { color: 'bg-gray-100 text-gray-800', text: status };
-    
+
     return (
       <span className={`px-3 py-1 rounded-full text-xs font-medium ${config.color}`}>
         {config.text}
@@ -95,7 +95,7 @@ const PopupEquip = ({ equipamento, onClose, onOptionClick }) => {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <button 
+              <button
                 className="p-3 bg-white/20 rounded-lg hover:bg-white/30 transition-colors"
                 onClick={handlePrint}
                 title="Imprimir relatório"
@@ -127,8 +127,8 @@ const PopupEquip = ({ equipamento, onClose, onOptionClick }) => {
                   </div>
                 )}
               </div>
-              <button 
-                className="p-3 bg-white/20 rounded-lg hover:bg-white/30 transition-colors" 
+              <button
+                className="p-3 bg-white/20 rounded-lg hover:bg-white/30 transition-colors"
                 onClick={onClose}
                 title="Fechar"
               >
@@ -156,6 +156,11 @@ const PopupEquip = ({ equipamento, onClose, onOptionClick }) => {
                   { label: 'Nº Patrimônio', value: equipamento.numeroPatrimonio },
                   { label: 'Nº Série', value: equipamento.numeroSerie },
                   { label: 'Nº Anvisa', value: equipamento.numeroAnvisa },
+                  { label: 'IP', value: equipamento.ip },
+                  { label: 'Sistema Operacional', value: equipamento.sistemaOperacional },
+
+                  
+
                 ].map((item, index) => (
                   <div key={index} className="bg-white p-4 rounded-lg border">
                     <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
@@ -177,13 +182,13 @@ const PopupEquip = ({ equipamento, onClose, onOptionClick }) => {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[
-                  { 
-                    label: 'Valor da Compra', 
-                    value: equipamento.valorCompra ? `R$ ${equipamento.valorCompra.toFixed(2)}` : 'R$ 0,00' 
+                  {
+                    label: 'Valor da Compra',
+                    value: equipamento.valorCompra ? `R$ ${equipamento.valorCompra.toFixed(2)}` : 'R$ 0,00'
                   },
-                  { 
-                    label: 'Valor Atual', 
-                    value: equipamento.valorAtual ? `R$ ${equipamento.valorAtual.toFixed(2)}` : 'R$ 0,00' 
+                  {
+                    label: 'Valor Atual',
+                    value: equipamento.valorAtual ? `R$ ${equipamento.valorAtual.toFixed(2)}` : 'R$ 0,00'
                   },
                   { label: 'Data da Compra', value: formatDate(equipamento.dataCompra) },
                   { label: 'Nota Fiscal', value: equipamento.notaFiscal },
@@ -248,8 +253,8 @@ const PopupEquip = ({ equipamento, onClose, onOptionClick }) => {
                     const filename = arquivo.split("\\").pop();
                     const fileInfo = getFileIcon(filename);
                     return (
-                      <div 
-                        key={index} 
+                      <div
+                        key={index}
                         className="bg-white p-4 rounded-lg border hover:shadow-md transition-shadow cursor-pointer group"
                         onClick={() => handleOpenFile(arquivo)}
                       >
@@ -321,9 +326,9 @@ const PopupEquip = ({ equipamento, onClose, onOptionClick }) => {
                               <div className="text-sm font-medium text-gray-900">
                                 {os.valorManutencao
                                   ? new Intl.NumberFormat("pt-BR", {
-                                      style: "currency",
-                                      currency: "BRL",
-                                    }).format(Number(os.valorManutencao))
+                                    style: "currency",
+                                    currency: "BRL",
+                                  }).format(Number(os.valorManutencao))
                                   : "-"}
                               </div>
                             </td>
@@ -358,7 +363,7 @@ const PopupEquip = ({ equipamento, onClose, onOptionClick }) => {
                     </table>
                   </div>
                 </div>
-                
+
                 {/* Total */}
                 <div className="mt-4 bg-white p-4 rounded-lg border">
                   <div className="text-right">

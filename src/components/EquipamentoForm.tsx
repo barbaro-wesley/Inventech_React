@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import api from "@/lib/api";
 
 interface EquipamentoFormProps {
@@ -41,8 +42,11 @@ export function EquipamentoForm({ isOpen, onClose, onSubmit, initialData = null 
     numeroSerie: '',
     numeroAnvisa: '',
     nomeEquipamento: '',
+    marca: '',
     modelo: '',
     fabricante: '',
+    ip: '',
+    sistemaOperacional: '',
     valorCompra: '',
     dataCompra: '',
     inicioGarantia: '',
@@ -59,6 +63,7 @@ export function EquipamentoForm({ isOpen, onClose, onSubmit, initialData = null 
   const [setores, setSetores] = useState<Setor[]>([]);
   const [filteredLocalizacoes, setFilteredLocalizacoes] = useState<Localizacao[]>([]);
   const [tiposEquipamentos, setTiposEquipamentos] = useState<TipoEquipamento[]>([]);
+  const [isOptionalExpanded, setIsOptionalExpanded] = useState(false);
 
   useEffect(() => {
     const fetchSetores = async () => {
@@ -86,37 +91,40 @@ export function EquipamentoForm({ isOpen, onClose, onSubmit, initialData = null 
   }, [isOpen]);
 
   useEffect(() => {
-  if (initialData && setores.length > 0) {
-    setFormData({
-      numeroPatrimonio: initialData.numeroPatrimonio ?? '',
-      identificacao: initialData.identificacao ?? '',
-      numeroSerie: initialData.numeroSerie ?? '',
-      numeroAnvisa: initialData.numeroAnvisa ?? '',
-      nomeEquipamento: initialData.nomeEquipamento ?? '',
-      modelo: initialData.modelo ?? '',
-      fabricante: initialData.fabricante ?? '',
-      valorCompra: initialData.valorCompra ? String(initialData.valorCompra) : '',
-      dataCompra: initialData.dataCompra ? initialData.dataCompra.slice(0, 10) : '',
-      inicioGarantia: initialData.inicioGarantia ? initialData.inicioGarantia.slice(0, 10) : '',
-      terminoGarantia: initialData.terminoGarantia ? initialData.terminoGarantia.slice(0, 10) : '',
-      notaFiscal: initialData.notaFiscal ?? '',
-      obs: initialData.obs ?? '',
-      setorId: initialData.setorId ? String(initialData.setorId) : '',
-      localizacaoId: initialData.localizacaoId 
-        ? String(initialData.localizacaoId) 
-        : initialData.localizacao?.id 
-          ? String(initialData.localizacao.id) 
-          : '',
-      tipoEquipamentoId: initialData.tipoEquipamentoId ? String(initialData.tipoEquipamentoId) : '',
-      arquivos: initialData.arquivos ?? [],
-    });
+    if (initialData && setores.length > 0) {
+      setFormData({
+        numeroPatrimonio: initialData.numeroPatrimonio ?? '',
+        identificacao: initialData.identificacao ?? '',
+        numeroSerie: initialData.numeroSerie ?? '',
+        numeroAnvisa: initialData.numeroAnvisa ?? '',
+        nomeEquipamento: initialData.nomeEquipamento ?? '',
+        marca: initialData.marca ?? '',
+        modelo: initialData.modelo ?? '',
+        fabricante: initialData.fabricante ?? '',
+        ip: initialData.ip ?? '',
+        sistemaOperacional: initialData.sistemaOperacional ?? '',
+        valorCompra: initialData.valorCompra ? String(initialData.valorCompra) : '',
+        dataCompra: initialData.dataCompra ? initialData.dataCompra.slice(0, 10) : '',
+        inicioGarantia: initialData.inicioGarantia ? initialData.inicioGarantia.slice(0, 10) : '',
+        terminoGarantia: initialData.terminoGarantia ? initialData.terminoGarantia.slice(0, 10) : '',
+        notaFiscal: initialData.notaFiscal ?? '',
+        obs: initialData.obs ?? '',
+        setorId: initialData.setorId ? String(initialData.setorId) : '',
+        localizacaoId: initialData.localizacaoId 
+          ? String(initialData.localizacaoId) 
+          : initialData.localizacao?.id 
+            ? String(initialData.localizacao.id) 
+            : '',
+        tipoEquipamentoId: initialData.tipoEquipamentoId ? String(initialData.tipoEquipamentoId) : '',
+        arquivos: initialData.arquivos ?? [],
+      });
 
-    if (Array.isArray(initialData.arquivos)) {
-      const nomes = initialData.arquivos.map((a: string) => a.split('/').pop());
-      setFileNames(nomes);
+      if (Array.isArray(initialData.arquivos)) {
+        const nomes = initialData.arquivos.map((a: string) => a.split('/').pop());
+        setFileNames(nomes);
+      }
     }
-  }
-}, [initialData, setores]);
+  }, [initialData, setores]);
 
   useEffect(() => {
     if (formData.setorId && setores.length > 0) {
@@ -228,8 +236,11 @@ export function EquipamentoForm({ isOpen, onClose, onSubmit, initialData = null 
         numeroSerie: '',
         numeroAnvisa: '',
         nomeEquipamento: '',
+        marca: '',
         modelo: '',
         fabricante: '',
+        ip: '',
+        sistemaOperacional: '',
         valorCompra: '',
         dataCompra: '',
         inicioGarantia: '',
@@ -261,7 +272,7 @@ export function EquipamentoForm({ isOpen, onClose, onSubmit, initialData = null 
           </SheetTitle>
         </SheetHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
+        <div className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
           {/* Identificação */}
           <Card className="p-4 sm:p-5">
             <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Identificação</h3>
@@ -276,15 +287,6 @@ export function EquipamentoForm({ isOpen, onClose, onSubmit, initialData = null 
                 />
               </div>
               <div>
-                <Label htmlFor="identificacao" className="text-sm sm:text-base">Identificação</Label>
-                <Input
-                  id="identificacao"
-                  value={formData.identificacao}
-                  onChange={(e) => handleChange('identificacao', e.target.value)}
-                  className="text-sm sm:text-base"
-                />
-              </div>
-              <div>
                 <Label htmlFor="numeroSerie" className="text-sm sm:text-base">Número Série</Label>
                 <Input
                   id="numeroSerie"
@@ -293,7 +295,7 @@ export function EquipamentoForm({ isOpen, onClose, onSubmit, initialData = null 
                   className="text-sm sm:text-base"
                 />
               </div>
-              <div>
+              <div className="sm:col-span-2">
                 <Label htmlFor="numeroAnvisa" className="text-sm sm:text-base">Número ANVISA</Label>
                 <Input
                   id="numeroAnvisa"
@@ -321,6 +323,15 @@ export function EquipamentoForm({ isOpen, onClose, onSubmit, initialData = null 
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
+                  <Label htmlFor="marca" className="text-sm sm:text-base">Marca</Label>
+                  <Input
+                    id="marca"
+                    value={formData.marca}
+                    onChange={(e) => handleChange('marca', e.target.value)}
+                    className="text-sm sm:text-base"
+                  />
+                </div>
+                <div>
                   <Label htmlFor="modelo" className="text-sm sm:text-base">Modelo</Label>
                   <Input
                     id="modelo"
@@ -329,17 +340,95 @@ export function EquipamentoForm({ isOpen, onClose, onSubmit, initialData = null 
                     className="text-sm sm:text-base"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="fabricante" className="text-sm sm:text-base">Fabricante</Label>
-                  <Input
-                    id="fabricante"
-                    value={formData.fabricante}
-                    onChange={(e) => handleChange('fabricante', e.target.value)}
-                    className="text-sm sm:text-base"
-                  />
-                </div>
+              </div>
+              <div>
+                <Label htmlFor="fabricante" className="text-sm sm:text-base">Fabricante</Label>
+                <Input
+                  id="fabricante"
+                  value={formData.fabricante}
+                  onChange={(e) => handleChange('fabricante', e.target.value)}
+                  className="text-sm sm:text-base"
+                />
               </div>
             </div>
+          </Card>
+
+          {/* Campos Opcionais - Seção Expansiva */}
+          <Card className="p-4 sm:p-5">
+            <div 
+              className="flex items-center justify-between cursor-pointer"
+              onClick={() => setIsOptionalExpanded(!isOptionalExpanded)}
+            >
+              <h3 className="font-semibold text-base sm:text-lg">Opcional</h3>
+              <div className="flex items-center gap-2">
+                {(formData.ip || formData.identificacao || formData.sistemaOperacional) && (
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span className="text-xs text-blue-600 font-medium">Preenchido</span>
+                  </div>
+                )}
+                {isOptionalExpanded ? (
+                  <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                )}
+              </div>
+            </div>
+            
+            {!isOptionalExpanded && (
+              <p className="text-sm text-muted-foreground mt-2">
+                Clique para configurar campos adicionais (IP, Sistema Operacional, etc.)
+              </p>
+            )}
+            
+            {isOptionalExpanded && (
+              <div className="mt-4 space-y-4 animate-in slide-in-from-top-2 duration-200">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div>
+                    <Label htmlFor="ip" className="text-sm font-medium">IP</Label>
+                    <Input
+                      id="ip"
+                      placeholder="Ex: 192.168.1.100"
+                      value={formData.ip}
+                      onChange={(e) => handleChange('ip', e.target.value)}
+                      className="text-sm"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="sistemaOperacional" className="text-sm font-medium">Sistema Operacional</Label>
+                    <Input
+                      id="sistemaOperacional"
+                      placeholder="Ex: Windows 11, Linux Ubuntu"
+                      value={formData.sistemaOperacional}
+                      onChange={(e) => handleChange('sistemaOperacional', e.target.value)}
+                      className="text-sm"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="identificacaoOpcional" className="text-sm font-medium">Identificação Adicional</Label>
+                  <Input
+                    id="identificacaoOpcional"
+                    placeholder="Informações adicionais de identificação"
+                    value={formData.identificacao}
+                    onChange={(e) => handleChange('identificacao', e.target.value)}
+                    className="text-sm"
+                  />
+                </div>
+                
+                {/* Resumo dos campos preenchidos */}
+                {(formData.ip || formData.identificacao || formData.sistemaOperacional) && (
+                  <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                    <p className="text-xs font-medium text-blue-800 mb-2">Resumo dos campos preenchidos:</p>
+                    <div className="text-xs text-blue-700 space-y-1">
+                      {formData.ip && <p>• <strong>IP:</strong> {formData.ip}</p>}
+                      {formData.identificacao && <p>• <strong>Identificação:</strong> {formData.identificacao}</p>}
+                      {formData.sistemaOperacional && <p>• <strong>Sistema Operacional:</strong> {formData.sistemaOperacional}</p>}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </Card>
 
           {/* Localização */}
@@ -397,6 +486,8 @@ export function EquipamentoForm({ isOpen, onClose, onSubmit, initialData = null 
               </Select>
             </div>
           </Card>
+
+          {/* Financeiro e Garantia */}
           <Card className="p-4 sm:p-5">
             <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Financeiro e Garantia</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -489,11 +580,11 @@ export function EquipamentoForm({ isOpen, onClose, onSubmit, initialData = null 
             <Button type="button" variant="outline" onClick={onClose} className="w-full sm:w-auto text-sm sm:text-base">
               Cancelar
             </Button>
-            <Button type="submit" className="bg-gradient-brand hover:opacity-90 w-full sm:w-auto text-sm sm:text-base">
+            <Button onClick={handleSubmit} className="bg-gradient-brand hover:opacity-90 w-full sm:w-auto text-sm sm:text-base">
               {initialData ? 'Atualizar' : 'Cadastrar'}
             </Button>
           </div>
-        </form>
+        </div>
       </SheetContent>
     </Sheet>
   );
