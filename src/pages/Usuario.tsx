@@ -49,10 +49,18 @@ export default function Usuarios() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterPapel, setFilterPapel] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<Usuario | null>(null);
   const [formData, setFormData] = useState({
     nome: "",
     email: "",
     senha: "",
+    papel: "",
+    tecnicoId: "",
+  });
+  const [editFormData, setEditFormData] = useState({
+    nome: "",
+    email: "",
     papel: "",
     tecnicoId: "",
   });
@@ -124,6 +132,43 @@ export default function Usuarios() {
       setIsModalOpen(false);
     } catch (error) {
       console.error("Erro ao cadastrar usuário:", error);
+    }
+  };
+
+  const handleEdit = (usuario: Usuario) => {
+    setEditingUser(usuario);
+    setEditFormData({
+      nome: usuario.nome,
+      email: usuario.email,
+      papel: usuario.papel,
+      tecnicoId: usuario.tecnicoId || "",
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setEditFormData({ ...editFormData, [name]: value });
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
+
+    try {
+      const response = await api.put(`/usuarios/${editingUser.id}`, {
+        nome: editFormData.nome,
+        email: editFormData.email,
+        papel: editFormData.papel,
+        tecnicoId: editFormData.tecnicoId || null,
+      });
+      setUsuarios(usuarios.map(user => 
+        user.id === editingUser.id ? response.data : user
+      ));
+      setIsEditModalOpen(false);
+      setEditingUser(null);
+    } catch (error) {
+      console.error("Erro ao editar usuário:", error);
     }
   };
 
@@ -222,7 +267,11 @@ export default function Usuarios() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleEdit(usuario)}
+                        >
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button
@@ -326,6 +375,89 @@ export default function Usuarios() {
               </Button>
               <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg">
                 Salvar
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Usuário</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleEditSubmit} className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Nome</label>
+              <Input
+                type="text"
+                name="nome"
+                value={editFormData.nome}
+                onChange={handleEditChange}
+                required
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Email</label>
+              <Input
+                type="email"
+                name="email"
+                value={editFormData.email}
+                onChange={handleEditChange}
+                required
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Papel</label>
+              <Select 
+                name="papel" 
+                value={editFormData.papel} 
+                onValueChange={(value) => setEditFormData({ ...editFormData, papel: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um papel" />
+                </SelectTrigger>
+                <SelectContent>
+                  {papelOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Técnico</label>
+              <Select
+                name="tecnicoId"
+                value={editFormData.tecnicoId || "none"}
+                onValueChange={(value) =>
+                  setEditFormData({ ...editFormData, tecnicoId: value === "none" ? "" : value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um técnico" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Nenhum</SelectItem>
+                  {tecnicos.map((tecnico) => (
+                    <SelectItem key={tecnico.id} value={tecnico.id}>
+                      {tecnico.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsEditModalOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg">
+                Salvar Alterações
               </Button>
             </DialogFooter>
           </form>
