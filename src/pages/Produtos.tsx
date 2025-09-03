@@ -15,8 +15,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import api from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
-
-
 const productSchema = z.object({
   nome: z.string().min(1, 'Nome é obrigatório'),
   descricao: z.string().optional(),
@@ -52,7 +50,7 @@ export default function Produtos() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [showLowStock, setShowLowStock] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -60,6 +58,7 @@ export default function Produtos() {
   const [loading, setLoading] = useState(true);
 
   const { toast } = useToast();
+
   const itemsPerPage = 10;
 
   const form = useForm<ProductForm>({
@@ -76,7 +75,7 @@ export default function Produtos() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/products');
+      const response = await api.get('/products');
       setProducts(response.data.data || []);
       setFilteredProducts(response.data.data || []);
     } catch (error) {
@@ -92,7 +91,7 @@ export default function Produtos() {
 
   const fetchCategories = async () => {
     try {
-      const response = await api.get('/api/categories');
+      const response = await api.get('/categories');
       setCategories(response.data.data || []);
     } catch (error) {
       console.error('Erro ao carregar categorias:', error);
@@ -114,7 +113,7 @@ export default function Produtos() {
       );
     }
 
-    if (selectedCategory) {
+    if (selectedCategory && selectedCategory !== 'all') {
       filtered = filtered.filter(product => 
         product.categoriaId === parseInt(selectedCategory)
       );
@@ -140,13 +139,13 @@ export default function Produtos() {
       };
 
       if (editingProduct) {
-        await api.put(`/api/products/${editingProduct.id}`, payload);
+        await api.put(`/products/${editingProduct.id}`, payload);
         toast({
           title: 'Sucesso',
           description: 'Produto atualizado com sucesso',
         });
       } else {
-        await api.post('/api/products', payload);
+        await api.post('/products', payload);
         toast({
           title: 'Sucesso',
           description: 'Produto criado com sucesso',
@@ -179,7 +178,7 @@ export default function Produtos() {
   const handleDelete = async (id: number) => {
     if (confirm('Tem certeza que deseja excluir este produto?')) {
       try {
-        await api.delete(`/api/products/${id}`);
+        await api.delete(`/products/${id}`);
         toast({
           title: 'Sucesso',
           description: 'Produto excluído com sucesso',
@@ -342,7 +341,7 @@ export default function Produtos() {
                   <SelectValue placeholder="Filtrar por categoria" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas as categorias</SelectItem>
+                  <SelectItem value="all">Todas as categorias</SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category.id} value={category.id.toString()}>
                       {category.nome}
@@ -474,6 +473,5 @@ export default function Produtos() {
           </CardContent>
         </Card>
       </div>
-    </div>
   );
 }

@@ -50,7 +50,7 @@ export default function CategoriasProdutos() {
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/categories');
+      const response = await api.get('/categories');
       setCategories(response.data.data || []);
       setFilteredCategories(response.data.data || []);
     } catch (error) {
@@ -83,13 +83,13 @@ export default function CategoriasProdutos() {
   const handleSubmit = async (data: CategoryForm) => {
     try {
       if (editingCategory) {
-        await api.put(`/api/categories/${editingCategory.id}`, data);
+        await api.put(`categories/${editingCategory.id}`, data);
         toast({
           title: 'Sucesso',
           description: 'Categoria atualizada com sucesso',
         });
       } else {
-        await api.post('/api/categories', data);
+        await api.post('categories', data);
         toast({
           title: 'Sucesso',
           description: 'Categoria criada com sucesso',
@@ -118,7 +118,7 @@ export default function CategoriasProdutos() {
   const handleDelete = async (id: number) => {
     if (confirm('Tem certeza que deseja excluir esta categoria?')) {
       try {
-        await api.delete(`/api/categories/${id}`);
+        await api.delete(`/categories/${id}`);
         toast({
           title: 'Sucesso',
           description: 'Categoria excluída com sucesso',
@@ -294,6 +294,5 @@ export default function CategoriasProdutos() {
           </CardContent>
         </Card>
       </div>
-    </div>
   );
 }

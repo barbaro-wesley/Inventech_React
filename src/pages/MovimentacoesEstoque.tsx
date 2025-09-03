@@ -21,7 +21,7 @@ import { cn } from '@/lib/utils';
 import type { DateRange } from 'react-day-picker';
 import api from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
-
+import { useAuth } from '@/contexts/AuthContext';
 
 const movementSchema = z.object({
   tipo: z.enum(['ENTRADA', 'SAIDA'], {
@@ -68,13 +68,13 @@ export default function MovimentacoesEstoque() {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredMovements, setFilteredMovements] = useState<Movement[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('');
-  const [filterProduct, setFilterProduct] = useState('');
+  const [filterType, setFilterType] = useState('all');
+  const [filterProduct, setFilterProduct] = useState('all');
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [currentPage, setCurrentPage] = useState(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-
+  const { user } = useAuth();
   const { toast } = useToast();
   const itemsPerPage = 10;
 
@@ -91,7 +91,7 @@ export default function MovimentacoesEstoque() {
   const fetchMovements = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/stock-movements');
+      const response = await api.get('/stock-movements');
       setMovements(response.data.data || []);
       setFilteredMovements(response.data.data || []);
     } catch (error) {
@@ -107,7 +107,7 @@ export default function MovimentacoesEstoque() {
 
   const fetchProducts = async () => {
     try {
-      const response = await api.get('/api/products');
+      const response = await api.get('/products');
       setProducts(response.data.data || []);
     } catch (error) {
       console.error('Erro ao carregar produtos:', error);
@@ -129,12 +129,12 @@ export default function MovimentacoesEstoque() {
       );
     }
 
-    if (filterType) {
+    if (filterType !== 'all') {
       filtered = filtered.filter(movement => movement.tipo === filterType);
     }
 
-    if (filterProduct) {
-      filtered = filtered.filter(movement => 
+    if (filterProduct !== 'all') {
+      filtered = filtered.filter(movement =>
         movement.produtoId === parseInt(filterProduct)
       );
     }
@@ -156,15 +156,15 @@ export default function MovimentacoesEstoque() {
         ...data,
         produtoId: parseInt(data.produtoId),
         quantidade: parseInt(data.quantidade),
-        usuarioId: 1, // TODO: Get from auth context
+        usuarioId: user.id,
       };
 
-      await api.post('/api/stock-movements', payload);
+      await api.post('/stock-movements', payload);
       toast({
         title: 'Sucesso',
         description: 'Movimentação registrada com sucesso',
       });
-      
+
       setIsDialogOpen(false);
       form.reset();
       fetchMovements();
@@ -185,9 +185,17 @@ export default function MovimentacoesEstoque() {
 
   const clearFilters = () => {
     setSearchTerm('');
-    setFilterType('');
-    setFilterProduct('');
+    setFilterType('all');
+    setFilterProduct('all');
     setDateRange(undefined);
+  };
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) {
+      return 'Data inválida';
+    }
+    return format(date, 'dd/MM/yyyy HH:mm', { locale: ptBR });
   };
 
   const totalPages = Math.ceil(filteredMovements.length / itemsPerPage);
@@ -196,276 +204,280 @@ export default function MovimentacoesEstoque() {
 
   return (
     <div className="p-6 space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Movimentações de Estoque</h1>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => setIsDialogOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Nova Movimentação
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Nova Movimentação</DialogTitle>
-              </DialogHeader>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="tipo"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tipo de Movimentação</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione o tipo" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="ENTRADA">Entrada</SelectItem>
-                            <SelectItem value="SAIDA">Saída</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="produtoId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Produto</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione um produto" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {products.map((product) => (
-                              <SelectItem key={product.id} value={product.id.toString()}>
-                                {product.nome} (Estoque: {product.quantidade})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="quantidade"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Quantidade</FormLabel>
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Movimentações de Estoque</h1>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={() => setIsDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nova Movimentação
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Nova Movimentação</DialogTitle>
+            </DialogHeader>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="tipo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipo de Movimentação</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <Input type="number" placeholder="0" {...field} />
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o tipo" />
+                          </SelectTrigger>
                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="motivo"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Motivo</FormLabel>
-                        <FormControl>
-                          <Textarea placeholder="Descreva o motivo da movimentação" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="flex justify-end space-x-2">
-                    <Button type="button" variant="outline" onClick={handleDialogClose}>
-                      Cancelar
-                    </Button>
-                    <Button type="submit">Registrar</Button>
-                  </div>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Histórico de Movimentações</CardTitle>
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center space-x-2">
-                <Search className="h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar movimentações..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="max-w-sm"
+                        <SelectContent>
+                          <SelectItem value="ENTRADA">Entrada</SelectItem>
+                          <SelectItem value="SAIDA">Saída</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
-              
-              <Select value={filterType} onValueChange={setFilterType}>
-                <SelectTrigger className="max-w-xs">
-                  <SelectValue placeholder="Filtrar por tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Todos os tipos</SelectItem>
-                  <SelectItem value="ENTRADA">Entrada</SelectItem>
-                  <SelectItem value="SAIDA">Saída</SelectItem>
-                </SelectContent>
-              </Select>
 
-              <Select value={filterProduct} onValueChange={setFilterProduct}>
-                <SelectTrigger className="max-w-xs">
-                  <SelectValue placeholder="Filtrar por produto" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Todos os produtos</SelectItem>
-                  {products.map((product) => (
-                    <SelectItem key={product.id} value={product.id.toString()}>
-                      {product.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <FormField
+                  control={form.control}
+                  name="produtoId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Produto</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione um produto" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {products.map((product) => (
+                            <SelectItem key={product.id} value={product.id.toString()}>
+                              {product.nome} (Estoque: {product.quantidade})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-[280px] justify-start text-left font-normal">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateRange?.from ? (
-                      dateRange.to ? (
-                        <>
-                          {format(dateRange.from, "LLL dd, y", { locale: ptBR })} -{" "}
-                          {format(dateRange.to, "LLL dd, y", { locale: ptBR })}
-                        </>
-                      ) : (
-                        format(dateRange.from, "LLL dd, y", { locale: ptBR })
-                      )
-                    ) : (
-                      <span>Período</span>
-                    )}
+                <FormField
+                  control={form.control}
+                  name="quantidade"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Quantidade</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="0" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="motivo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Motivo</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Descreva o motivo da movimentação" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex justify-end space-x-2">
+                  <Button type="button" variant="outline" onClick={handleDialogClose}>
+                    Cancelar
                   </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    initialFocus
-                    mode="range"
-                    defaultMonth={dateRange?.from}
-                    selected={dateRange}
-                    onSelect={setDateRange}
-                    numberOfMonths={2}
-                    className="pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
+                  <Button type="submit">Registrar</Button>
+                </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+      </div>
 
-              <Button variant="outline" onClick={clearFilters}>
-                Limpar Filtros
-              </Button>
+      <Card>
+        <CardHeader>
+          <CardTitle>Histórico de Movimentações</CardTitle>
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center space-x-2">
+              <Search className="h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar movimentações..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="max-w-sm"
+              />
             </div>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="text-center py-8">Carregando movimentações...</div>
-            ) : (
-              <>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Tipo</TableHead>
-                      <TableHead>Produto</TableHead>
-                      <TableHead>Categoria</TableHead>
-                      <TableHead>Quantidade</TableHead>
-                      <TableHead>Motivo</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {currentItems.length > 0 ? (
-                      currentItems.map((movement) => (
-                        <TableRow key={movement.id}>
-                          <TableCell>
-                            {format(new Date(movement.createdAt), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
-                          </TableCell>
-                          <TableCell>
-                            <Badge 
-                              variant={movement.tipo === 'ENTRADA' ? 'default' : 'secondary'}
-                            >
-                              {movement.tipo === 'ENTRADA' ? (
-                                <TrendingUp className="h-3 w-3 mr-1" />
-                              ) : (
-                                <TrendingDown className="h-3 w-3 mr-1" />
-                              )}
-                              {movement.tipo === 'ENTRADA' ? 'Entrada' : 'Saída'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            {movement.produto.nome}
-                          </TableCell>
-                          <TableCell>
-                            {movement.produto.categoria.nome}
-                          </TableCell>
-                          <TableCell>{movement.quantidade}</TableCell>
-                          <TableCell>{movement.motivo}</TableCell>
-                        </TableRow>
-                      ))
+
+            <Select value={filterType} onValueChange={setFilterType}>
+              <SelectTrigger className="max-w-xs">
+                <SelectValue placeholder="Filtrar por tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os tipos</SelectItem>
+                <SelectItem value="ENTRADA">Entrada</SelectItem>
+                <SelectItem value="SAIDA">Saída</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={filterProduct} onValueChange={setFilterProduct}>
+              <SelectTrigger className="max-w-xs">
+                <SelectValue placeholder="Filtrar por produto" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os produtos</SelectItem>
+                {products.map((product) => (
+                  <SelectItem key={product.id} value={product.id.toString()}>
+                    {product.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-[280px] justify-start text-left font-normal">
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dateRange?.from ? (
+                    dateRange.to ? (
+                      <>
+                        {format(dateRange.from, "LLL dd, y", { locale: ptBR })} -{" "}
+                        {format(dateRange.to, "LLL dd, y", { locale: ptBR })}
+                      </>
                     ) : (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8">
-                          Nenhuma movimentação encontrada
+                      format(dateRange.from, "LLL dd, y", { locale: ptBR })
+                    )
+                  ) : (
+                    <span>Período</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  initialFocus
+                  mode="range"
+                  defaultMonth={dateRange?.from}
+                  selected={dateRange}
+                  onSelect={setDateRange}
+                  numberOfMonths={2}
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+
+            <Button variant="outline" onClick={clearFilters}>
+              Limpar Filtros
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="text-center py-8">Carregando movimentações...</div>
+          ) : (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Data</TableHead>
+                    <TableHead>Tipo</TableHead>
+                    <TableHead>Produto</TableHead>
+                    <TableHead>Categoria</TableHead>
+                    <TableHead>Quantidade</TableHead>
+                    <TableHead>Motivo</TableHead>
+                    <TableHead>Usuário</TableHead> {/* nova coluna */}
+
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {currentItems.length > 0 ? (
+                    currentItems.map((movement) => (
+                      <TableRow key={movement.id}>
+                        <TableCell>
+                          {formatDate(movement.createdAt)}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={movement.tipo === 'ENTRADA' ? 'default' : 'secondary'}
+                          >
+                            {movement.tipo === 'ENTRADA' ? (
+                              <TrendingUp className="h-3 w-3 mr-1" />
+                            ) : (
+                              <TrendingDown className="h-3 w-3 mr-1" />
+                            )}
+                            {movement.tipo === 'ENTRADA' ? 'Entrada' : 'Saída'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {movement.produto.nome}
+                        </TableCell>
+                        <TableCell>
+                          {movement.produto.categoria.nome}
+                        </TableCell>
+                        <TableCell>{movement.quantidade}</TableCell>
+                        <TableCell>{movement.motivo}</TableCell>
+                        <TableCell>
+                          {movement.usuario?.nome ?? '—'} {/* mostra o nome do usuário */}
                         </TableCell>
                       </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8">
+                        Nenhuma movimentação encontrada
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
 
-                {totalPages > 1 && (
-                  <div className="mt-6">
-                    <Pagination>
-                      <PaginationContent>
-                        <PaginationItem>
-                          <PaginationPrevious 
-                            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                            className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                          />
+              {totalPages > 1 && (
+                <div className="mt-6">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                          className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            onClick={() => setCurrentPage(page)}
+                            isActive={currentPage === page}
+                            className="cursor-pointer"
+                          >
+                            {page}
+                          </PaginationLink>
                         </PaginationItem>
-                        
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                          <PaginationItem key={page}>
-                            <PaginationLink
-                              onClick={() => setCurrentPage(page)}
-                              isActive={currentPage === page}
-                              className="cursor-pointer"
-                            >
-                              {page}
-                            </PaginationLink>
-                          </PaginationItem>
-                        ))}
-                        
-                        <PaginationItem>
-                          <PaginationNext 
-                            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                            className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                          />
-                        </PaginationItem>
-                      </PaginationContent>
-                    </Pagination>
-                  </div>
-                )}
-              </>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                      ))}
+
+                      <PaginationItem>
+                        <PaginationNext
+                          onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                          className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
