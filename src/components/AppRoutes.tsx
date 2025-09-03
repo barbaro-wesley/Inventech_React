@@ -207,9 +207,9 @@ export const AppRoutes = () => {
         }
       />
       <Route
-        path="/gestao-software"
+        path="/software"
         element={
-          <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
+          <ProtectedRoute allowedRoles={['admin']}>
             <GestaoSoftware/>
           </ProtectedRoute>
         }

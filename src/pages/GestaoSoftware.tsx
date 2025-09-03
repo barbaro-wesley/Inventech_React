@@ -81,51 +81,49 @@ export default function GestaoSoftware() {
   }, [currentPage, searchSoftware, filterStatus]);
 
   const fetchSoftwares = async () => {
-    try {
-      setLoading(true);
-      const params = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: "10"
-      });
-      
-      if (searchSoftware) params.append("software", searchSoftware);
-      if (filterStatus) params.append("statusLicenca", filterStatus);
-      
-      const response = await api.get(`/api/gestao-software?${params}`);
-      
-      if (response.data.success) {
-        setSoftwares(response.data.data.items || response.data.data);
-        setTotalPages(response.data.data.totalPages || 1);
-      }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao carregar gestões de software",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
+  try {
+    setLoading(true);
+    const params = new URLSearchParams({
+      page: currentPage.toString(),
+      limit: "10"
+    });
+    
+    if (searchSoftware) params.append("software", searchSoftware);
+    if (filterStatus) params.append("statusLicenca", filterStatus);
+    
+    const response = await api.get(`/gestao-software?${params}`);
+    
+    if (response.data.sucesso) {  // Change to 'sucesso'
+      setSoftwares(response.data.dados || []);  // Use 'dados' (direct array, no .items)
+      setTotalPages(response.data.totalPaginas || 1);  // Use 'totalPaginas'
     }
-  };
+  } catch (error) {
+    toast({
+      title: "Erro",
+      description: "Erro ao carregar gestões de software",
+      variant: "destructive"
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   const fetchEquipamentos = async () => {
-    try {
-      const response = await api.get("/equipamentos-medicos/tipo/1");
-      if (response.data.success) {
-        setEquipamentos(response.data.data);
-      }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao carregar equipamentos",
-        variant: "destructive"
-      });
-    }
-  };
+  try {
+    const response = await api.get("/equipamentos-medicos/tipo/1");
+    setEquipamentos(response.data); // direto, porque já vem array
+  } catch (error) {
+    toast({
+      title: "Erro",
+      description: "Erro ao carregar equipamentos",
+      variant: "destructive"
+    });
+  }
+};
 
   const fetchLicencasExpirando = async () => {
     try {
-      const response = await api.get("/api/gestao-software/licencas-expirando?dias=30");
+      const response = await api.get("/gestao-software/licencas-expirando?dias=30");
       if (response.data.success) {
         setLicencasExpirando(response.data.data);
       }
@@ -146,13 +144,13 @@ export default function GestaoSoftware() {
       };
 
       if (editingSoftware) {
-        await api.put(`/api/gestao-software/${editingSoftware.id}`, payload);
+        await api.put(`/gestao-software/${editingSoftware.id}`, payload);
         toast({
           title: "Sucesso",
           description: "Gestão de software atualizada com sucesso"
         });
       } else {
-        await api.post("/api/gestao-software", payload);
+        await api.post("/gestao-software", payload);
         toast({
           title: "Sucesso",
           description: "Gestão de software criada com sucesso"
@@ -190,7 +188,7 @@ export default function GestaoSoftware() {
   const handleDelete = async (id: number) => {
     if (confirm("Tem certeza que deseja excluir esta gestão de software?")) {
       try {
-        await api.delete(`/api/gestao-software/${id}`);
+        await api.delete(`/gestao-software/${id}`);
         toast({
           title: "Sucesso",
           description: "Gestão de software excluída com sucesso"
@@ -437,12 +435,15 @@ export default function GestaoSoftware() {
             </div>
             <div>
               <Label htmlFor="status">Status</Label>
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <Select 
+                value={filterStatus || "all"} 
+                onValueChange={(value) => setFilterStatus(value === "all" ? "" : value)}
+              >
                 <SelectTrigger className="w-40">
                   <SelectValue placeholder="Todos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="all">Todos</SelectItem>
                   <SelectItem value="ATIVA">Ativa</SelectItem>
                   <SelectItem value="EXPIRADA">Expirada</SelectItem>
                   <SelectItem value="PENDENTE">Pendente</SelectItem>

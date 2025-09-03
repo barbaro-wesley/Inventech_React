@@ -111,7 +111,7 @@ const menuItems = [
     title: "Software",
     icon: Monitor,
     items: [
-      { title: "Gestão de Software", icon: Shield, url: "/gestao-software"},
+      { title: "Gestão de Software", icon: Shield, url: "/software"},
     ],
   },
 ];
