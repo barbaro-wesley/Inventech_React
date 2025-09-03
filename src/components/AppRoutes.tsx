@@ -27,6 +27,7 @@ import OSViewer from "./OSViewer";
 import CategoriasProdutos from "@/pages/CategoriasProdutos";
 import Produtos from "@/pages/Produtos";
 import MovimentacoesEstoque from "@/pages/MovimentacoesEstoque";
+import GestaoSoftware from "@/pages/GestaoSoftware";
 export const AppRoutes = () => {
   return (
     <Routes>
@@ -202,6 +203,14 @@ export const AppRoutes = () => {
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
             <MovimentacoesEstoque/>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/gestao-software"
+        element={
+          <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
+            <GestaoSoftware/>
           </ProtectedRoute>
         }
       />

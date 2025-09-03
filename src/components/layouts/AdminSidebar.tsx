@@ -105,8 +105,13 @@ const menuItems = [
       { title: "Categorias", icon: BarChart3,url: "/categorias-produtos"},
       { title: "Produtos", icon: BarChart3,url: "/produtos"},
       { title: "Movimentação", icon: BarChart3,url: "/movimentacoes-estoque"},
-
-
+    ],
+  },
+  {
+    title: "Software",
+    icon: Monitor,
+    items: [
+      { title: "Gestão de Software", icon: Shield, url: "/gestao-software"},
     ],
   },
 ];
