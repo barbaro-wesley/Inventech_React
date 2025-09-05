@@ -28,6 +28,9 @@ import CategoriasProdutos from "@/pages/CategoriasProdutos";
 import Produtos from "@/pages/Produtos";
 import MovimentacoesEstoque from "@/pages/MovimentacoesEstoque";
 import GestaoSoftware from "@/pages/GestaoSoftware";
+import TiposEPI from "@/pages/TiposEPI";
+import CadastroEPI from "@/pages/CadastroEPI";
+import RegistroEntregaEPI from "@/pages/RegistroEntregaEPI";
 export const AppRoutes = () => {
   return (
     <Routes>
@@ -247,6 +250,30 @@ export const AppRoutes = () => {
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
             <PesquisarDocumentos />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/gestao/tipos-epi"
+        element={
+          <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
+            <TiposEPI />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/gestao/cadastro-epi"
+        element={
+          <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
+            <CadastroEPI />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/gestao/registro-entrega-epi"
+        element={
+          <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
+            <RegistroEntregaEPI />
           </ProtectedRoute>
         }
       />

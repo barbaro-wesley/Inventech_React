@@ -10,7 +10,10 @@ import {
   Search,
   UserPlus,
   ClipboardList,
-  FolderOpen
+  FolderOpen,
+  Shield,
+  Package,
+  Clipboard
 } from "lucide-react";
 
 import {
@@ -40,6 +43,15 @@ const menuItems = [
     items: [
       { title: "Tipos de Documentos", url: "/gestao/tipos-documentos", icon: FolderOpen },
       { title: "Registros de Capacitação", url: "/gestao/registros-capacitacao", icon: GraduationCap },
+    ],
+  },
+  {
+    title: "Gestão de EPI",
+    icon: Shield,
+    items: [
+      { title: "Tipos de EPI", url: "/gestao/tipos-epi", icon: Shield },
+      { title: "Cadastro de EPI", url: "/gestao/cadastro-epi", icon: Package },
+      { title: "Registro de Entrega", url: "/gestao/registro-entrega-epi", icon: Clipboard },
     ],
   },
   {
