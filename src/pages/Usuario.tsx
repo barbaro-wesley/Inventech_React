@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Search, Edit, Trash2 } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -28,29 +28,53 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
+interface Tecnico {
+  id: number;
+  nome: string;
+  email: string;
+  telefone: string;
+  matricula: string;
+  ativo: boolean;
+  grupo: {
+    id: number;
+    nome: string;
+  };
+}
 
 interface Usuario {
-  id: string;
+  id: number;
   nome: string;
   email: string;
   papel: string;
-  tecnicoId?: string;
-  tecnicoNome?: string;
+  tecnicoId?: number;
+  tecnico?: Tecnico;
+  modulos?: any[];
 }
 
-interface Tecnico {
-  id: string;
+interface TecnicoDisponivel {
+  id: number;
   nome: string;
+  email: string;
+  telefone: string;
+  matricula: string;
+  ativo: boolean;
+  grupo: {
+    id: number;
+    nome: string;
+  };
 }
 
 export default function Usuarios() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
-  const [tecnicos, setTecnicos] = useState<Tecnico[]>([]);
+  const [tecnicosDisponiveis, setTecnicosDisponiveis] = useState<TecnicoDisponivel[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterPapel, setFilterPapel] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<Usuario | null>(null);
+  const [passwordUser, setPasswordUser] = useState<Usuario | null>(null);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     nome: "",
     email: "",
@@ -63,7 +87,10 @@ export default function Usuarios() {
     email: "",
     papel: "",
     tecnicoId: "",
-    senha: "",
+  });
+  const [passwordFormData, setPasswordFormData] = useState({
+    novaSenha: "",
+    confirmarSenha: "",
   });
 
   const papelOptions = [
@@ -75,25 +102,30 @@ export default function Usuarios() {
   ];
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [usuariosResponse, tecnicosResponse] = await Promise.all([
-          api.get("/usuarios"),
-          api.get("/tecnicos"),
-        ]);
-        setUsuarios(usuariosResponse.data);
-        setTecnicos(tecnicosResponse.data);
-      } catch (error) {
-        console.error("Erro ao buscar dados:", error);
-      }
-    };
     fetchData();
   }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [usuariosResponse, tecnicosResponse] = await Promise.all([
+        api.get("/usuarios"),
+        api.get("/usuarios/disponiveis"),
+      ]);
+      setUsuarios(usuariosResponse.data);
+      setTecnicosDisponiveis(tecnicosResponse.data);
+    } catch (error) {
+      console.error("Erro ao buscar dados:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredUsuarios = usuarios.filter((usuario) => {
     const matchesSearch =
       usuario.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      usuario.email.toLowerCase().includes(searchTerm.toLowerCase());
+      usuario.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (usuario.tecnico?.nome.toLowerCase().includes(searchTerm.toLowerCase()) || false);
 
     const matchesPapel = filterPapel === "all" || usuario.papel === filterPapel;
 
@@ -102,37 +134,46 @@ export default function Usuarios() {
 
   const uniquePapeis = [...new Set(usuarios.map((user) => user.papel))];
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     if (confirm("Tem certeza que deseja excluir este usuário?")) {
       try {
         await api.delete(`/usuarios/${id}`);
         setUsuarios(usuarios.filter((user) => user.id !== id));
+        await fetchData();
       } catch (error) {
         console.error("Erro ao excluir usuário:", error);
+        alert("Erro ao excluir usuário. Tente novamente.");
       }
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const response = await api.post("/usuarios/cadastro", {
         nome: formData.nome,
         email: formData.email,
         senha: formData.senha,
         papel: formData.papel,
-        tecnicoId: formData.tecnicoId || null,
+        tecnicoId: formData.tecnicoId ? parseInt(formData.tecnicoId) : null,
       });
-      setUsuarios([...usuarios, response.data]);
+      
+      await fetchData();
+      
       setFormData({ nome: "", email: "", senha: "", papel: "", tecnicoId: "" });
       setIsModalOpen(false);
-    } catch (error) {
+      alert("Usuário cadastrado com sucesso!");
+    } catch (error: any) {
       console.error("Erro ao cadastrar usuário:", error);
+      alert(error.response?.data?.error || "Erro ao cadastrar usuário");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -142,13 +183,12 @@ export default function Usuarios() {
       nome: usuario.nome,
       email: usuario.email,
       papel: usuario.papel,
-      tecnicoId: usuario.tecnicoId || "",
-      senha: "",
+      tecnicoId: usuario.tecnicoId?.toString() || "",
     });
     setIsEditModalOpen(true);
   };
 
-  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setEditFormData({ ...editFormData, [name]: value });
   };
@@ -157,28 +197,92 @@ export default function Usuarios() {
     e.preventDefault();
     if (!editingUser) return;
 
+    setLoading(true);
     try {
-      const updateData: any = {
+      const updateData = {
         nome: editFormData.nome,
         email: editFormData.email,
         papel: editFormData.papel,
-        tecnicoId: editFormData.tecnicoId || null,
+        tecnicoId: editFormData.tecnicoId ? parseInt(editFormData.tecnicoId) : null,
       };
-      
-      // Só inclui a senha se foi preenchida
-      if (editFormData.senha.trim() !== "") {
-        updateData.senha = editFormData.senha;
-      }
 
-      const response = await api.put(`/usuarios/${editingUser.id}`, updateData);
-      setUsuarios(usuarios.map(user => 
-        user.id === editingUser.id ? response.data : user
-      ));
+      await api.put(`/usuarios/${editingUser.id}`, updateData);
+      
+      await fetchData();
+      
       setIsEditModalOpen(false);
       setEditingUser(null);
-    } catch (error) {
+      alert("Usuário atualizado com sucesso!");
+    } catch (error: any) {
       console.error("Erro ao editar usuário:", error);
+      alert(error.response?.data?.error || "Erro ao editar usuário");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  // Funções para redefinir senha
+  const handlePasswordReset = (usuario: Usuario) => {
+    setPasswordUser(usuario);
+    setPasswordFormData({
+      novaSenha: "",
+      confirmarSenha: "",
+    });
+    setIsPasswordModalOpen(true);
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPasswordFormData({ ...passwordFormData, [name]: value });
+  };
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!passwordUser) return;
+
+    // Validações
+    if (passwordFormData.novaSenha !== passwordFormData.confirmarSenha) {
+      alert("As senhas não coincidem!");
+      return;
+    }
+
+    if (passwordFormData.novaSenha.length < 6) {
+      alert("A senha deve ter pelo menos 6 caracteres!");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await api.put(`/usuarios/${passwordUser.id}/redefinir-senha`, {
+        novaSenha: passwordFormData.novaSenha,
+      });
+      
+      setIsPasswordModalOpen(false);
+      setPasswordUser(null);
+      setPasswordFormData({ novaSenha: "", confirmarSenha: "" });
+      alert("Senha redefinida com sucesso!");
+    } catch (error: any) {
+      console.error("Erro ao redefinir senha:", error);
+      alert(error.response?.data?.error || "Erro ao redefinir senha");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Função para obter todos os técnicos disponíveis (incluindo o técnico atual do usuário sendo editado)
+  const getTecnicosParaEdicao = () => {
+    if (!editingUser) return tecnicosDisponiveis;
+    
+    if (editingUser.tecnico) {
+      const tecnicoAtual = editingUser.tecnico;
+      const jaExisteNaLista = tecnicosDisponiveis.some(t => t.id === tecnicoAtual.id);
+      
+      if (!jaExisteNaLista) {
+        return [...tecnicosDisponiveis, tecnicoAtual];
+      }
+    }
+    
+    return tecnicosDisponiveis;
   };
 
   return (
@@ -193,6 +297,7 @@ export default function Usuarios() {
         <Button
           className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
           onClick={() => setIsModalOpen(true)}
+          disabled={loading}
         >
           <Plus className="w-4 h-4 mr-2" />
           Novo Usuário
@@ -208,7 +313,7 @@ export default function Usuarios() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar por nome ou email..."
+                placeholder="Buscar por nome, email ou técnico..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -247,60 +352,98 @@ export default function Usuarios() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Papel</TableHead>
-                  <TableHead>Técnico Associado</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUsuarios.map((usuario) => (
-                  <TableRow key={usuario.id} className="hover:bg-muted/50">
-                    <TableCell className="font-medium">{usuario.nome}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {usuario.email}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">
-                        {papelOptions.find((opt) => opt.value === usuario.papel)?.label ||
-                          usuario.papel}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {usuario.tecnicoNome || "Nenhum"}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleEdit(usuario)}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(usuario.id)}
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+          {loading ? (
+            <div className="text-center py-8">Carregando...</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Papel</TableHead>
+                    <TableHead>Técnico Associado</TableHead>
+                    <TableHead>Grupo</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {filteredUsuarios.map((usuario) => (
+                    <TableRow key={usuario.id} className="hover:bg-muted/50">
+                      <TableCell className="font-medium">{usuario.nome}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {usuario.email}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">
+                          {papelOptions.find((opt) => opt.value === usuario.papel)?.label ||
+                            usuario.papel}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {usuario.tecnico ? (
+                          <div className="flex flex-col">
+                            <span className="font-medium">{usuario.tecnico.nome}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {usuario.tecnico.matricula}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">Nenhum</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {usuario.tecnico?.grupo ? (
+                          <Badge variant="outline">
+                            {usuario.tecnico.grupo.nome}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleEdit(usuario)}
+                            disabled={loading}
+                            title="Editar usuário"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handlePasswordReset(usuario)}
+                            disabled={loading}
+                            title="Redefinir senha"
+                            className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                          >
+                            <Key className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(usuario.id)}
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            disabled={loading}
+                            title="Excluir usuário"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
 
+      {/* Modal de Cadastro */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent>
           <DialogHeader>
@@ -315,6 +458,7 @@ export default function Usuarios() {
                 value={formData.nome}
                 onChange={handleChange}
                 required
+                disabled={loading}
               />
             </div>
             <div>
@@ -325,6 +469,7 @@ export default function Usuarios() {
                 value={formData.email}
                 onChange={handleChange}
                 required
+                disabled={loading}
               />
             </div>
             <div>
@@ -335,11 +480,17 @@ export default function Usuarios() {
                 value={formData.senha}
                 onChange={handleChange}
                 required
+                disabled={loading}
               />
             </div>
             <div>
               <label className="text-sm font-medium">Papel</label>
-              <Select name="papel" value={formData.papel} onValueChange={(value) => setFormData({ ...formData, papel: value })}>
+              <Select 
+                name="papel" 
+                value={formData.papel} 
+                onValueChange={(value) => setFormData({ ...formData, papel: value })}
+                disabled={loading}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione um papel" />
                 </SelectTrigger>
@@ -359,15 +510,21 @@ export default function Usuarios() {
                 onValueChange={(value) =>
                   setFormData({ ...formData, tecnicoId: value === "none" ? "" : value })
                 }
+                disabled={loading}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione um técnico" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">Nenhum</SelectItem>
-                  {tecnicos.map((tecnico) => (
-                    <SelectItem key={tecnico.id} value={tecnico.id}>
-                      {tecnico.nome}
+                  {tecnicosDisponiveis.map((tecnico) => (
+                    <SelectItem key={tecnico.id} value={tecnico.id.toString()}>
+                      <div className="flex flex-col">
+                        <span>{tecnico.nome}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {tecnico.matricula} - {tecnico.grupo.nome}
+                        </span>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -378,17 +535,23 @@ export default function Usuarios() {
                 type="button"
                 variant="outline"
                 onClick={() => setIsModalOpen(false)}
+                disabled={loading}
               >
                 Cancelar
               </Button>
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg">
-                Salvar
+              <Button 
+                type="submit" 
+                className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
+                disabled={loading}
+              >
+                {loading ? "Salvando..." : "Salvar"}
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
+      {/* Modal de Edição (sem campo de senha) */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
         <DialogContent>
           <DialogHeader>
@@ -403,16 +566,7 @@ export default function Usuarios() {
                 value={editFormData.nome}
                 onChange={handleEditChange}
                 required
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Nova Senha (opcional)</label>
-              <Input
-                type="password"
-                name="senha"
-                value={editFormData.senha}
-                onChange={handleEditChange}
-                placeholder="Deixe em branco para manter a atual"
+                disabled={loading}
               />
             </div>
             <div>
@@ -423,6 +577,7 @@ export default function Usuarios() {
                 value={editFormData.email}
                 onChange={handleEditChange}
                 required
+                disabled={loading}
               />
             </div>
             <div>
@@ -431,6 +586,7 @@ export default function Usuarios() {
                 name="papel" 
                 value={editFormData.papel} 
                 onValueChange={(value) => setEditFormData({ ...editFormData, papel: value })}
+                disabled={loading}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione um papel" />
@@ -451,15 +607,21 @@ export default function Usuarios() {
                 onValueChange={(value) =>
                   setEditFormData({ ...editFormData, tecnicoId: value === "none" ? "" : value })
                 }
+                disabled={loading}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione um técnico" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">Nenhum</SelectItem>
-                  {tecnicos.map((tecnico) => (
-                    <SelectItem key={tecnico.id} value={tecnico.id}>
-                      {tecnico.nome}
+                  {getTecnicosParaEdicao().map((tecnico) => (
+                    <SelectItem key={tecnico.id} value={tecnico.id.toString()}>
+                      <div className="flex flex-col">
+                        <span>{tecnico.nome}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {tecnico.matricula} - {tecnico.grupo.nome}
+                        </span>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -470,11 +632,73 @@ export default function Usuarios() {
                 type="button"
                 variant="outline"
                 onClick={() => setIsEditModalOpen(false)}
+                disabled={loading}
               >
                 Cancelar
               </Button>
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg">
-                Salvar Alterações
+              <Button 
+                type="submit" 
+                className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
+                disabled={loading}
+              >
+                {loading ? "Salvando..." : "Salvar Alterações"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Redefinir Senha */}
+      <Dialog open={isPasswordModalOpen} onOpenChange={setIsPasswordModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Redefinir Senha</DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              Redefinindo senha para: <strong>{passwordUser?.nome}</strong>
+            </p>
+          </DialogHeader>
+          <form onSubmit={handlePasswordSubmit} className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Nova Senha</label>
+              <Input
+                type="password"
+                name="novaSenha"
+                value={passwordFormData.novaSenha}
+                onChange={handlePasswordChange}
+                required
+                minLength={6}
+                disabled={loading}
+                placeholder="Mínimo 6 caracteres"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Confirmar Nova Senha</label>
+              <Input
+                type="password"
+                name="confirmarSenha"
+                value={passwordFormData.confirmarSenha}
+                onChange={handlePasswordChange}
+                required
+                minLength={6}
+                disabled={loading}
+                placeholder="Confirme a nova senha"
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsPasswordModalOpen(false)}
+                disabled={loading}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                type="submit" 
+                className="bg-amber-600 hover:bg-amber-700 text-white shadow-lg"
+                disabled={loading}
+              >
+                {loading ? "Redefinindo..." : "Redefinir Senha"}
               </Button>
             </DialogFooter>
           </form>

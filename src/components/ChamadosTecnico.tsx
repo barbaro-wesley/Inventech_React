@@ -16,10 +16,11 @@ interface OS {
   status: string;
   criadoEm: string;
   finalizadoEm?: string | null;
+  prioridade: string;
   iniciadaEm?: string | null;
   preventiva: boolean;
   dataAgendada?: string | null;
-  arquivos?: string[]; // Adicionado campo de arquivos
+  arquivos?: string[]; 
   tipoEquipamento?: {
     nome: string;
   } | null;
@@ -297,6 +298,9 @@ const ChamadosTecnico = () => {
                           <Badge className={`text-white ${getStatusColor(os.status)}`}>
                             {os.status}
                           </Badge>
+                          <Badge className={`text-white ${getStatusColor(os.prioridade)}`}>
+                            {os.prioridade}
+                          </Badge>
                           {os.preventiva && (
                             <Badge variant="outline" className="text-xs">Preventiva</Badge>
                           )}
@@ -308,6 +312,7 @@ const ChamadosTecnico = () => {
                         </div>
                         <div className="space-y-1">
                           <p className="text-sm text-foreground font-medium">{os.descricao}</p>
+                        
                           <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
                             {os.tipoEquipamento && <div><span className="font-medium">Tipo:</span> {os.tipoEquipamento.nome}</div>}
                             {os.Setor && <div><span className="font-medium">Setor:</span> {os.Setor.nome}</div>}

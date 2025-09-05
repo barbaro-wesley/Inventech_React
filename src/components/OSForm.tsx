@@ -50,6 +50,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
     tipoEquipamentoId: '',
     tecnicoId: '',
     status: 'ABERTA',
+    prioridade: 'MEDIA',
     preventiva: false,
     setorId: '',
     equipamentoId: '',
@@ -69,7 +70,14 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
   const statusOptions = [
     { value: 'ABERTA', label: 'Aberta' },
     { value: 'EM_ANDAMENTO', label: 'Em Andamento' },
-    { value: 'CONCLUIDA', label: 'ConcluÃ­da' },
+    { value: 'CONCLUIDA', label: 'Concluída' },
+  ];
+
+  const prioridadeOptions = [
+    { value: 'BAIXA', label: 'Baixa' },
+    { value: 'MEDIA', label: 'Média' },
+    { value: 'ALTA', label: 'Alta' },
+    { value: 'URGENTE', label: 'Urgente' },
   ];
 
   useEffect(() => {
@@ -87,7 +95,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
         console.error('Erro ao buscar dados:', error);
         toast({
           title: "Erro",
-          description: "Erro ao carregar opÃ§Ãµes do formulÃ¡rio",
+          description: "Erro ao carregar opções do formulário",
           variant: "destructive",
         });
       }
@@ -126,6 +134,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
         tipoEquipamentoId: tipoId,
         tecnicoId: '',
         status: 'ABERTA',
+        prioridade: initialData.prioridade || 'MEDIA',
         preventiva: !!initialData.preventiva,
         setorId: eq.setor?.id ? String(eq.setor.id) : '',
         equipamentoId: String(eq.id),
@@ -196,6 +205,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
         tipoEquipamentoId: '',
         tecnicoId: '',
         status: 'ABERTA',
+        prioridade: 'MEDIA',
         preventiva: false,
         setorId: '',
         equipamentoId: '',
@@ -285,6 +295,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
       formDataToSend.append('equipamentoId', Number(formData.equipamentoId).toString());
       formDataToSend.append('tecnicoId', Number(formData.tecnicoId).toString());
       formDataToSend.append('status', formData.status);
+      formDataToSend.append('prioridade', formData.prioridade);
       formDataToSend.append('preventiva', formData.preventiva ? 'true' : 'false');
       if (formData.setorId) formDataToSend.append('setorId', Number(formData.setorId).toString());
 
@@ -295,7 +306,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
 
       toast({
         title: "Sucesso",
-        description: "Ordem de ServiÃ§o cadastrada com sucesso!",
+        description: "Ordem de Serviço cadastrada com sucesso!",
       });
 
       if (onSubmit) {
@@ -307,7 +318,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
       console.error('Erro ao cadastrar OS:', error);
       toast({
         title: "Erro",
-        description: "Erro ao cadastrar Ordem de ServiÃ§o",
+        description: "Erro ao cadastrar Ordem de Serviço",
         variant: "destructive",
       });
     } finally {
@@ -316,16 +327,31 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
   };
 
   const getEquipamentoNome = (equipamento: Equipamento) => {
-    return `${equipamento.numeroPatrimonio || 'Sem NÂº de PatrimÃ´nio'} - ${equipamento.nomeEquipamento || equipamento.marca || 'Sem Nome'}`;
+    return `${equipamento.numeroPatrimonio || 'Sem Nº de Patrimônio'} - ${equipamento.nomeEquipamento || equipamento.marca || 'Sem Nome'}`;
+  };
+
+  const getPrioridadeColor = (prioridade: string) => {
+    switch (prioridade) {
+      case 'BAIXA':
+        return 'text-green-600';
+      case 'MEDIA':
+        return 'text-yellow-600';
+      case 'ALTA':
+        return 'text-orange-600';
+      case 'URGENTE':
+        return 'text-red-600';
+      default:
+        return 'text-gray-600';
+    }
   };
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto" aria-describedby="os-form-description">
         <SheetHeader className="mb-6">
-          <SheetTitle>Cadastro de Ordem de ServiÃ§o Corretiva</SheetTitle>
+          <SheetTitle>Cadastro de Ordem de Serviço Corretiva</SheetTitle>
           <div id="os-form-description" className="sr-only">
-            FormulÃ¡rio para registrar uma ordem de serviÃ§o corretiva, incluindo detalhes do equipamento e descriÃ§Ã£o do problema.
+            Formulário para registrar uma ordem de serviço corretiva, incluindo detalhes do equipamento e descrição do problema.
           </div>
         </SheetHeader>
 
@@ -397,7 +423,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="tecnico">TÃ©cnico ResponsÃ¡vel *</Label>
+              <Label htmlFor="tecnico">Técnico Responsável *</Label>
               <Select
                 value={formData.tecnicoId}
                 onValueChange={(value) => handleChange('tecnicoId', value)}
@@ -445,6 +471,27 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="prioridade">Prioridade *</Label>
+              <Select
+                value={formData.prioridade}
+                onValueChange={(value) => handleChange('prioridade', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent className="bg-background border z-50">
+                  {prioridadeOptions.map((p) => (
+                    <SelectItem key={p.value} value={p.value}>
+                      <span className={getPrioridadeColor(p.value)}>
+                        {p.label}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="grupoEquipamento">Grupo do Equipamento</Label>
               <Input
                 id="grupoEquipamento"
@@ -456,14 +503,14 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="descricao">DescriÃ§Ã£o *</Label>
+            <Label htmlFor="descricao">Descrição *</Label>
             <Textarea
               id="descricao"
               value={formData.descricao}
               onChange={(e) => handleChange('descricao', e.target.value)}
               rows={4}
               required
-              placeholder="Descreva o problema ou manutenÃ§Ã£o necessÃ¡ria..."
+              placeholder="Descreva o problema ou manutenção necessária..."
             />
           </div>
 

@@ -14,6 +14,7 @@ interface OS {
   descricao: string;
   status: string;
   criadoEm: string;
+  prioridade: string;
   finalizadoEm?: string | null;
   iniciadaEm?: string | null;
   preventiva: boolean;
@@ -59,14 +60,14 @@ const OSViewer = () => {
       try {
         setLoading(true);
         setError(null);
-        
+
         const response = await api.get('/os', { withCredentials: true });
-        
+
         // Verifica se a resposta tem a estrutura esperada
         if (response.data) {
           const prevList = Array.isArray(response.data.preventivas) ? response.data.preventivas : [];
           const corrList = Array.isArray(response.data.corretivas) ? response.data.corretivas : [];
-          
+
           setPreventivas(prevList);
           setCorretivas(corrList);
         } else {
@@ -74,11 +75,11 @@ const OSViewer = () => {
           const allOrdens = Array.isArray(response.data) ? response.data : [];
           const prevList = allOrdens.filter((os: OS) => os.preventiva === true);
           const corrList = allOrdens.filter((os: OS) => os.preventiva === false);
-          
+
           setPreventivas(prevList);
           setCorretivas(corrList);
         }
-        
+
       } catch (error: any) {
         console.error('Erro ao buscar ordens de serviço:', error);
         setError(error.response?.data?.message || 'Erro ao carregar dados');
@@ -88,7 +89,7 @@ const OSViewer = () => {
         setLoading(false);
       }
     };
-    
+
     fetchData();
   }, []);
 
@@ -271,6 +272,7 @@ const OSViewer = () => {
                       <th className="p-3 text-left font-medium text-foreground">Tipo Equipamento</th>
                       <th className="p-3 text-left font-medium text-foreground">Técnico</th>
                       <th className="p-3 text-left font-medium text-foreground">Status</th>
+                      <th className="p-3 text-left font-medium text-foreground">Prioridade</th>
                       <th className="p-3 text-left font-medium text-foreground">Setor</th>
                       <th className="p-3 text-left font-medium text-foreground">Solicitante</th>
                       <th className="p-3 text-left font-medium text-foreground">Criado em</th>
@@ -292,6 +294,11 @@ const OSViewer = () => {
                               {item.status}
                             </Badge>
                           </td>
+                          <td className="p-3">
+                            <Badge className={`text-white ${getStatusColor(item.prioridade)}`}>
+                              {item.prioridade}
+                            </Badge>
+                          </td>
                           <td className="p-3">{item.Setor?.nome || '-'}</td>
                           <td className="p-3">{item.solicitante?.nome || '-'}</td>
                           <td className="p-3">{formatDate(item.criadoEm)}</td>
@@ -305,8 +312,8 @@ const OSViewer = () => {
                     ) : (
                       <tr>
                         <td colSpan={9} className="text-center py-8 text-muted-foreground">
-                          {searchTerm || filterStatus !== 'todos' 
-                            ? 'Nenhuma ordem de serviço encontrada com os filtros aplicados.' 
+                          {searchTerm || filterStatus !== 'todos'
+                            ? 'Nenhuma ordem de serviço encontrada com os filtros aplicados.'
                             : 'Nenhuma ordem de serviço encontrada.'
                           }
                         </td>

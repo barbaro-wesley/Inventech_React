@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Calendar, CalendarIcon, Paperclip, X } from "lucide-react";
+import { Calendar, CalendarIcon, Paperclip, X, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -49,6 +49,41 @@ const recorrencias = [
   { value: 'ANUAL', label: 'Anual' },
 ];
 
+const prioridades = [
+  { 
+    value: 'BAIXO', 
+    label: 'Baixa', 
+    emoji: '🟢', 
+    color: 'text-green-600',
+    bgColor: 'bg-green-50 border-green-200',
+    description: 'Não urgente' 
+  },
+  { 
+    value: 'MEDIO', 
+    label: 'Média', 
+    emoji: '🟡', 
+    color: 'text-yellow-600',
+    bgColor: 'bg-yellow-50 border-yellow-200',
+    description: 'Normal' 
+  },
+  { 
+    value: 'ALTO', 
+    label: 'Alta', 
+    emoji: '🟠', 
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-50 border-orange-200',
+    description: 'Importante' 
+  },
+  { 
+    value: 'URGENTE', 
+    label: 'Urgente', 
+    emoji: '🔴', 
+    color: 'text-red-600',
+    bgColor: 'bg-red-50 border-red-200',
+    description: 'Imediato' 
+  },
+];
+
 export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
   isOpen,
   onClose,
@@ -61,6 +96,7 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
     equipamentoId: '',
     tecnicoId: '',
     setorId: '',
+    prioridade: 'MEDIO',
     preventiva: true,
     dataAgendada: undefined as Date | undefined,
     recorrencia: '',
@@ -110,6 +146,7 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
         tipoEquipamentoId: String(eq.tipoEquipamentoId || ''),
         equipamentoId: String(eq.id || ''),
         setorId: eq.setor?.id || '',
+        prioridade: initialData.prioridade || 'MEDIO',
         preventiva: !!initialData.preventiva,
       }));
 
@@ -150,7 +187,30 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
         setFilteredTecnicos(tecnicos);
       }
     }
-  }, [initialData, dataLoaded, toast]);
+  }, [initialData, dataLoaded, toast, tiposEquipamento, tecnicos]);
+
+  // Reset form quando fechar
+  useEffect(() => {
+    if (!isOpen) {
+      setFormData({
+        descricao: '',
+        tipoEquipamentoId: '',
+        equipamentoId: '',
+        tecnicoId: '',
+        setorId: '',
+        prioridade: 'MEDIO',
+        preventiva: true,
+        dataAgendada: undefined,
+        recorrencia: '',
+        intervaloDias: '',
+        arquivos: [],
+      });
+      setFileNames([]);
+      setGrupo('');
+      setFilteredTecnicos(tecnicos);
+      setEquipamentos([]);
+    }
+  }, [isOpen, tecnicos]);
 
   const handleChange = async (name: string, value: any) => {
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -233,6 +293,7 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
       formDataToSend.append('equipamentoId', Number(formData.equipamentoId).toString());
       formDataToSend.append('tecnicoId', Number(formData.tecnicoId).toString());
       formDataToSend.append('status', 'ABERTA');
+      formDataToSend.append('prioridade', formData.prioridade);
       formDataToSend.append('preventiva', 'true');
       if (formData.setorId) formDataToSend.append('setorId', Number(formData.setorId).toString());
       formDataToSend.append('dataAgendada', formData.dataAgendada ? formData.dataAgendada.toISOString() : '');
@@ -251,24 +312,6 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
 
       if (onSubmit) onSubmit(response.data);
       onClose();
-
-      // Reset form
-      setFormData({
-        descricao: '',
-        tipoEquipamentoId: '',
-        equipamentoId: '',
-        tecnicoId: '',
-        setorId: '',
-        preventiva: true,
-        dataAgendada: undefined,
-        recorrencia: '',
-        intervaloDias: '',
-        arquivos: [],
-      });
-      setFileNames([]);
-      setGrupo('');
-      setFilteredTecnicos(tecnicos);
-      setEquipamentos([]);
     } catch (error) {
       console.error('Erro ao cadastrar OS preventiva:', error);
       toast({
@@ -284,6 +327,12 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
   const getEquipamentoNome = (equipamento: Equipamento) => {
     return `${equipamento.numeroPatrimonio || 'Sem Nº de Patrimônio'} - ${equipamento.nomeEquipamento || 'Sem Nome'}`;
   };
+
+  const getPrioridadeInfo = (value: string) => {
+    return prioridades.find(p => p.value === value) || prioridades[1]; // Default to MEDIO
+  };
+
+  const selectedPrioridade = getPrioridadeInfo(formData.prioridade);
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -314,6 +363,47 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
               required
               placeholder="Descreva a manutenção preventiva..."
             />
+          </div>
+
+          {/* Campo Prioridade - Nova seção com destaque visual */}
+          <div className="space-y-3">
+            <Label htmlFor="prioridade" className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4" />
+              Prioridade *
+            </Label>
+            
+            {/* Visual indicator da prioridade selecionada */}
+            <div className={cn(
+              "p-3 rounded-lg border-2 transition-all",
+              selectedPrioridade.bgColor
+            )}>
+              <div className={cn("flex items-center gap-3", selectedPrioridade.color)}>
+                <span className="text-xl">{selectedPrioridade.emoji}</span>
+                <div>
+                  <div className="font-medium">{selectedPrioridade.label}</div>
+                  <div className="text-sm opacity-75">{selectedPrioridade.description}</div>
+                </div>
+              </div>
+            </div>
+
+            <Select value={formData.prioridade} onValueChange={(value) => handleChange('prioridade', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione a prioridade" />
+              </SelectTrigger>
+              <SelectContent className="bg-background border z-50">
+                {prioridades.map((p) => (
+                  <SelectItem key={p.value} value={p.value} className="py-3">
+                    <div className="flex items-center gap-3">
+                      <span className="text-lg">{p.emoji}</span>
+                      <div>
+                        <div className="font-medium">{p.label}</div>
+                        <div className="text-xs text-muted-foreground">{p.description}</div>
+                      </div>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
