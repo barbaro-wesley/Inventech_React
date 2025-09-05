@@ -63,6 +63,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
   const [fileNames, setFileNames] = useState<string[]>([]);
   const [loadingEquipamentos, setLoadingEquipamentos] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const statusOptions = [
@@ -275,6 +276,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       const formDataToSend = new FormData();
       formData.arquivos.forEach((file) => formDataToSend.append('arquivos', file));
@@ -308,6 +310,8 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
         description: "Erro ao cadastrar Ordem de ServiÃ§o",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -324,6 +328,16 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
             FormulÃ¡rio para registrar uma ordem de serviÃ§o corretiva, incluindo detalhes do equipamento e descriÃ§Ã£o do problema.
           </div>
         </SheetHeader>
+
+        {isSubmitting && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-background p-8 rounded-lg shadow-lg text-center max-w-sm mx-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <h3 className="text-lg font-semibold mb-2">Processando...</h3>
+              <p className="text-muted-foreground">Criando ordem de serviço e enviando notificações por email. Aguarde um momento.</p>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -501,10 +515,17 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
           </div>
 
           <div className="flex gap-3 pt-4">
-            <Button type="submit" className="flex-1">
-              Salvar
+            <Button type="submit" className="flex-1" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Processando...
+                </>
+              ) : (
+                'Salvar'
+              )}
             </Button>
-            <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1" disabled={isSubmitting}>
               Cancelar
             </Button>
           </div>
