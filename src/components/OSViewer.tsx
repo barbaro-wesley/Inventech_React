@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Eye, Search, Filter } from 'lucide-react';
 import api from '@/lib/api';
+import OSDetails from './OSDetails';
 
 interface OS {
   id: number;
@@ -43,6 +44,8 @@ const OSViewer = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedOsId, setSelectedOsId] = useState<number | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   const itemsPerPage = 10;
 
@@ -149,6 +152,16 @@ const OSViewer = () => {
 
   const handleRefresh = () => {
     window.location.reload();
+  };
+
+  const handleViewDetails = (osId: number) => {
+    setSelectedOsId(osId);
+    setIsDetailsOpen(true);
+  };
+
+  const handleCloseDetails = () => {
+    setIsDetailsOpen(false);
+    setSelectedOsId(null);
   };
 
   if (loading) {
@@ -303,7 +316,11 @@ const OSViewer = () => {
                           <td className="p-3">{item.solicitante?.nome || '-'}</td>
                           <td className="p-3">{formatDate(item.criadoEm)}</td>
                           <td className="p-3">
-                            <Button variant="ghost" size="sm">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleViewDetails(item.id)}
+                            >
                               <Eye className="h-4 w-4" />
                             </Button>
                           </td>
@@ -356,6 +373,12 @@ const OSViewer = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <OSDetails 
+        osId={selectedOsId}
+        isOpen={isDetailsOpen}
+        onClose={handleCloseDetails}
+      />
     </div>
   );
 };
