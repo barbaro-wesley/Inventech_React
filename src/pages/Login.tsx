@@ -44,77 +44,83 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-gradient-to-br from-primary/5 via-background to-secondary/5">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-background">
       {/* Painel esquerdo - Hero Section */}
-      <div className="hidden lg:flex lg:flex-1 flex-col items-center justify-center bg-gradient-to-br from-primary to-primary/80 text-center p-12 relative overflow-hidden">
+      <div className="hidden lg:flex lg:flex-1 flex-col items-center justify-center bg-gradient-to-br from-primary via-primary/90 to-primary/80 text-center p-12 relative overflow-hidden">
         {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-30">
-          <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent"></div>
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-white/5"></div>
         </div>
         
-        <div className="relative z-10">
-          <Logo size="lg" className="max-w-[300px] mb-12 filter brightness-0 invert" />
+        <div className="relative z-10 space-y-8">
+          <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-8 shadow-xl">
+            <Logo size="lg" className="max-w-[320px] mb-0 filter brightness-0 invert" />
+          </div>
           
-          <h1 className="text-5xl font-bold mb-6 text-white leading-tight">
-            Controle total sobre
-            <span className="block text-accent">equipamentos</span>
-          </h1>
+          <div className="space-y-6">
+            <h1 className="text-5xl font-bold text-white leading-tight">
+              Sistema de Gestão
+              <span className="block text-accent-foreground">InvenTech</span>
+            </h1>
+            
+            <p className="text-white/90 text-xl max-w-xl leading-relaxed">
+              Controle completo de equipamentos, manutenções e documentos em uma plataforma integrada e moderna.
+            </p>
+          </div>
           
-          <p className="text-primary-foreground/90 text-xl max-w-xl leading-relaxed">
-            Gerencie computadores, impressoras, equipamentos médicos e manutenções com uma plataforma moderna e intuitiva.
-          </p>
-          
-          <div className="mt-12 grid grid-cols-3 gap-8 text-center">
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-              <div className="text-2xl font-bold text-white">500+</div>
-              <div className="text-sm text-primary-foreground/80">Equipamentos</div>
+          <div className="grid grid-cols-3 gap-6 mt-12">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+              <div className="text-3xl font-bold text-white">500+</div>
+              <div className="text-sm text-white/80 mt-1">Equipamentos</div>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-              <div className="text-2xl font-bold text-white">99%</div>
-              <div className="text-sm text-primary-foreground/80">Uptime</div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+              <div className="text-3xl font-bold text-white">99%</div>
+              <div className="text-sm text-white/80 mt-1">Uptime</div>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-              <div className="text-2xl font-bold text-white">24/7</div>
-              <div className="text-sm text-primary-foreground/80">Suporte</div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+              <div className="text-3xl font-bold text-white">24/7</div>
+              <div className="text-sm text-white/80 mt-1">Suporte</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Painel direito - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-10">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-background via-muted/20 to-background">
         <div className="w-full max-w-md">
-          {/* Mobile Logo */}
-          <div className="lg:hidden text-center mb-8">
-            <Logo size="lg" className="mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-foreground mb-2">InvenTech</h1>
-            <p className="text-muted-foreground">Sistema de Gestão</p>
+          {/* Mobile Header */}
+          <div className="lg:hidden text-center mb-10">
+            <div className="bg-primary/10 backdrop-blur-sm rounded-2xl p-6 mb-6 shadow-lg border border-primary/20">
+              <Logo size="lg" className="mx-auto" />
+            </div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">InvenTech</h1>
+            <p className="text-muted-foreground text-lg">Sistema de Gestão Integrada</p>
           </div>
 
-          <Card className="p-6 sm:p-8 shadow-2xl border border-border/50 backdrop-blur-sm bg-card/95">
-            {/* Login Icon */}
-            <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+          <Card className="p-8 shadow-2xl border border-border/50 backdrop-blur-sm bg-card/80 rounded-2xl">
+            {/* Header do formulário */}
+            <div className="text-center space-y-4 mb-8">
+              <div className="mx-auto w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
                 <img
                   src={LoginIllustration}
                   alt="Login"
-                  className="w-10 h-10"
+                  className="w-12 h-12 object-contain"
                 />
+              </div>
+              
+              <div>
+                <h2 className="text-3xl font-bold text-foreground mb-2">
+                  Bem-vindo
+                </h2>
+                <p className="text-muted-foreground">
+                  Acesse sua conta para continuar
+                </p>
               </div>
             </div>
 
-            <div className="text-center space-y-2 mb-8">
-              <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-                Bem-vindo de volta
-              </h2>
-              <p className="text-muted-foreground text-sm sm:text-base">
-                Entre com suas credenciais para acessar o sistema
-              </p>
-            </div>
-
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium">
+              <div className="space-y-3">
+                <Label htmlFor="email" className="text-sm font-semibold text-foreground">
                   Email
                 </Label>
                 <Input
@@ -124,12 +130,12 @@ const Login = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="seu@email.com"
                   required
-                  className="h-11 sm:h-12 transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                  className="h-12 border-border/50 bg-background/50 backdrop-blur-sm focus:border-primary focus:ring-primary/20 transition-all duration-200"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium">
+              <div className="space-y-3">
+                <Label htmlFor="password" className="text-sm font-semibold text-foreground">
                   Senha
                 </Label>
                 <Input
@@ -139,18 +145,23 @@ const Login = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="h-11 sm:h-12 transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                  className="h-12 border-border/50 bg-background/50 backdrop-blur-sm focus:border-primary focus:ring-primary/20 transition-all duration-200"
                 />
               </div>
 
-              <div className="flex items-center justify-between text-sm">
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input type="checkbox" className="rounded border-border" />
-                  <span className="text-muted-foreground">Lembrar-me</span>
+              <div className="flex items-center justify-between text-sm pt-2">
+                <label className="flex items-center space-x-3 cursor-pointer group">
+                  <input 
+                    type="checkbox" 
+                    className="w-4 h-4 text-primary border-border rounded focus:ring-primary/20 bg-background/50" 
+                  />
+                  <span className="text-muted-foreground group-hover:text-foreground transition-colors">
+                    Lembrar-me
+                  </span>
                 </label>
                 <a
                   href="#"
-                  className="text-primary hover:text-primary/80 font-medium transition-colors"
+                  className="text-primary hover:text-primary/80 font-medium transition-colors duration-200"
                 >
                   Esqueceu a senha?
                 </a>
@@ -158,12 +169,12 @@ const Login = () => {
 
               <Button
                 type="submit"
-                className="w-full h-11 sm:h-12 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground font-semibold transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50"
+                className="w-full h-12 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100 rounded-xl"
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin"></div>
+                  <div className="flex items-center justify-center space-x-3">
+                    <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin"></div>
                     <span>Entrando...</span>
                   </div>
                 ) : (
@@ -172,7 +183,7 @@ const Login = () => {
               </Button>
             </form>
 
-            <div className="mt-8 pt-6 border-t border-border/50 text-center">
+            <div className="mt-8 pt-6 border-t border-border/30 text-center">
               <p className="text-xs text-muted-foreground">
                 © 2025 InvenTech. Todos os direitos reservados.
               </p>
