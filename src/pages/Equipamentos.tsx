@@ -253,130 +253,96 @@ useEffect(() => {
       </div>
 
       {/* Equipment List */}
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {loading ? (
-          Array.from({ length: 5 }).map((_, i) => (
-            <Card key={i} className="p-4 sm:p-6 animate-pulse">
-              <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-                <div className="flex-1">
-                  <div className="h-5 bg-muted rounded w-1/3 mb-2"></div>
-                  <div className="h-4 bg-muted rounded w-1/2 mb-4"></div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="h-3 bg-muted rounded"></div>
-                    <div className="h-3 bg-muted rounded"></div>
-                    <div className="h-3 bg-muted rounded"></div>
-                  </div>
-                </div>
-                <div className="h-8 w-20 bg-muted rounded"></div>
+          Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i} className="p-4 animate-pulse">
+              <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+              <div className="h-3 bg-muted rounded w-1/2 mb-4"></div>
+              <div className="space-y-2">
+                <div className="h-3 bg-muted rounded"></div>
+                <div className="h-3 bg-muted rounded w-5/6"></div>
               </div>
             </Card>
           ))
         ) : equipments.length > 0 ? (
           equipments.map((equipment: any, index) => (
             <Card key={index} className="p-4 sm:p-6 hover:shadow-soft transition-shadow">
-              <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-                <div className="flex gap-4 flex-1">
-                  <div className="p-3 bg-gradient-brand rounded-lg">
-                    <Settings className="h-6 w-6 text-white" />
-                  </div>
-
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-base sm:text-lg mb-1">
-                      {equipment.nomeEquipamento || `Equipamento #${index + 1}`}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-muted-foreground mb-3">
-                      {equipment.tipoEquipamento?.nome || 'Equipamento Médico'}
-                    </p>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs sm:text-sm">
-                      <div>
-                        <span className="font-medium">Setor:</span>
-                        <span className="text-muted-foreground ml-1">
-                          {equipment.setor?.nome || 'Não informado'}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="font-medium">Localizacao:</span>
-                        <span className="text-muted-foreground ml-1">
-                          {equipment.localizacao?.nome || 'Não informado'}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="font-medium">Modelo:</span>
-                        <span className="text-muted-foreground ml-1">
-                          {equipment.modelo || 'Não informado'}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="font-medium">Patrimônio:</span>
-                        <span className="text-muted-foreground ml-1">
-                          {equipment.numeroPatrimonio || 'Não informado'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+              <div className="flex items-start justify-between mb-3 sm:mb-4">
+                <div className="p-2 bg-gradient-brand rounded-lg">
+                  <Settings className="h-5 sm:h-6 w-5 sm:w-6 text-white" />
                 </div>
+                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                  Ativo
+                </span>
+              </div>
 
-                <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full sm:w-auto"
-                    onClick={() => handleEdit(equipment)}
-                  >
-                    Editar
-                  </Button>
+              <h3 className="font-semibold text-base sm:text-lg mb-2">
+                {equipment.nomeEquipamento || `Equipamento #${index + 1}`}
+              </h3>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-3">
+                {equipment.tipoEquipamento?.nome || 'Equipamento Médico'}
+              </p>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full sm:w-auto"
-                    onClick={() => setSelectedEquipment(equipment)}
-                  >
-                    Detalhes
-                  </Button>
+              <div className="space-y-1 text-xs sm:text-sm text-muted-foreground">
+                <p>Patrimônio: {equipment.numeroPatrimonio || 'Não informado'}</p>
+                <p>Modelo: {equipment.modelo || 'Não informado'}</p>
+                <p>Série: {equipment.numeroSerie || 'Não informado'}</p>
+                <p>Setor: {equipment.setor?.nome || 'Não informado'}</p>
+                <p>Localização: {equipment.localizacao?.nome || 'Não informado'}</p>
+              </div>
 
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="w-full sm:w-auto">
-                        <Wrench className="h-4 w-4 mr-1" />
-                        Manutenção
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem
-                        onClick={() => handleMaintenanceClick(equipment, 'preventiva')}
-                        className="cursor-pointer"
-                      >
-                        <Calendar className="h-4 w-4 mr-2" />
-                        Preventiva
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleMaintenanceClick(equipment, 'corretiva')}
-                        className="cursor-pointer"
-                      >
-                        <Hammer className="h-4 w-4 mr-2" />
-                        Corretiva
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+              <div className="mt-3 sm:mt-4 flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="min-w-[70px] px-2 rounded-md hover:bg-gray-100 text-sm"
+                  onClick={() => handleEdit(equipment)}
+                >
+                  Editar
+                </Button>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full sm:w-auto"
-                  >
-                    Histórico
-                  </Button>
-                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="min-w-[70px] px-2 rounded-md hover:bg-gray-100 text-sm"
+                  onClick={() => setSelectedEquipment(equipment)}
+                >
+                  Detalhes
+                </Button>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="text-sm">
+                      <Wrench className="h-4 w-4 mr-1" />
+                      Manutenção
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem
+                      onClick={() => handleMaintenanceClick(equipment, 'preventiva')}
+                      className="cursor-pointer"
+                    >
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Preventiva
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handleMaintenanceClick(equipment, 'corretiva')}
+                      className="cursor-pointer"
+                    >
+                      <Hammer className="h-4 w-4 mr-2" />
+                      Corretiva
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </Card>
           ))
         ) : (
-          <Card className="p-6 sm:p-12 text-center">
-            <Settings className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-4" />
+          <div className="col-span-full text-center py-8 sm:py-12">
+            <Settings className="h-10 sm:h-12 w-10 sm:w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-base sm:text-lg font-semibold mb-2">Nenhum equipamento encontrado</h3>
-            <p className="text-xs sm:text-sm text-muted-foreground mb-4">
+            <p className="text-muted-foreground mb-4 text-sm sm:text-base">
               Comece adicionando o primeiro equipamento ao sistema
             </p>
             <Button
@@ -386,7 +352,7 @@ useEffect(() => {
               <Plus className="h-4 w-4 mr-2" />
               Adicionar Equipamento
             </Button>
-          </Card>
+          </div>
         )}
       </div>
 
