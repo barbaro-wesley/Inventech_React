@@ -74,11 +74,11 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
   ];
 
   const prioridadeOptions = [
-    { value: 'BAIXA', label: 'Baixa' },
-    { value: 'MEDIA', label: 'Média' },
-    { value: 'ALTA', label: 'Alta' },
-    { value: 'URGENTE', label: 'Urgente' },
-  ];
+  { value: 'BAIXO', label: 'Baixa' },
+  { value: 'MEDIO', label: 'Média' },  // Mudança aqui
+  { value: 'ALTO', label: 'Alta' },
+  { value: 'URGENTE', label: 'Urgente' },
+];
 
   useEffect(() => {
     async function fetchOptions() {
@@ -134,7 +134,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
         tipoEquipamentoId: tipoId,
         tecnicoId: '',
         status: 'ABERTA',
-        prioridade: initialData.prioridade || 'MEDIA',
+        prioridade: initialData.prioridade || 'MEDIO',
         preventiva: !!initialData.preventiva,
         setorId: eq.setor?.id ? String(eq.setor.id) : '',
         equipamentoId: String(eq.id),
@@ -205,7 +205,7 @@ export const OSForm = ({ isOpen, onClose, onSubmit, initialData }: OSFormProps) 
         tipoEquipamentoId: '',
         tecnicoId: '',
         status: 'ABERTA',
-        prioridade: 'MEDIA',
+        prioridade: 'MEDIO',
         preventiva: false,
         setorId: '',
         equipamentoId: '',

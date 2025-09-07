@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Calendar, CalendarIcon, Paperclip, X, AlertTriangle } from "lucide-react";
+import { Calendar, CalendarIcon, Paperclip, X, AlertTriangle, Info, Repeat } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -42,11 +42,13 @@ interface Equipamento {
 }
 
 const recorrencias = [
-  { value: 'DIARIA', label: 'Diariamente' },
-  { value: 'SEMANAL', label: 'Semanalmente' },
-  { value: 'QUINZENAL', label: 'A cada 15 dias' },
-  { value: 'MENSAL', label: 'Mensalmente' },
-  { value: 'ANUAL', label: 'Anual' },
+  { value: 'NENHUMA', label: 'Sem recorrência', description: 'OS única, não será repetida' },
+  { value: 'DIARIA', label: 'Diariamente', description: 'Repetir todos os dias' },
+  { value: 'SEMANAL', label: 'Semanalmente', description: 'Repetir toda semana' },
+  { value: 'QUINZENAL', label: 'A cada 15 dias', description: 'Repetir quinzenalmente' },
+  { value: 'MENSAL', label: 'Mensalmente', description: 'Repetir todo mês' },
+  { value: 'ANUAL', label: 'Anual', description: 'Repetir anualmente' },
+  { value: 'PERSONALIZADA', label: 'Personalizada', description: 'Definir intervalo customizado' },
 ];
 
 const prioridades = [
@@ -99,8 +101,9 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
     prioridade: 'MEDIO',
     preventiva: true,
     dataAgendada: undefined as Date | undefined,
-    recorrencia: '',
+    recorrencia: 'NENHUMA',
     intervaloDias: '',
+    quantidadeOcorrencias: '12',
     arquivos: [] as File[],
   });
 
@@ -148,6 +151,9 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
         setorId: eq.setor?.id || '',
         prioridade: initialData.prioridade || 'MEDIO',
         preventiva: !!initialData.preventiva,
+        recorrencia: initialData.recorrencia || 'NENHUMA',
+        intervaloDias: initialData.intervaloDias ? String(initialData.intervaloDias) : '',
+        quantidadeOcorrencias: '12',
       }));
 
       setEquipamentos([eq]);
@@ -177,7 +183,6 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
         }
       })();
 
-      // Set grupo and filter técnicos based on tipoEquipamentoId
       const selectedTipo = tiposEquipamento.find(t => t.id === parseInt(tipoId));
       setGrupo(selectedTipo?.grupo?.nome || '');
       if (selectedTipo?.grupo?.id) {
@@ -189,7 +194,6 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
     }
   }, [initialData, dataLoaded, toast, tiposEquipamento, tecnicos]);
 
-  // Reset form quando fechar
   useEffect(() => {
     if (!isOpen) {
       setFormData({
@@ -201,8 +205,9 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
         prioridade: 'MEDIO',
         preventiva: true,
         dataAgendada: undefined,
-        recorrencia: '',
+        recorrencia: 'NENHUMA',
         intervaloDias: '',
+        quantidadeOcorrencias: '12',
         arquivos: [],
       });
       setFileNames([]);
@@ -215,12 +220,15 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
   const handleChange = async (name: string, value: any) => {
     setFormData(prev => ({ ...prev, [name]: value }));
 
+    if (name === 'recorrencia' && value !== 'PERSONALIZADA') {
+      setFormData(prev => ({ ...prev, intervaloDias: '' }));
+    }
+
     if (name === 'tipoEquipamentoId') {
       const tipoId = String(value);
       const tipo = tiposEquipamento.find((t) => t.id === parseInt(tipoId));
       setGrupo(tipo?.grupo?.nome || '');
 
-      // Filtrar técnicos
       if (tipo?.grupo?.id) {
         const filtered = tecnicos.filter(t => t.grupo?.id === tipo.grupo.id);
         setFilteredTecnicos(filtered);
@@ -232,7 +240,6 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
         setFormData(prev => ({ ...prev, tecnicoId: '' }));
       }
 
-      // Buscar equipamentos
       try {
         setLoadingEquipamentos(true);
         setEquipamentos([]);
@@ -283,6 +290,16 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (formData.recorrencia === 'PERSONALIZADA' && (!formData.intervaloDias || parseInt(formData.intervaloDias) < 1)) {
+      toast({
+        title: "Erro de validação",
+        description: "Para recorrência personalizada, é obrigatório informar o intervalo de dias (mínimo 1)",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -297,8 +314,13 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
       formDataToSend.append('preventiva', 'true');
       if (formData.setorId) formDataToSend.append('setorId', Number(formData.setorId).toString());
       formDataToSend.append('dataAgendada', formData.dataAgendada ? formData.dataAgendada.toISOString() : '');
-      formDataToSend.append('recorrencia', formData.recorrencia || 'NENHUMA');
+      
+      // Converter 'NENHUMA' para string vazia para o servidor
+      const recorrenciaValue = formData.recorrencia === 'NENHUMA' ? '' : formData.recorrencia;
+      formDataToSend.append('recorrencia', recorrenciaValue);
+      
       if (formData.intervaloDias) formDataToSend.append('intervaloDias', Number(formData.intervaloDias).toString());
+      if (formData.quantidadeOcorrencias) formDataToSend.append('quantidadeOcorrencias', Number(formData.quantidadeOcorrencias).toString());
 
       const response = await api.post('/os', formDataToSend, {
         withCredentials: true,
@@ -307,16 +329,18 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
 
       toast({
         title: "Sucesso",
-        description: "OS preventiva cadastrada com sucesso!",
+        description: formData.recorrencia === 'NENHUMA' 
+          ? "OS preventiva cadastrada com sucesso!" 
+          : `OS preventiva criada com recorrência ${formData.recorrencia.toLowerCase()}. Múltiplas OSs foram geradas automaticamente!`,
       });
 
       if (onSubmit) onSubmit(response.data);
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao cadastrar OS preventiva:', error);
       toast({
         title: "Erro",
-        description: "Erro ao cadastrar OS preventiva",
+        description: error.response?.data?.error || "Erro ao cadastrar OS preventiva",
         variant: "destructive",
       });
     } finally {
@@ -329,10 +353,21 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
   };
 
   const getPrioridadeInfo = (value: string) => {
-    return prioridades.find(p => p.value === value) || prioridades[1]; // Default to MEDIO
+    return prioridades.find(p => p.value === value) || prioridades[1];
+  };
+
+  const getRecorrenciaInfo = (value: string) => {
+    return recorrencias.find(r => r.value === value) || recorrencias[0];
   };
 
   const selectedPrioridade = getPrioridadeInfo(formData.prioridade);
+  const selectedRecorrencia = getRecorrenciaInfo(formData.recorrencia);
+
+  const calcularEstimativaOSs = () => {
+    if (formData.recorrencia === 'NENHUMA') return 1;
+    const quantidade = parseInt(formData.quantidadeOcorrencias) || 12;
+    return Math.min(quantidade, 50);
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -352,7 +387,6 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Descrição */}
           <div className="space-y-2">
             <Label htmlFor="descricao">Descrição *</Label>
             <Textarea
@@ -365,14 +399,12 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
             />
           </div>
 
-          {/* Campo Prioridade - Nova seção com destaque visual */}
           <div className="space-y-3">
             <Label htmlFor="prioridade" className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4" />
               Prioridade *
             </Label>
             
-            {/* Visual indicator da prioridade selecionada */}
             <div className={cn(
               "p-3 rounded-lg border-2 transition-all",
               selectedPrioridade.bgColor
@@ -407,7 +439,6 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Tipo de Equipamento */}
             <div className="space-y-2">
               <Label htmlFor="tipoEquipamentoId">Tipo de Equipamento *</Label>
               <Select value={formData.tipoEquipamentoId} onValueChange={(value) => handleChange('tipoEquipamentoId', value)}>
@@ -422,7 +453,6 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
               </Select>
             </div>
 
-            {/* Equipamento */}
             <div className="space-y-2">
               <Label htmlFor="equipamentoId">Equipamento *</Label>
               <Select 
@@ -443,7 +473,6 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
               </Select>
             </div>
 
-            {/* Técnico Responsável */}
             <div className="space-y-2">
               <Label htmlFor="tecnicoId">Técnico Responsável *</Label>
               <Select value={formData.tecnicoId} onValueChange={(value) => handleChange('tecnicoId', value)}>
@@ -458,7 +487,6 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
               </Select>
             </div>
 
-            {/* Grupo do Técnico */}
             <div className="space-y-2">
               <Label htmlFor="grupo">Grupo</Label>
               <Input
@@ -469,7 +497,6 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
               />
             </div>
 
-            {/* Data Agendada */}
             <div className="space-y-2">
               <Label>Data Agendada *</Label>
               <Popover>
@@ -496,37 +523,98 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
                 </PopoverContent>
               </Popover>
             </div>
-
-            {/* Recorrência */}
-            <div className="space-y-2">
-              <Label htmlFor="recorrencia">Recorrência (opcional)</Label>
-              <Select value={formData.recorrencia} onValueChange={(value) => handleChange('recorrencia', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent className="bg-background border z-50">
-                  {recorrencias.map((r) => (
-                    <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Intervalo Dias */}
-            <div className="space-y-2">
-              <Label htmlFor="intervaloDias">Intervalo Dias (opcional)</Label>
-              <Input
-                id="intervaloDias"
-                type="number"
-                value={formData.intervaloDias}
-                onChange={(e) => handleChange('intervaloDias', e.target.value)}
-                min={1}
-                placeholder="Informe intervalo em dias"
-              />
-            </div>
           </div>
 
-          {/* Upload de Arquivos */}
+          <Card className="border-blue-200 bg-blue-50">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Repeat className="w-5 h-5 text-blue-600" />
+                Configuração de Recorrência
+              </CardTitle>
+              <CardDescription>
+                Configure se esta manutenção deve ser repetida automaticamente
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="p-3 rounded-lg border bg-background">
+                <div className="flex items-center gap-3">
+                  <Repeat className="w-5 h-5 text-blue-600" />
+                  <div>
+                    <div className="font-medium">{selectedRecorrencia.label}</div>
+                    <div className="text-sm text-muted-foreground">{selectedRecorrencia.description}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="recorrencia">Tipo de Recorrência</Label>
+                  <Select value={formData.recorrencia} onValueChange={(value) => handleChange('recorrencia', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a recorrência" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border z-50">
+                      {recorrencias.map((r) => (
+                        <SelectItem key={r.value} value={r.value} className="py-3">
+                          <div>
+                            <div className="font-medium">{r.label}</div>
+                            <div className="text-xs text-muted-foreground">{r.description}</div>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {formData.recorrencia && formData.recorrencia !== 'NENHUMA' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="quantidadeOcorrencias">Quantidade de OSs</Label>
+                    <Input
+                      id="quantidadeOcorrencias"
+                      type="number"
+                      value={formData.quantidadeOcorrencias}
+                      onChange={(e) => handleChange('quantidadeOcorrencias', e.target.value)}
+                      min={1}
+                      max={50}
+                      placeholder="12"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {formData.recorrencia === 'PERSONALIZADA' && (
+                <div className="space-y-2">
+                  <Label htmlFor="intervaloDias">Intervalo em Dias *</Label>
+                  <Input
+                    id="intervaloDias"
+                    type="number"
+                    value={formData.intervaloDias}
+                    onChange={(e) => handleChange('intervaloDias', e.target.value)}
+                    min={1}
+                    required
+                    placeholder="Exemplo: 30 (para repetir a cada 30 dias)"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Informe o número de dias entre cada manutenção
+                  </p>
+                </div>
+              )}
+
+              {formData.recorrencia && formData.recorrencia !== 'NENHUMA' && (
+                <div className="flex items-start gap-2 p-3 bg-blue-100 rounded-lg">
+                  <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                  <div className="text-sm text-blue-800">
+                    <div className="font-medium">Resumo:</div>
+                    <div>
+                      Serão criadas <strong>{calcularEstimativaOSs()}</strong> ordens de serviço automaticamente, 
+                      começando na data agendada e seguindo a recorrência {selectedRecorrencia.label.toLowerCase()}.
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           <div className="space-y-2">
             <Label htmlFor="arquivos">
               <Paperclip className="w-4 h-4 inline mr-2" />
@@ -574,7 +662,6 @@ export const OSPreventivaForm: React.FC<OSPreventivaFormProps> = ({
             )}
           </div>
 
-          {/* Botões */}
           <div className="flex gap-3 pt-4">
             <Button type="submit" className="flex-1" disabled={isSubmitting}>
               {isSubmitting ? (

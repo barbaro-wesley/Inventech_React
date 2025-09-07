@@ -79,7 +79,7 @@ const OSDetails: React.FC<OSDetailsProps> = ({ osId, isOpen, onClose }) => {
 
   const fetchOSDetails = async () => {
     if (!osId) return;
-    
+
     try {
       setLoading(true);
       setError(null);
@@ -225,27 +225,28 @@ const OSDetails: React.FC<OSDetailsProps> = ({ osId, isOpen, onClose }) => {
             <CardContent className="space-y-3">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h4 className="font-medium text-sm text-muted-foreground">Nome</h4>
-                  <p className="text-sm">{osData.equipamento.nomeEquipamento}</p>
+                  <h4 className="font-medium text-sm text-muted-foreground">Nome do Equipamento</h4>
+                  <p className="text-sm">{osData?.equipamento?.nomeEquipamento || '-'}</p>
                 </div>
                 <div>
                   <h4 className="font-medium text-sm text-muted-foreground">Tipo</h4>
-                  <p className="text-sm">{osData.tipoEquipamento.nome}</p>
+                  <p className="text-sm">{osData?.tipoEquipamento?.nome || '-'}</p>
                 </div>
                 <div>
                   <h4 className="font-medium text-sm text-muted-foreground">Marca</h4>
-                  <p className="text-sm">{osData.equipamento.marca || '-'}</p>
+                  <p className="text-sm">{osData?.equipamento?.marca || '-'}</p>
                 </div>
                 <div>
                   <h4 className="font-medium text-sm text-muted-foreground">Modelo</h4>
-                  <p className="text-sm">{osData.equipamento.modelo}</p>
+                  <p className="text-sm">{osData?.equipamento?.modelo || '-'}</p>
                 </div>
                 <div>
                   <h4 className="font-medium text-sm text-muted-foreground">Número de Série</h4>
-                  <p className="text-sm">{osData.equipamento.numeroSerie}</p>
+                  <p className="text-sm">{osData?.equipamento?.numeroSerie || '-'}</p>
                 </div>
               </div>
             </CardContent>
+
           </Card>
 
           {/* Pessoas Envolvidas */}
