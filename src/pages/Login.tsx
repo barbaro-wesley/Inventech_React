@@ -67,21 +67,6 @@ const Login = () => {
               Controle completo de equipamentos, manutenções e documentos em uma plataforma integrada e moderna.
             </p>
           </div>
-          
-          <div className="grid grid-cols-3 gap-6 mt-12">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="text-3xl font-bold text-white">500+</div>
-              <div className="text-sm text-white/80 mt-1">Equipamentos</div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="text-3xl font-bold text-white">99%</div>
-              <div className="text-sm text-white/80 mt-1">Uptime</div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="text-3xl font-bold text-white">24/7</div>
-              <div className="text-sm text-white/80 mt-1">Suporte</div>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -149,23 +134,6 @@ const Login = () => {
                 />
               </div>
 
-              <div className="flex items-center justify-between text-sm pt-2">
-                <label className="flex items-center space-x-3 cursor-pointer group">
-                  <input 
-                    type="checkbox" 
-                    className="w-4 h-4 text-primary border-border rounded focus:ring-primary/20 bg-background/50" 
-                  />
-                  <span className="text-muted-foreground group-hover:text-foreground transition-colors">
-                    Lembrar-me
-                  </span>
-                </label>
-                <a
-                  href="#"
-                  className="text-primary hover:text-primary/80 font-medium transition-colors duration-200"
-                >
-                  Esqueceu a senha?
-                </a>
-              </div>
 
               <Button
                 type="submit"
