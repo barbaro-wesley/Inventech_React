@@ -8,7 +8,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
-// Substitua pelo caminho da sua imagem
 import LoginIllustration from "@/assets/logo.png";
 
 const Login = () => {
@@ -44,68 +43,98 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-gradient-to-br from-slate-50 via-white to-slate-100">
-      {/* Painel esquerdo - Hero Section */}
-      <div className="flex-1 flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 text-center p-8 lg:p-12 relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,_rgba(0,0,0,0.15)_1px,_transparent_0)] bg-[length:20px_20px]"></div>
+    <div className="min-h-screen flex flex-col lg:flex-row bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900">
+      {/* Hero Section - Desktop/Tablet */}
+      <div className="hidden lg:flex flex-1 flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 text-white p-12 relative overflow-hidden">
+        {/* Animated Background */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(68,68,68,.2)_50%,transparent_75%,transparent_100%)] bg-[length:250px_250px] animate-pulse"></div>
         </div>
         
-        <div className="relative z-10 max-w-lg space-y-8">
-          <div className="bg-white/60 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/20">
-            <Logo size="lg" className="max-w-[280px] mb-0" />
+        {/* Floating Elements */}
+        <div className="absolute top-20 left-20 w-32 h-32 bg-blue-500/20 rounded-full blur-xl animate-pulse"></div>
+        <div className="absolute bottom-32 right-16 w-24 h-24 bg-indigo-500/20 rounded-full blur-xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        
+        <div className="relative z-10 max-w-2xl text-center space-y-8">
+          {/* Logo Container */}
+          <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/10 hover:scale-105 transition-transform duration-500">
+            <Logo size="lg" className="max-w-[320px] filter drop-shadow-lg" />
           </div>
           
+          {/* Hero Content */}
           <div className="space-y-6">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight bg-gradient-to-r from-blue-900 via-blue-600 to-orange-500 bg-clip-text text-transparent">
-              Controle total sobre equipamentos
+            <h1 className="text-4xl lg:text-6xl font-black leading-tight bg-gradient-to-r from-white via-blue-100 to-indigo-200 bg-clip-text text-transparent">
+              Controle Total
             </h1>
             
-            <p className="text-gray-600 text-lg sm:text-xl leading-relaxed max-w-md mx-auto">
-              Controle total sobre computadores, impressoras, equipamentos médicos e
-              manutenções. Tudo em uma plataforma moderna e intuitiva.
+            <h2 className="text-xl lg:text-2xl font-semibold text-blue-100 mb-6">
+              sobre seus equipamentos
+            </h2>
+            
+            <p className="text-slate-300 text-lg lg:text-xl leading-relaxed max-w-lg mx-auto">
+              Gerencie computadores, impressoras, equipamentos médicos e 
+              manutenções em uma plataforma moderna e intuitiva.
             </p>
+
+            {/* Features */}
+            <div className="flex flex-wrap justify-center gap-4 mt-8">
+              <div className="bg-white/5 backdrop-blur-sm px-4 py-2 rounded-full border border-white/10">
+                <span className="text-sm font-medium text-blue-200">🖥️ Gestão de TI</span>
+              </div>
+              <div className="bg-white/5 backdrop-blur-sm px-4 py-2 rounded-full border border-white/10">
+                <span className="text-sm font-medium text-blue-200">🏥 Equipamentos Médicos</span>
+              </div>
+              <div className="bg-white/5 backdrop-blur-sm px-4 py-2 rounded-full border border-white/10">
+                <span className="text-sm font-medium text-blue-200">🔧 Manutenções</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Painel direito - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-blue-50 via-blue-25 to-indigo-50">
-        <div className="w-full max-w-md">
-          {/* Mobile Header */}
-          <div className="lg:hidden text-center mb-8">
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 mb-6 shadow-lg border border-white/30">
-              <Logo size="lg" className="mx-auto" />
+      {/* Login Form Section */}
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-12 bg-gradient-to-br from-slate-50 via-white to-gray-50 min-h-screen lg:min-h-0">
+        <div className="w-full max-w-md mx-auto">
+          {/* Mobile Hero */}
+          <div className="lg:hidden text-center mb-8 space-y-6">
+            <div className="bg-gradient-to-br from-slate-900 to-blue-900 rounded-3xl p-6 shadow-2xl">
+              <Logo size="md" className="mx-auto filter brightness-0 invert" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">InvenTech</h1>
-            <p className="text-gray-600">Sistema de Gestão Integrada</p>
+            <div>
+              <h1 className="text-3xl font-black text-slate-800 mb-2 bg-gradient-to-r from-slate-800 to-blue-900 bg-clip-text text-transparent">
+                InvenTech
+              </h1>
+              <p className="text-slate-600 text-sm">Sistema de Gestão Integrada</p>
+            </div>
           </div>
 
-          <Card className="p-6 sm:p-8 shadow-2xl border-0 backdrop-blur-sm bg-white/95 rounded-3xl">
-            {/* Header do formulário */}
+          {/* Login Card */}
+          <Card className="p-6 sm:p-8 lg:p-10 shadow-2xl border-0 backdrop-blur-sm bg-white/95 rounded-3xl hover:shadow-3xl transition-shadow duration-500">
+            {/* Form Header */}
             <div className="text-center space-y-4 mb-8">
-              <div className="mx-auto w-24 h-24 bg-gradient-to-br from-blue-100 to-orange-100 rounded-3xl flex items-center justify-center mb-6 shadow-lg border border-white/30">
+              <div className="mx-auto w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-xl hover:scale-110 transition-transform duration-300">
                 <img
                   src={LoginIllustration}
                   alt="Login"
-                  className="w-14 h-14 object-contain"
+                  className="w-10 h-10 sm:w-12 sm:h-12 object-contain filter brightness-0 invert"
                 />
               </div>
               
               <div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
-                  Bem-vindo
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-2">
+                  Bem-vindo de volta
                 </h2>
-                <p className="text-gray-500 text-base">
-                  Faça login para acessar sua conta
+                <p className="text-slate-500 text-sm sm:text-base">
+                  Entre com suas credenciais para continuar
                 </p>
               </div>
             </div>
 
+            {/* Login Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-3">
-                <Label htmlFor="email" className="text-sm font-semibold text-gray-700">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                  <span>📧</span>
                   Email
                 </Label>
                 <Input
@@ -115,12 +144,13 @@ const Login = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="seu@email.com"
                   required
-                  className="h-12 border-gray-200 bg-white/80 backdrop-blur-sm focus:border-blue-500 focus:ring-blue-500/20 transition-all duration-200 rounded-xl"
+                  className="h-12 sm:h-14 border-slate-200 bg-white/90 backdrop-blur-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-300 rounded-xl text-base hover:bg-white group-hover:shadow-md"
                 />
               </div>
 
-              <div className="space-y-3">
-                <Label htmlFor="password" className="text-sm font-semibold text-gray-700">
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                  <span>🔒</span>
                   Senha
                 </Label>
                 <Input
@@ -130,13 +160,13 @@ const Login = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="h-12 border-gray-200 bg-white/80 backdrop-blur-sm focus:border-blue-500 focus:ring-blue-500/20 transition-all duration-200 rounded-xl"
+                  className="h-12 sm:h-14 border-slate-200 bg-white/90 backdrop-blur-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-300 rounded-xl text-base hover:bg-white"
                 />
               </div>
 
               <Button
                 type="submit"
-                className="w-full h-12 bg-gradient-to-r from-blue-900 via-blue-600 to-orange-500 text-white hover:opacity-90 hover:scale-[1.02] transition-all duration-300 font-semibold rounded-xl shadow-lg hover:shadow-xl disabled:opacity-50 disabled:hover:scale-100"
+                className="w-full h-12 sm:h-14 bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white hover:from-blue-700 hover:via-blue-800 hover:to-indigo-800 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 font-semibold rounded-xl shadow-lg hover:shadow-xl disabled:opacity-50 disabled:hover:scale-100 text-base"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -145,22 +175,29 @@ const Login = () => {
                     <span>Entrando...</span>
                   </div>
                 ) : (
-                  "Entrar no Sistema"
+                  <div className="flex items-center justify-center space-x-2">
+                    <span>Entrar no Sistema</span>
+                    <span>→</span>
+                  </div>
                 )}
               </Button>
             </form>
 
-            <div className="mt-8 pt-6 border-t border-gray-200/50 text-center">
-              <a
-                href="#"
-                className="text-sm text-blue-600 hover:text-blue-700 hover:underline transition-colors duration-200 font-medium"
-              >
-                Esqueceu sua senha?
-              </a>
+            {/* Footer */}
+            <div className="mt-8 pt-6 border-t border-slate-200/60 space-y-4">
               
-              <p className="text-xs text-gray-400 mt-4">
-                © 2025 InvenTech. Todos os direitos reservados.
-              </p>
+              <div className="text-center space-y-2">
+                <p className="text-xs text-slate-400">
+                  © 2025 InvenTech. Todos os direitos reservados.
+                </p>
+                <div className="flex justify-center gap-4 text-xs text-slate-400">
+                  <a href="#" className="hover:text-blue-600 transition-colors">Privacidade</a>
+                  <span>•</span>
+                  <a href="#" className="hover:text-blue-600 transition-colors">Termos</a>
+                  <span>•</span>
+                  <a href="#" className="hover:text-blue-600 transition-colors">Suporte</a>
+                </div>
+              </div>
             </div>
           </Card>
         </div>
