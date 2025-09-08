@@ -46,7 +46,7 @@ const Login = () => {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-background">
       {/* Painel esquerdo - Hero Section */}
-      <div className="hidden lg:flex lg:flex-1 flex-col items-center justify-center bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-center p-12 relative overflow-hidden">
+      <div className="hidden lg:flex lg:flex-1 flex-col items-center justify-center bg-gradient-to-br from-primary via-primary/90 to-primary/80 text-center p-12 relative overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-white/5"></div>
