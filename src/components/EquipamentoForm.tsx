@@ -227,6 +227,15 @@ export function EquipamentoForm({ isOpen, onClose, onSubmit, initialData = null 
       };
 
       onSubmit(itemCompleto);
+      
+      // Mostrar opção de gerar QR code para equipamentos recém-cadastrados
+      if (!initialData?.id && equipamentoAtualizado.numeroPatrimonio) {
+        toast({
+          title: "QR Code disponível",
+          description: "Equipamento cadastrado! Você pode gerar a etiqueta QR Code na lista de equipamentos.",
+        });
+      }
+      
       onClose();
       
       // Reset form

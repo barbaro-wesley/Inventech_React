@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Settings, Plus, Search, Wrench, Calendar, Hammer } from "lucide-react";
+import { Settings, Plus, Search, Wrench, Calendar, Hammer, QrCode } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { EquipamentoForm } from "@/components/EquipamentoForm";
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import api from "@/lib/api";
 import PopupEquip from "@/components/popups/PopupEquip";
+import { QRCodeLabel } from "@/components/QRCodeLabel";
 
 const Equipamentos = () => {
   const [equipments, setEquipments] = useState([]);
@@ -310,6 +311,8 @@ useEffect(() => {
                 >
                   Detalhes
                 </Button>
+
+                <QRCodeLabel equipamento={equipment} />
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
