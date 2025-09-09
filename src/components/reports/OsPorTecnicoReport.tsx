@@ -57,7 +57,6 @@ export function OsPorTecnicoReport({ data, filtros }: Props) {
 
               <View style={styles.headerRow}>
                 <Text style={[styles.cellSmall]}>OS</Text>
-                <Text style={[styles.cell]}>Descrição</Text>
                 <Text style={[styles.cell]}>Equipamento</Text>
                 <Text style={[styles.cellSmall]}>Status</Text>
                 <Text style={[styles.cellSmall]}>Criado</Text>
@@ -67,7 +66,6 @@ export function OsPorTecnicoReport({ data, filtros }: Props) {
               {tec.ordens?.map((os, oidx) => (
                 <View key={oidx} style={styles.row}>
                   <Text style={[styles.cellSmall]}>{String(os.id || '-')}</Text>
-                  <Text style={[styles.cell]}>{os.descricao || '-'}</Text>
                   <Text style={[styles.cell]}>{os.equipamento || '-'}</Text>
                   <Text style={[styles.cellSmall]}>{os.status || '-'}</Text>
                   <Text style={[styles.cellSmall]}>{os.criadoEm || '-'}</Text>

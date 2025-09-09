@@ -44,15 +44,59 @@ const PopupEquip = ({ equipamento, onClose, onOptionClick }) => {
     }
   };
 
+  // Função melhorada para abrir arquivos
   const handleOpenFile = (filePath) => {
-    const filename = filePath.split('\\').pop();
-    const isPdf = isPdfFile(filename);
+    try {
+      // Extrair nome do arquivo do caminho
+      const filename = filePath.split(/[/\\]/).pop();
+      
+      // Construir URL baseado no tipo de arquivo
+      let fileUrl;
+      
+      if (isPdfFile(filename)) {
+        // Para PDFs, usar a pasta pdfs
+        fileUrl = `${import.meta.env.VITE_API_URL2}/uploads/pdfs/${filename}`;
+      } else if (isImageFile(filename)) {
+        // Para imagens, usar a pasta padrão de uploads
+        fileUrl = `${import.meta.env.VITE_API_URL2}/uploads/${filename}`;
+      } else {
+        // Para outros arquivos, tentar usar o caminho original
+        fileUrl = `${import.meta.env.VITE_API_URL2}/${filePath}`;
+      }
+      
+      console.log('Abrindo arquivo:', fileUrl); // Para debug
+      window.open(fileUrl, '_blank');
+    } catch (error) {
+      console.error('Erro ao abrir arquivo:', error);
+      alert('Erro ao abrir o arquivo. Verifique se o arquivo existe.');
+    }
+  };
 
-    const fileUrl = isPdf
-      ? `${import.meta.env.VITE_API_URL2}/uploads/pdfs/${filename.replace(/^Uploads\/pdfs\//i, '')}`
-      : `${import.meta.env.VITE_API_URL2}/uploads/${filename.replace(/^uploads[\/\\]pdfs[\/\\]/i, '')}`;
-
-    window.open(fileUrl, '_blank');
+  // Função para fazer download do arquivo
+  const handleDownloadFile = (filePath) => {
+    try {
+      const filename = filePath.split(/[/\\]/).pop();
+      
+      let fileUrl;
+      if (isPdfFile(filename)) {
+        fileUrl = `${import.meta.env.VITE_API_URL2}/uploads/pdfs/${filename}`;
+      } else if (isImageFile(filename)) {
+        fileUrl = `${import.meta.env.VITE_API_URL2}/uploads/${filename}`;
+      } else {
+        fileUrl = `${import.meta.env.VITE_API_URL2}/${filePath}`;
+      }
+      
+      // Criar link temporário para download
+      const link = document.createElement('a');
+      link.href = fileUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Erro ao fazer download:', error);
+      alert('Erro ao fazer download do arquivo.');
+    }
   };
 
   const handlePrint = async () => {
@@ -158,9 +202,6 @@ const PopupEquip = ({ equipamento, onClose, onOptionClick }) => {
                   { label: 'Nº Anvisa', value: equipamento.numeroAnvisa },
                   { label: 'IP', value: equipamento.ip },
                   { label: 'Sistema Operacional', value: equipamento.sistemaOperacional },
-
-                  
-
                 ].map((item, index) => (
                   <div key={index} className="bg-white p-4 rounded-lg border">
                     <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
@@ -241,7 +282,7 @@ const PopupEquip = ({ equipamento, onClose, onOptionClick }) => {
               </div>
             </div>
 
-            {/* Anexos */}
+            {/* Anexos - Seção Melhorada */}
             {equipamento.arquivos && equipamento.arquivos.length > 0 && (
               <div className="bg-orange-50 rounded-xl p-6">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
@@ -250,31 +291,61 @@ const PopupEquip = ({ equipamento, onClose, onOptionClick }) => {
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {equipamento.arquivos.map((arquivo, index) => {
-                    const filename = arquivo.split("\\").pop();
+                    const filename = arquivo.split(/[/\\]/).pop();
                     const fileInfo = getFileIcon(filename);
+                    
                     return (
                       <div
                         key={index}
-                        className="bg-white p-4 rounded-lg border hover:shadow-md transition-shadow cursor-pointer group"
-                        onClick={() => handleOpenFile(arquivo)}
+                        className="bg-white p-4 rounded-lg border hover:shadow-lg transition-all duration-200 group"
                       >
                         <div className="flex items-start gap-3">
                           <div className={`p-3 rounded-lg ${fileInfo.bg} ${fileInfo.color} group-hover:scale-110 transition-transform`}>
                             {fileInfo.icon}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="text-sm font-medium text-gray-900 truncate group-hover:text-blue-600 transition-colors">
+                            <div 
+                              className="text-sm font-medium text-gray-900 truncate group-hover:text-blue-600 transition-colors"
+                              title={filename}
+                            >
                               {filename}
                             </div>
                             <div className="text-xs text-gray-500 mt-1">
-                              Clique para visualizar
+                              {isPdfFile(filename) ? 'Documento PDF' : 
+                               isImageFile(filename) ? 'Imagem' : 'Arquivo'}
+                            </div>
+                            
+                            {/* Botões de Ação */}
+                            <div className="flex gap-2 mt-3">
+                              <button
+                                onClick={() => handleOpenFile(arquivo)}
+                                className="flex items-center gap-1 px-3 py-1.5 text-xs bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+                                title="Visualizar arquivo"
+                              >
+                                <FaEye className="h-3 w-3" />
+                                Ver
+                              </button>
+                              <button
+                                onClick={() => handleDownloadFile(arquivo)}
+                                className="flex items-center gap-1 px-3 py-1.5 text-xs bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
+                                title="Fazer download"
+                              >
+                                <FaDownload className="h-3 w-3" />
+                                Download
+                              </button>
                             </div>
                           </div>
-                          <FaEye className="h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
                         </div>
                       </div>
                     );
                   })}
+                </div>
+                
+                {/* Informação adicional sobre anexos */}
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                  <p className="text-sm text-blue-800">
+                    <strong>Dica:</strong> Clique em "Ver" para visualizar o arquivo em uma nova aba ou em "Download" para baixá-lo.
+                  </p>
                 </div>
               </div>
             )}
@@ -336,7 +407,7 @@ const PopupEquip = ({ equipamento, onClose, onOptionClick }) => {
                               {os.arquivos && os.arquivos.length > 0 ? (
                                 <div className="flex items-center gap-2">
                                   {os.arquivos.map((arquivo, idx) => {
-                                    const filename = arquivo.split("\\").pop();
+                                    const filename = arquivo.split(/[/\\]/).pop();
                                     const fileInfo = getFileIcon(filename);
                                     return (
                                       <button
