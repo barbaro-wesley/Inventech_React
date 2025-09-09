@@ -1,12 +1,11 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Scan, Eye } from "lucide-react";
+import { Search, QrCode, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import api from "@/lib/api";
 import PopupEquip from "@/components/popups/PopupEquip";
-import BarcodeScannerComponent from "react-qr-barcode-scanner";
 
 interface Setor {
   id: number;
@@ -89,7 +88,10 @@ const PesquisarEquipamento = () => {
   const [loading, setLoading] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
+  const [qrScanner, setQrScanner] = useState<any>(null);
+  const [cameraError, setCameraError] = useState<string | null>(null);
   const { toast } = useToast();
+  const videoRef = useRef<HTMLVideoElement>(null);
   const scannerRef = useRef<HTMLDivElement>(null);
 
   const pesquisarEquipamento = async (patrimonio: string) => {
@@ -141,31 +143,114 @@ const PesquisarEquipamento = () => {
     pesquisarEquipamento(numeroPatrimonio);
   };
 
-  const handleScanResult = useCallback((result: string) => {
-    if (result) {
-      setNumeroPatrimonio(result);
+  const extractPatrimonioFromQR = (qrData: string): string => {
+    try {
+      // Tentar fazer parse como JSON (formato do nosso QR Code)
+      const parsed = JSON.parse(qrData);
+      if (parsed.patrimonio) {
+        return parsed.patrimonio;
+      }
+    } catch (e) {
+      // Se não for JSON, tentar extrair número de patrimônio diretamente
+      // Procurar por padrões comuns de números de patrimônio
+      const patterns = [
+        /patrimonio[:\s]*([A-Za-z0-9]+)/i,
+        /^([A-Za-z0-9]+)$/,
+        /\b([A-Za-z0-9]{4,})\b/
+      ];
+      
+      for (const pattern of patterns) {
+        const match = qrData.match(pattern);
+        if (match && match[1]) {
+          return match[1];
+        }
+      }
+    }
+    
+    // Se nada der certo, retornar o próprio dado
+    return qrData.trim();
+  };
+
+  const handleQRScan = useCallback((result: string) => {
+    if (result && result.trim()) {
+      const patrimonio = extractPatrimonioFromQR(result);
+      setNumeroPatrimonio(patrimonio);
       setShowScanner(false);
-      pesquisarEquipamento(result);
+      stopScanner();
+      
+      toast({
+        title: "QR Code lido!",
+        description: `Patrimônio: ${patrimonio}`,
+      });
+      
+      pesquisarEquipamento(patrimonio);
     }
   }, []);
 
- const handleScanError = useCallback((error: any) => {
-  if (error?.name === "NotAllowedError") {
-    toast({
-      title: "Permissão negada",
-      description: "Habilite o acesso à câmera no navegador.",
-      variant: "destructive",
-    });
-  } else if (error?.name === "NotReadableError") {
-    toast({
-      title: "Erro",
-      description: "Outro app pode estar usando a câmera.",
-      variant: "destructive",
-    });
-  } else {
-    console.error("Scanner error:", error);
-  }
-}, [toast]);
+  const startScanner = async () => {
+    try {
+      setCameraError(null);
+      
+      // Importar QrScanner dinamicamente
+      const QrScanner = (await import('qr-scanner')).default;
+      
+      if (videoRef.current) {
+        const scanner = new QrScanner(
+          videoRef.current,
+          (result: any) => handleQRScan(result.data),
+          {
+            preferredCamera: 'environment',
+            highlightScanRegion: true,
+            highlightCodeOutline: true,
+          }
+        );
+
+        await scanner.start();
+        setQrScanner(scanner);
+      }
+    } catch (error: any) {
+      console.error('Erro ao iniciar scanner:', error);
+      
+      let errorMessage = "Erro ao acessar a câmera";
+      
+      if (error.name === "NotAllowedError") {
+        errorMessage = "Permissão de câmera negada. Habilite o acesso à câmera.";
+      } else if (error.name === "NotReadableError") {
+        errorMessage = "Câmera ocupada. Feche outros apps que usam a câmera.";
+      } else if (error.name === "NotFoundError") {
+        errorMessage = "Nenhuma câmera encontrada no dispositivo.";
+      } else if (error.name === "NotSupportedError") {
+        errorMessage = "Navegador não suporta acesso à câmera.";
+      }
+      
+      setCameraError(errorMessage);
+      toast({
+        title: "Erro na câmera",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const stopScanner = () => {
+    if (qrScanner) {
+      qrScanner.stop();
+      qrScanner.destroy();
+      setQrScanner(null);
+    }
+  };
+
+  useEffect(() => {
+    if (showScanner) {
+      startScanner();
+    } else {
+      stopScanner();
+    }
+
+    return () => {
+      stopScanner();
+    };
+  }, [showScanner]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
@@ -183,7 +268,7 @@ const PesquisarEquipamento = () => {
             Pesquisar Equipamento
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground mt-1">
-            Encontre equipamentos pelo número de patrimônio ou código de barras
+            Encontre equipamentos pelo número de patrimônio ou QR Code
           </p>
         </div>
       </div>
@@ -215,17 +300,20 @@ const PesquisarEquipamento = () => {
                 onClick={() => setShowScanner(!showScanner)}
                 className="text-sm sm:text-base px-3 sm:px-4"
               >
-                <Scan className="h-4 w-4 mr-2" />
-                Scanner
+                <QrCode className="h-4 w-4 mr-2" />
+                {showScanner ? "Fechar QR" : "QR Scanner"}
               </Button>
             </div>
           </div>
 
-          {/* Barcode Scanner */}
+          {/* QR Code Scanner */}
           {showScanner && (
             <div className="border rounded-lg p-4 bg-background">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-base sm:text-lg font-semibold">Scanner de Código de Barras</h3>
+                <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
+                  <QrCode className="h-5 w-5" />
+                  Scanner QR Code
+                </h3>
                 <Button
                   variant="outline"
                   size="sm"
@@ -234,24 +322,47 @@ const PesquisarEquipamento = () => {
                   Fechar
                 </Button>
               </div>
-              <div ref={scannerRef} className="w-full max-w-[90vw] sm:max-w-md mx-auto">
-                <BarcodeScannerComponent
-                  width="100%"
-                  height={window.innerWidth < 640 ? 300 : 400}
-                  facingMode="environment"
-                  onUpdate={(err: any, result: any) => {
-                    if (result) {
-                      handleScanResult(result.getText());
-                    }
-                    if (err && err.name !== "NotFoundException") {
-                      handleScanError(err);
-                    }
-                  }}
-                />
+              
+              <div className="w-full max-w-md mx-auto">
+                {cameraError ? (
+                  <div className="text-center py-8">
+                    <QrCode className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-sm text-destructive mb-4">{cameraError}</p>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        setCameraError(null);
+                        startScanner();
+                      }}
+                    >
+                      Tentar Novamente
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <video
+                      ref={videoRef}
+                      className="w-full rounded-lg bg-black"
+                      style={{ aspectRatio: '1/1' }}
+                    />
+                    <div className="absolute inset-4 border-2 border-blue-500 rounded-lg pointer-events-none">
+                      <div className="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-blue-500 rounded-tl"></div>
+                      <div className="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-blue-500 rounded-tr"></div>
+                      <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-blue-500 rounded-bl"></div>
+                      <div className="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-blue-500 rounded-br"></div>
+                    </div>
+                  </div>
+                )}
               </div>
-              <p className="text-xs sm:text-sm text-muted-foreground text-center mt-2">
-                Posicione o código de barras dentro da área de leitura
-              </p>
+              
+              <div className="text-center mt-4 space-y-2">
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Posicione o QR Code dentro da área destacada
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  O scanner detectará automaticamente o código
+                </p>
+              </div>
             </div>
           )}
         </div>
