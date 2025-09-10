@@ -43,10 +43,11 @@ interface Equipamento {
 
 const recorrencias = [
   { value: 'NENHUMA', label: 'Sem recorrência', description: 'OS única, não será repetida' },
-  { value: 'DIARIA', label: 'Diariamente', description: 'Repetir todos os dias' },
   { value: 'SEMANAL', label: 'Semanalmente', description: 'Repetir toda semana' },
   { value: 'QUINZENAL', label: 'A cada 15 dias', description: 'Repetir quinzenalmente' },
   { value: 'MENSAL', label: 'Mensalmente', description: 'Repetir todo mês' },
+  { value: 'TRIMESTRAL', label: 'Trimestralmente', description: 'Repetir a cada 3 meses' },
+  { value: 'SEMESTRAL', label: 'Semestralmente', description: 'Repetir a cada 6 meses' },
   { value: 'ANUAL', label: 'Anual', description: 'Repetir anualmente' },
   { value: 'PERSONALIZADA', label: 'Personalizada', description: 'Definir intervalo customizado' },
 ];

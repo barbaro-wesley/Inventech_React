@@ -23,16 +23,23 @@ import {
   TrendingUp,
   CheckCircle 
 } from 'lucide-react';
-
 import api from '@/lib/api';
 
 interface Tecnico {
   id: number;
   nome: string;
   email: string;
+  telefone: string;
+  cpf: string;
+  matricula: string;
+  admissao: string;
   ativo: boolean;
-  grupo?: {
+  telegramChatId: string;
+  grupoId: number;
+  grupo: {
+    id: number;
     nome: string;
+    descricao: string;
   };
 }
 
@@ -81,6 +88,8 @@ export function ReportConfigPerformanceTecnicos({
         setGrupos(gruposResponse.data || []);
       } catch (error) {
         console.error('Erro ao carregar dados:', error);
+        setTecnicos([]);
+        setGrupos([]);
       } finally {
         setLoadingData(false);
       }
@@ -89,30 +98,31 @@ export function ReportConfigPerformanceTecnicos({
     fetchData();
   }, []);
 
-  // Notificar mudanças na configuração
-  useEffect(() => {
+  // Função para preparar configuração
+  const prepareConfig = () => {
     const tecnicosNomes = config.tecnicos
       .map(id => tecnicos.find(t => t.id === id)?.nome)
       .filter(Boolean)
       .join(', ');
 
-    const updatedConfig = {
-      ...config,
+    return {
+      inicio: config.inicio,
+      fim: config.fim,
+      detalhes: config.detalhes,
       tecnicosNomes,
-      tecnicos: config.tecnicos.length > 0 ? config.tecnicos.join(',') : undefined,
+      tecnicos: config.tecnicos.join(',')
     };
-
-    onConfigChange(updatedConfig);
-  }, [config, tecnicos, onConfigChange]);
+  };
 
   // Filtrar técnicos
   const tecnicosFiltrados = tecnicos.filter(tecnico => {
     const matchesSearch = searchTecnico === '' || 
       tecnico.nome.toLowerCase().includes(searchTecnico.toLowerCase()) ||
-      tecnico.email.toLowerCase().includes(searchTecnico.toLowerCase());
+      tecnico.email.toLowerCase().includes(searchTecnico.toLowerCase()) ||
+      tecnico.matricula.toLowerCase().includes(searchTecnico.toLowerCase());
     
     const matchesGroup = filtroGrupo === 'all' || 
-      tecnico.grupo?.nome === filtroGrupo;
+      tecnico.grupo.nome === filtroGrupo;
     
     return matchesSearch && matchesGroup && tecnico.ativo;
   });
@@ -142,17 +152,10 @@ export function ReportConfigPerformanceTecnicos({
 
   const handleGenerate = () => {
     const finalConfig = prepareConfig();
+    console.log('Configuração final enviada:', finalConfig);
     
-    // Se tem a nova prop, usa ela (recomendado)
-    if (onGenerateWithConfig) {
-      onGenerateWithConfig(finalConfig);
-    } else {
-      // Fallback para compatibilidade
-      if (onConfigChange) {
-        onConfigChange(finalConfig);
-      }
-      onGenerate();
-    }
+    onConfigChange(finalConfig);
+    onGenerate();
   };
 
   const isFormValid = config.inicio && config.fim;
@@ -163,10 +166,14 @@ export function ReportConfigPerformanceTecnicos({
     if (!config.inicio || !config.fim) return 0;
     const inicio = new Date(config.inicio);
     const fim = new Date(config.fim);
-    return Math.ceil((fim.getTime() - inicio.getTime()) / (1000 * 60 * 60 * 24));
+    return Math.ceil((fim.getTime() - inicio.getTime()) / (1000 * 60 * 60 * 24)) + 1;
   };
 
   const periodoDias = getPeriodoDias();
+
+  const gruposUnicos = grupos.length > 0 ? grupos : [
+    ...new Map(tecnicos.map(t => [t.grupo.id, t.grupo])).values()
+  ];
 
   return (
     <Card>
@@ -230,24 +237,39 @@ export function ReportConfigPerformanceTecnicos({
             Seleção de Técnicos
           </Label>
 
-          {/* Filtros */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label htmlFor="searchTecnico" className="text-xs text-muted-foreground">
-                Buscar Técnico
+                Buscar por nome, email ou matrícula
               </Label>
               <Input
                 id="searchTecnico"
-                placeholder="Nome ou email..."
+                placeholder="Nome, email ou matrícula..."
                 value={searchTecnico}
                 onChange={(e) => setSearchTecnico(e.target.value)}
                 className="text-sm"
               />
             </div>
-            
+            <div>
+              <Label className="text-xs text-muted-foreground">
+                Filtrar por Grupo
+              </Label>
+              <Select value={filtroGrupo} onValueChange={setFiltroGrupo}>
+                <SelectTrigger className="text-sm">
+                  <SelectValue placeholder="Todos os grupos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os grupos</SelectItem>
+                  {gruposUnicos.map((grupo) => (
+                    <SelectItem key={grupo.id} value={grupo.nome}>
+                      {grupo.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          {/* Ações de seleção */}
           <div className="flex gap-2">
             <Button 
               type="button" 
@@ -269,7 +291,6 @@ export function ReportConfigPerformanceTecnicos({
             </Button>
           </div>
 
-          {/* Lista de técnicos */}
           <div className="border rounded-lg p-3 max-h-64 overflow-y-auto">
             {loadingData ? (
               <div className="text-center text-sm text-muted-foreground py-4">
@@ -285,34 +306,36 @@ export function ReportConfigPerformanceTecnicos({
                   >
                     <Checkbox
                       checked={config.tecnicos.includes(tecnico.id)}
-                      onChange={() => handleTecnicoToggle(tecnico.id)}
+                      onCheckedChange={() => handleTecnicoToggle(tecnico.id)}
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium truncate">
                           {tecnico.nome}
                         </span>
-                        {tecnico.grupo && (
-                          <Badge variant="secondary" className="text-xs">
-                            {tecnico.grupo.nome}
-                          </Badge>
-                        )}
+                        <Badge variant="secondary" className="text-xs">
+                          {tecnico.grupo.nome}
+                        </Badge>
                       </div>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {tecnico.email}
-                      </p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span className="truncate">{tecnico.email}</span>
+                        <span>•</span>
+                        <span>Mat: {tecnico.matricula}</span>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="text-center text-sm text-muted-foreground py-4">
-                Nenhum técnico encontrado
+                {searchTecnico || filtroGrupo !== 'all' 
+                  ? 'Nenhum técnico encontrado com os filtros aplicados' 
+                  : 'Nenhum técnico ativo encontrado'
+                }
               </div>
             )}
           </div>
 
-          {/* Contador de selecionados */}
           {config.tecnicos.length > 0 && (
             <div className="text-sm text-muted-foreground flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-green-600" />
@@ -325,7 +348,6 @@ export function ReportConfigPerformanceTecnicos({
 
         <Separator />
 
-        {/* Opções do Relatório */}
         <div className="space-y-3">
           <Label className="text-sm font-medium flex items-center gap-2">
             <Target className="h-4 w-4" />
@@ -340,7 +362,7 @@ export function ReportConfigPerformanceTecnicos({
                 setConfig(prev => ({ ...prev, detalhes: checked as boolean }))
               }
             />
-            <Label htmlFor="detalhes" className="text-sm">
+            <Label htmlFor="detalhes" className="text-sm cursor-pointer">
               Incluir histórico detalhado das ordens
             </Label>
           </div>
@@ -355,7 +377,6 @@ export function ReportConfigPerformanceTecnicos({
 
         <Separator />
 
-        {/* Métricas que serão analisadas */}
         <div className="space-y-3">
           <Label className="text-sm font-medium flex items-center gap-2">
             <TrendingUp className="h-4 w-4" />
@@ -382,20 +403,26 @@ export function ReportConfigPerformanceTecnicos({
           </div>
         </div>
 
-        {/* Botões de ação */}
         <div className="flex gap-2 pt-4">
           <Button
             onClick={handleGenerate}
             disabled={!canGenerate}
-            variant="outline"
+            variant="default"
             className="flex-1"
           >
             <Eye className="h-4 w-4 mr-2" />
-            {loading ? 'Carregando...' : 'Gerar Relatório'}
+            {loading ? 'Gerando Relatório...' : 'Gerar Relatório'}
           </Button>
         </div>
 
-        {/* Alertas */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="bg-gray-50 p-3 rounded text-xs">
+            <strong>Debug:</strong><br />
+            Técnicos selecionados: {config.tecnicos.join(', ') || 'nenhum'}<br />
+            Config atual: {JSON.stringify(prepareConfig(), null, 2)}
+          </div>
+        )}
+
         {!isFormValid && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
             <p className="text-sm text-yellow-800">
@@ -407,7 +434,15 @@ export function ReportConfigPerformanceTecnicos({
         {config.tecnicos.length === 0 && isFormValid && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
             <p className="text-sm text-blue-800">
-              👥 Nenhum técnico selecionado. O relatório incluirá todos os técnicos ativos.
+              👥 Nenhum técnico selecionado. O relatório incluirá todos os técnicos ativos do período.
+            </p>
+          </div>
+        )}
+
+        {periodoDias > 365 && isFormValid && (
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+            <p className="text-sm text-orange-800">
+              ⚠️ Período muito extenso ({periodoDias} dias). Considere reduzir o período para melhor performance.
             </p>
           </div>
         )}

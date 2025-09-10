@@ -7,182 +7,70 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, Download, FileText, Eye } from 'lucide-react';
-
-// Mock API
-const api = {
-  get: async (endpoint, options = {}) => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    console.log(`API Call: ${endpoint}`, options.params);
-    
-    if (endpoint === '/reports/performance-tecnicos') {
-      return {
-        data: [
-          {
-            tecnico: {
-              id: 18,
-              nome: "Compras",
-              email: "ti2@hcrmarau.com.br",
-              grupo: "Engenharia Clinica",
-              ativo: true
-            },
-            estatisticas: {
-              totalOrdens: 74,
-              concluidas: 7,
-              abertas: 66,
-              emAndamento: 1,
-              canceladas: 0,
-              taxaSucesso: 9.46,
-              tempoMedioResolucaoHoras: 37.02,
-              valorTotalManutencoes: 12500.00
-            },
-            analisePorTipo: [
-              {
-                tipo: "Equipamentos Cirurgicos",
-                total: 74,
-                concluidas: 7,
-                taxaSucesso: 9.46
-              }
-            ]
-          },
-          {
-            tecnico: {
-              id: 1,
-              nome: "Wesley Barbaro",
-              email: "wesleybarbaro09@gmail.com",
-              grupo: "TI",
-              ativo: true
-            },
-            estatisticas: {
-              totalOrdens: 92,
-              concluidas: 4,
-              abertas: 85,
-              emAndamento: 3,
-              canceladas: 0,
-              taxaSucesso: 4.35,
-              tempoMedioResolucaoHoras: 61.06,
-              valorTotalManutencoes: 8750.00
-            },
-            analisePorTipo: [
-              {
-                tipo: "Ar Condicionado",
-                total: 18,
-                concluidas: 3,
-                taxaSucesso: 16.67
-              },
-              {
-                tipo: "Computador",
-                total: 62,
-                concluidas: 1,
-                taxaSucesso: 1.61
-              },
-              {
-                tipo: "Impressora",
-                total: 12,
-                concluidas: 0,
-                taxaSucesso: 0
-              }
-            ]
-          }
-        ]
-      };
-    }
-    
-    return { data: [] };
-  }
-};
-
-// Mock components para demonstração
-const EquipamentosPorSetorReport = ({ data, filtros }) => (
-  <div style={{ padding: 20 }}>
-    <h1>Relatório de Equipamentos por Setor</h1>
-    <p>Dados: {JSON.stringify({ data: data.length, filtros }, null, 2)}</p>
-  </div>
-);
-
-const OsPorTecnicoReport = ({ data, filtros }) => (
-  <div style={{ padding: 20 }}>
-    <h1>Relatório de OS por Técnico</h1>
-    <p>Dados: {JSON.stringify({ data: data.length, filtros }, null, 2)}</p>
-  </div>
-);
-
-const PerformanceTecnicosReport = ({ data, filtros }) => (
-  <div style={{ padding: 20 }}>
-    <h1>Relatório de Performance dos Técnicos</h1>
-    <p>Técnicos: {data.length}</p>
-    <p>Período: {filtros?.periodo}</p>
-    <p>Incluir detalhes: {filtros?.incluirDetalhes ? 'Sim' : 'Não'}</p>
-    {data.map((item, index) => (
-      <div key={item.tecnico.id} style={{ margin: '10px 0', padding: 10, border: '1px solid #ccc' }}>
-        <h3>{item.tecnico.nome} - {item.tecnico.grupo}</h3>
-        <p>Total de Ordens: {item.estatisticas.totalOrdens}</p>
-        <p>Taxa de Sucesso: {item.estatisticas.taxaSucesso}%</p>
-      </div>
-    ))}
-  </div>
-);
-
-// Mock config components
-const ReportConfigEquipamentosPorSetor = ({ onGenerateWithConfig, loading }) => (
-  <Card>
-    <CardHeader>
-      <CardTitle>Equipamentos por Setor</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <Button 
-        onClick={() => onGenerateWithConfig?.({ setores: 'TI,Compras', tipos: 'Computador,Impressora' })}
-        disabled={loading}
-      >
-        {loading ? 'Carregando...' : 'Gerar Relatório'}
-      </Button>
-    </CardContent>
-  </Card>
-);
-
-const ReportConfigOsPorTecnico = ({ onGenerateWithConfig, loading }) => (
-  <Card>
-    <CardHeader>
-      <CardTitle>OS por Técnico</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <Button 
-        onClick={() => onGenerateWithConfig?.({ 
-          tecnicos: '1,18', 
-          inicio: '2024-01-01', 
-          fim: '2024-12-31',
-          campoData: 'criadoEm'
-        })}
-        disabled={loading}
-      >
-        {loading ? 'Carregando...' : 'Gerar Relatório'}
-      </Button>
-    </CardContent>
-  </Card>
-);
-
-// Importando o componente que criamos anteriormente
+import { EquipamentosPorSetorReport } from './EquipamentosPorSetorReport';
+import { OsPorTecnicoReport } from './OsPorTecnicoReport';
+import { ReportConfigEquipamentosPorSetor } from './configs/ReportConfigEquipamentosPorSetor';
+import { ReportConfigOsPorTecnico } from './configs/ReportConfigOsPorTecnico';
 import ReportConfigPerformanceTecnicos from './configs/ReportConfigPerformanceTecnicos';
+import PerformanceTecnicosReport from './PerformanceTecnicosReport';
+import api from '@/lib/api';
 
 export const ReportGenerator: React.FC = () => {
-  const [reportType, setReportType] = useState<string>('performance-tecnicos');
+  const [reportType, setReportType] = useState<string>('condicionadores');
+  const [filters, setFilters] = useState({
+    dataInicio: '',
+    dataFim: '',
+    setor: '',
+    tipo: '',
+    setores: '',
+    tipos: '',
+    tecnicos: '',
+    inicio: '',
+    fim: '',
+    campoData: 'criadoEm',
+    status: '',
+  });
   const [showPreview, setShowPreview] = useState(false);
+  const [condicionadores, setCondicionadores] = useState<any[]>([]);
   const [equipamentosPorSetor, setEquipamentosPorSetor] = useState<any[]>([]);
   const [osPorTecnico, setOsPorTecnico] = useState<any[]>([]);
   const [performanceTecnicos, setPerformanceTecnicos] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [reportConfig, setReportConfig] = useState<any>({});
 
-  const fetchEquipamentosPorSetor = async (config: any) => {
+  useEffect(() => {
+    if (reportType === 'equipamentos-por-setor') {
+      if (filters.setores && filters.tipos) {
+        fetchEquipamentosPorSetor();
+      }
+      return;
+    }
+    if (reportType === 'os-por-tecnico') {
+      if (filters.tecnicos && filters.inicio && filters.fim) {
+        fetchOsPorTecnico();
+      }
+      return;
+    }
+    if (reportType === 'performance-tecnicos') {
+      if (filters.inicio && filters.fim) {
+        fetchPerformanceTecnicos();
+      }
+      return;
+    }
+  }, [reportType, filters.setores, filters.tipos, filters.tecnicos, filters.inicio, filters.fim, filters.campoData, filters.status]);
+
+  const fetchEquipamentosPorSetor = async (config?: any) => {
     try {
+      const configToUse = config || reportConfig;
+      if (!configToUse.setores || !configToUse.tipos) return;
       setLoading(true);
       const response = await api.get('/reports/equipamentos-por-setor', {
         params: {
-          setores: config.setores,
-          tipos: config.tipos,
+          setores: configToUse.setores,
+          tipos: configToUse.tipos,
         },
       });
       setEquipamentosPorSetor(response.data);
-      setShowPreview(true);
     } catch (error) {
       console.error('Erro ao buscar equipamentos por setor:', error);
     } finally {
@@ -190,20 +78,21 @@ export const ReportGenerator: React.FC = () => {
     }
   };
 
-  const fetchOsPorTecnico = async (config: any) => {
+  const fetchOsPorTecnico = async (config?: any) => {
     try {
+      const configToUse = config || reportConfig;
+      if (!configToUse.tecnicos || !configToUse.inicio || !configToUse.fim) return;
       setLoading(true);
       const response = await api.get('/reports/os-por-tecnico', {
         params: {
-          tecnicos: config.tecnicos,
-          inicio: config.inicio,
-          fim: config.fim,
-          campoData: config.campoData || 'criadoEm',
-          status: config.status || undefined,
+          tecnicos: configToUse.tecnicos,
+          inicio: configToUse.inicio,
+          fim: configToUse.fim,
+          campoData: configToUse.campoData || 'criadoEm',
+          status: configToUse.status || undefined,
         },
       });
       setOsPorTecnico(response.data);
-      setShowPreview(true);
     } catch (error) {
       console.error('Erro ao buscar OS por técnico:', error);
     } finally {
@@ -211,22 +100,20 @@ export const ReportGenerator: React.FC = () => {
     }
   };
 
-  const fetchPerformanceTecnicos = async (config: any) => {
+  const fetchPerformanceTecnicos = async (config?: any) => {
     try {
+      const configToUse = config || reportConfig;
+      if (!configToUse.inicio || !configToUse.fim) return;
       setLoading(true);
-      setReportConfig(config); // Salva a configuração
-      
       const response = await api.get('/reports/performance-tecnicos', {
         params: {
-          inicio: config.inicio,
-          fim: config.fim,
-          tecnicos: config.tecnicos || undefined,
-          detalhes: config.detalhes || false,
+          tecnicos: configToUse.tecnicos,
+          inicio: configToUse.inicio,
+          fim: configToUse.fim,
+          detalhes: configToUse.detalhes || false,
         },
       });
-      
       setPerformanceTecnicos(response.data);
-      setShowPreview(true);
     } catch (error) {
       console.error('Erro ao buscar performance dos técnicos:', error);
     } finally {
@@ -254,13 +141,7 @@ export const ReportGenerator: React.FC = () => {
         return (
           <PerformanceTecnicosReport
             data={performanceTecnicos}
-            filtros={{
-              periodo: reportConfig.inicio && reportConfig.fim 
-                ? `${new Date(reportConfig.inicio).toLocaleDateString('pt-BR')} - ${new Date(reportConfig.fim).toLocaleDateString('pt-BR')}`
-                : undefined,
-              tecnicos: reportConfig.tecnicosNomes || reportConfig.tecnicos,
-              incluirDetalhes: reportConfig.detalhes || false,
-            }}
+            filtros={reportConfig}
           />
         );
       default:
@@ -271,6 +152,10 @@ export const ReportGenerator: React.FC = () => {
   const getReportFilename = () => {
     const now = new Date().toISOString().split('T')[0];
     switch (reportType) {
+      case 'equipamentos':
+        return `relatorio-equipamentos-${now}.pdf`;
+      case 'condicionadores':
+        return `relatorio-condicionadores-${now}.pdf`;
       case 'equipamentos-por-setor':
         return `relatorio-equip-por-setor-${now}.pdf`;
       case 'os-por-tecnico':
@@ -287,21 +172,35 @@ export const ReportGenerator: React.FC = () => {
       case 'equipamentos-por-setor':
         return (
           <ReportConfigEquipamentosPorSetor
-            onGenerateWithConfig={fetchEquipamentosPorSetor}
+            onConfigChange={(config) => {
+              setReportConfig(config);
+              fetchEquipamentosPorSetor(config);
+            }}
+            onGenerate={() => setShowPreview(true)}
             loading={loading}
           />
         );
       case 'os-por-tecnico':
         return (
           <ReportConfigOsPorTecnico
-            onGenerateWithConfig={fetchOsPorTecnico}
+            onConfigChange={(config) => {
+              setReportConfig(config);
+              fetchOsPorTecnico(config);
+            }}
+            onGenerate={() => setShowPreview(true)}
             loading={loading}
           />
         );
       case 'performance-tecnicos':
         return (
           <ReportConfigPerformanceTecnicos
-            onGenerateWithConfig={fetchPerformanceTecnicos}
+            onConfigChange={(config) => {
+              setReportConfig(config);
+            }}
+            onGenerate={() => {
+              fetchPerformanceTecnicos(reportConfig);
+              setShowPreview(true);
+            }}
             loading={loading}
           />
         );
@@ -325,17 +224,61 @@ export const ReportGenerator: React.FC = () => {
                     <SelectValue placeholder="Selecione o tipo" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="equipamentos-por-setor">
-                      📦 Equipamentos por Setor
-                    </SelectItem>
-                    <SelectItem value="os-por-tecnico">
-                      🔧 OS por Técnico
-                    </SelectItem>
-                    <SelectItem value="performance-tecnicos">
-                      📊 Performance dos Técnicos
-                    </SelectItem>
+                    <SelectItem value="equipamentos-por-setor">Relatório de Equipamentos por Setor</SelectItem>
+                    <SelectItem value="os-por-tecnico">Relatório de OS por Técnico</SelectItem>
+                    <SelectItem value="performance-tecnicos">Relatório de Performance dos Técnicos</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label htmlFor="dataInicio">Data Início</Label>
+                  <Input
+                    id="dataInicio"
+                    type="date"
+                    value={filters.dataInicio}
+                    onChange={(e) =>
+                      setFilters(prev => ({ ...prev, dataInicio: e.target.value }))
+                    }
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="dataFim">Data Fim</Label>
+                  <Input
+                    id="dataFim"
+                    type="date"
+                    value={filters.dataFim}
+                    onChange={(e) =>
+                      setFilters(prev => ({ ...prev, dataFim: e.target.value }))
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setShowPreview(!showPreview)}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  {showPreview ? 'Ocultar' : 'Visualizar'}
+                </Button>
+
+                {getReportComponent() && (
+                  <PDFDownloadLink
+                    document={getReportComponent()!}
+                    fileName={getReportFilename()}
+                  >
+                    {({ loading }) => (
+                      <Button disabled={loading} className="flex-1">
+                        <Download className="h-4 w-4 mr-2" />
+                        {loading ? 'Carregando dados...' : 'Download'}
+                      </Button>
+                    )}
+                  </PDFDownloadLink>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -353,94 +296,44 @@ export const ReportGenerator: React.FC = () => {
 
         {/* Preview */}
         <div className="lg:col-span-2">
-          {showPreview && getReportComponent() && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Preview do Relatório</CardTitle>
-                <CardDescription>
-                  {reportType === 'performance-tecnicos' && 
-                    'Análise detalhada da performance dos técnicos'}
-                  {reportType === 'os-por-tecnico' && 
-                    'Ordens de serviço agrupadas por técnico'}
-                  {reportType === 'equipamentos-por-setor' && 
-                    'Equipamentos organizados por setor'}
-                </CardDescription>
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setShowPreview(false)}
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    Ocultar Preview
-                  </Button>
-                  
-                  {getReportComponent() && (
-                    <PDFDownloadLink
-                      document={getReportComponent()!}
-                      fileName={getReportFilename()}
-                    >
-                      {({ loading: pdfLoading }) => (
-                        <Button 
-                          disabled={pdfLoading} 
-                          size="sm"
-                        >
-                          <Download className="h-4 w-4 mr-2" />
-                          {pdfLoading ? 'Gerando PDF...' : 'Download PDF'}
-                        </Button>
-                      )}
-                    </PDFDownloadLink>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[600px] border rounded-lg overflow-hidden">
-                  <PDFViewer width="100%" height="100%">
-                    {getReportComponent()}
-                  </PDFViewer>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {!showPreview && (
+          {showPreview ? (
+            getReportComponent() ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Preview do Relatório</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[600px] border rounded-lg overflow-hidden">
+                    <PDFViewer width="100%" height="100%">
+                      {getReportComponent()}
+                    </PDFViewer>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardContent className="flex items-center justify-center h-[400px] text-muted-foreground">
+                  <div className="text-center">
+                    <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Nenhum dado disponível para gerar o relatório</p>
+                    <p className="text-sm mt-2">
+                      Tipo: {reportType} | 
+                      Config: {Object.keys(reportConfig).length > 0 ? 'OK' : 'Vazia'} |
+                      Loading: {loading ? 'Sim' : 'Não'}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          ) : (
             <Card>
               <CardContent className="flex items-center justify-center h-[400px] text-muted-foreground">
                 <div className="text-center">
                   <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p className="text-lg font-medium mb-2">
-                    Configure e gere um relatório
+                  <p>Configure os parâmetros e clique em "Gerar Relatório" para ver o preview</p>
+                  <p className="text-sm mt-2">
+                    Tipo selecionado: {reportType}
                   </p>
-                  <p className="text-sm mb-4">
-                    Preencha os filtros e clique em "Gerar Relatório" para visualizar
-                  </p>
-                  
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2 justify-center">
-                      <Select value={reportType} onValueChange={(value) => {
-                        setReportType(value);
-                        setShowPreview(false);
-                        setPerformanceTecnicos([]);
-                        setOsPorTecnico([]);
-                        setEquipamentosPorSetor([]);
-                      }}>
-                        <SelectTrigger className="w-64">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="equipamentos-por-setor">
-                            📦 Equipamentos por Setor
-                          </SelectItem>
-                          <SelectItem value="os-por-tecnico">
-                            🔧 OS por Técnico
-                          </SelectItem>
-                          <SelectItem value="performance-tecnicos">
-                            📊 Performance dos Técnicos
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
                 </div>
               </CardContent>
             </Card>
