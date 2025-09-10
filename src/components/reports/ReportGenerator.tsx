@@ -9,8 +9,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, Download, FileText, Eye } from 'lucide-react';
 import { EquipamentosPorSetorReport } from './EquipamentosPorSetorReport';
 import { OsPorTecnicoReport } from './OsPorTecnicoReport';
+import { PerformanceTecnicosReport } from './PerformanceTecnicosReport';
 import { ReportConfigEquipamentosPorSetor } from './configs/ReportConfigEquipamentosPorSetor';
 import { ReportConfigOsPorTecnico } from './configs/ReportConfigOsPorTecnico';
+import { ReportConfigPerformanceTecnicos } from './configs/ReportConfigPerformanceTecnicos';
 import api from '@/lib/api';
 
 export const ReportGenerator: React.FC = () => {
@@ -27,11 +29,13 @@ export const ReportGenerator: React.FC = () => {
     fim: '',
     campoData: 'criadoEm',
     status: '',
+    detalhes: false,
   });
   const [showPreview, setShowPreview] = useState(false);
   const [condicionadores, setCondicionadores] = useState<any[]>([]);
   const [equipamentosPorSetor, setEquipamentosPorSetor] = useState<any[]>([]);
   const [osPorTecnico, setOsPorTecnico] = useState<any[]>([]);
+  const [performanceTecnicos, setPerformanceTecnicos] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [reportConfig, setReportConfig] = useState<any>({});
 
@@ -48,7 +52,23 @@ export const ReportGenerator: React.FC = () => {
       }
       return;
     }
-  }, [reportType, filters.setores, filters.tipos, filters.tecnicos, filters.inicio, filters.fim, filters.campoData, filters.status]);
+    if (reportType === 'performance-tecnicos') {
+      if (filters.inicio && filters.fim) {
+        fetchPerformanceTecnicos();
+      }
+      return;
+    }
+  }, [
+    reportType, 
+    filters.setores, 
+    filters.tipos, 
+    filters.tecnicos, 
+    filters.inicio, 
+    filters.fim, 
+    filters.campoData, 
+    filters.status,
+    filters.detalhes
+  ]);
 
   const fetchEquipamentosPorSetor = async (config?: any) => {
     try {
@@ -91,7 +111,26 @@ export const ReportGenerator: React.FC = () => {
     }
   };
 
-
+  const fetchPerformanceTecnicos = async (config?: any) => {
+    try {
+      const configToUse = config || reportConfig;
+      if (!configToUse.inicio || !configToUse.fim) return;
+      setLoading(true);
+      const response = await api.get('/reports/performance-tecnicos', {
+        params: {
+          inicio: configToUse.inicio,
+          fim: configToUse.fim,
+          tecnicos: configToUse.tecnicos || undefined,
+          detalhes: configToUse.detalhes || false,
+        },
+      });
+      setPerformanceTecnicos(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar performance dos técnicos:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getReportComponent = () => {
     switch (reportType) {
@@ -107,6 +146,19 @@ export const ReportGenerator: React.FC = () => {
           <OsPorTecnicoReport
             data={osPorTecnico}
             filtros={reportConfig}
+          />
+        );
+      case 'performance-tecnicos':
+        return (
+          <PerformanceTecnicosReport
+            data={performanceTecnicos}
+            filtros={{
+              periodo: reportConfig.inicio && reportConfig.fim 
+                ? `${new Date(reportConfig.inicio).toLocaleDateString('pt-BR')} - ${new Date(reportConfig.fim).toLocaleDateString('pt-BR')}`
+                : undefined,
+              tecnicos: reportConfig.tecnicosNomes || reportConfig.tecnicos,
+              incluirDetalhes: reportConfig.detalhes || false,
+            }}
           />
         );
       default:
@@ -125,6 +177,8 @@ export const ReportGenerator: React.FC = () => {
         return `relatorio-equip-por-setor-${now}.pdf`;
       case 'os-por-tecnico':
         return `relatorio-os-por-tecnico-${now}.pdf`;
+      case 'performance-tecnicos':
+        return `relatorio-performance-tecnicos-${now}.pdf`;
       default:
         return `relatorio-${now}.pdf`;
     }
@@ -154,6 +208,17 @@ export const ReportGenerator: React.FC = () => {
             loading={loading}
           />
         );
+      case 'performance-tecnicos':
+        return (
+          <ReportConfigPerformanceTecnicos
+            onConfigChange={(config) => {
+              setReportConfig(config);
+              fetchPerformanceTecnicos(config);
+            }}
+            onGenerate={() => setShowPreview(true)}
+            loading={loading}
+          />
+        );
       default:
         return (
           <Card>
@@ -174,8 +239,15 @@ export const ReportGenerator: React.FC = () => {
                     <SelectValue placeholder="Selecione o tipo" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="equipamentos-por-setor">Relatório de Equipamentos por Setor</SelectItem>
-                    <SelectItem value="os-por-tecnico">Relatório de OS por Técnico</SelectItem>
+                    <SelectItem value="equipamentos-por-setor">
+                      📦 Equipamentos por Setor
+                    </SelectItem>
+                    <SelectItem value="os-por-tecnico">
+                      🔧 OS por Técnico
+                    </SelectItem>
+                    <SelectItem value="performance-tecnicos">
+                      📊 Performance dos Técnicos
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -249,6 +321,14 @@ export const ReportGenerator: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Preview do Relatório</CardTitle>
+                <CardDescription>
+                  {reportType === 'performance-tecnicos' && 
+                    'Análise detalhada da performance dos técnicos'}
+                  {reportType === 'os-por-tecnico' && 
+                    'Ordens de serviço agrupadas por técnico'}
+                  {reportType === 'equipamentos-por-setor' && 
+                    'Equipamentos organizados por setor'}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-[600px] border rounded-lg overflow-hidden">
@@ -265,7 +345,26 @@ export const ReportGenerator: React.FC = () => {
               <CardContent className="flex items-center justify-center h-[400px] text-muted-foreground">
                 <div className="text-center">
                   <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Clique em "Visualizar" para ver o preview do relatório</p>
+                  <p className="text-lg font-medium mb-2">
+                    Selecione um relatório para visualizar
+                  </p>
+                  <p className="text-sm">
+                    Configure os filtros e clique em "Visualizar" para ver o preview
+                  </p>
+                  <div className="mt-4 grid grid-cols-1 gap-2 text-sm">
+                    <div className="flex items-center gap-2 justify-center">
+                      <span>📦</span>
+                      <span>Equipamentos por Setor</span>
+                    </div>
+                    <div className="flex items-center gap-2 justify-center">
+                      <span>🔧</span>
+                      <span>OS por Técnico</span>
+                    </div>
+                    <div className="flex items-center gap-2 justify-center">
+                      <span>📊</span>
+                      <span>Performance dos Técnicos</span>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
