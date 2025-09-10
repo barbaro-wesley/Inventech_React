@@ -24,37 +24,7 @@ import {
   CheckCircle 
 } from 'lucide-react';
 
-// Mock API for demonstration
-const api = {
-  get: async (endpoint) => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    if (endpoint === '/tecnicos') {
-      return {
-        data: [
-          { id: 1, nome: 'João Silva', email: 'joao@empresa.com', ativo: true, grupo: { nome: 'Mecânica' } },
-          { id: 2, nome: 'Maria Santos', email: 'maria@empresa.com', ativo: true, grupo: { nome: 'Elétrica' } },
-          { id: 3, nome: 'Pedro Costa', email: 'pedro@empresa.com', ativo: true, grupo: { nome: 'Hidráulica' } },
-          { id: 4, nome: 'Ana Oliveira', email: 'ana@empresa.com', ativo: true, grupo: { nome: 'Mecânica' } },
-          { id: 5, nome: 'Carlos Ferreira', email: 'carlos@empresa.com', ativo: false, grupo: { nome: 'Elétrica' } },
-        ]
-      };
-    }
-    
-    if (endpoint === '/grupos-manutencao') {
-      return {
-        data: [
-          { id: 1, nome: 'Mecânica', descricao: 'Manutenção mecânica geral' },
-          { id: 2, nome: 'Elétrica', descricao: 'Manutenção elétrica e eletrônica' },
-          { id: 3, nome: 'Hidráulica', descricao: 'Sistemas hidráulicos e pneumáticos' },
-        ]
-      };
-    }
-    
-    return { data: [] };
-  }
-};
+import api from '@/lib/api';
 
 interface Tecnico {
   id: number;
@@ -170,6 +140,21 @@ export function ReportConfigPerformanceTecnicos({
     }));
   };
 
+  const handleGenerate = () => {
+    const finalConfig = prepareConfig();
+    
+    // Se tem a nova prop, usa ela (recomendado)
+    if (onGenerateWithConfig) {
+      onGenerateWithConfig(finalConfig);
+    } else {
+      // Fallback para compatibilidade
+      if (onConfigChange) {
+        onConfigChange(finalConfig);
+      }
+      onGenerate();
+    }
+  };
+
   const isFormValid = config.inicio && config.fim;
   const canGenerate = isFormValid && !loading;
 
@@ -259,24 +244,7 @@ export function ReportConfigPerformanceTecnicos({
                 className="text-sm"
               />
             </div>
-            <div>
-              <Label htmlFor="filtroGrupo" className="text-xs text-muted-foreground">
-                Filtrar por Grupo
-              </Label>
-              <Select value={filtroGrupo} onValueChange={setFiltroGrupo}>
-                <SelectTrigger className="text-sm">
-                  <SelectValue placeholder="Todos os grupos" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os grupos</SelectItem>
-                  {grupos.map((grupo) => (
-                    <SelectItem key={grupo.id} value={grupo.nome}>
-                      {grupo.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            
           </div>
 
           {/* Ações de seleção */}
@@ -417,7 +385,7 @@ export function ReportConfigPerformanceTecnicos({
         {/* Botões de ação */}
         <div className="flex gap-2 pt-4">
           <Button
-            onClick={canGenerate}
+            onClick={handleGenerate}
             disabled={!canGenerate}
             variant="outline"
             className="flex-1"

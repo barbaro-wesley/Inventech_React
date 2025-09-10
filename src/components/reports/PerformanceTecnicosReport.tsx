@@ -229,11 +229,17 @@ export function PerformanceTecnicosReport({ data, filtros }: Props) {
     );
   }
 
- const totalTecnicos = data.length;
- const totalOrdens = data.reduce((sum, item) => sum + item.estatisticas.totalOrdens, 0);const totalConcluidas = data.reduce((sum, item) => sum + item.estatisticas.concluidas, 0); const totalValor = data.reduce((sum, item) => sum + item.estatisticas.valorTotalManutencoes, 0);
-const taxaMedia = totalOrdens > 0 ? Math.round((totalConcluidas / totalOrdens * 100) * 100) / 100 : 0;
- const totalTempoSum = data.reduce((sum, item) => sum + (item.estatisticas.tempoMedioResolucaoHoras * item.estatisticas.concluidas), 0);
-  const tempoMedioGeral = totalConcluidas > 0 ? Math.round((totalTempoSum / totalConcluidas) * 100) / 100 : 0;
+  // Calcular resumo consolidado (corrigido)
+  const totalTecnicos = data.length;
+  const totalOrdens = data.reduce((sum, item) => sum + item.estatisticas.totalOrdens, 0);
+  const totalConcluidas = data.reduce((sum, item) => sum + item.estatisticas.concluidas, 0);
+  const totalValor = data.reduce((sum, item) => sum + item.estatisticas.valorTotalManutencoes, 0);
+  const taxaMedia = totalOrdens > 0 ? Math.round((totalConcluidas / totalOrdens * 100) * 100) / 100 : 0;
+  
+  // Calcular tempo médio corretamente - só considera técnicos com ordens concluídas
+  const tecnicosComConcluidas = data.filter(item => item.estatisticas.concluidas > 0);
+  const tempoMedioGeral = tecnicosComConcluidas.length > 0 ? 
+    Math.round((tecnicosComConcluidas.reduce((sum, item) => sum + item.estatisticas.tempoMedioResolucaoHoras, 0) / tecnicosComConcluidas.length) * 100) / 100 : 0;
 
   return (
     <BaseReport
@@ -366,42 +372,16 @@ const taxaMedia = totalOrdens > 0 ? Math.round((totalConcluidas / totalOrdens * 
           </View>
         ))}
 
-        {/* Resumo Geral */}
+        {/* Resumo Geral - CORRIGIDO */}
         <View style={styles.divider} />
         <Text style={styles.subHeader}>📈 Resumo Consolidado</Text>
         <View style={styles.statsContainer}>
-         <StatCard 
-           label="Total de Técnicos" 
-           value={data.length} 
-         />
-         <StatCard label="Total de Técnicos" value={totalTecnicos} />
-         <StatCard 
-           label="Total de Ordens" 
-           value={data.reduce((sum, item) => sum + item.estatisticas.totalOrdens, 0)} 
-         />
-         <StatCard label="Total de Ordens" value={totalOrdens} />
-         <StatCard 
-           label="Ordens Concluídas" 
-           value={data.reduce((sum, item) => sum + item.estatisticas.concluidas, 0)} 
-         />
-         <StatCard label="Ordens Concluídas" value={totalConcluidas} />
-         <StatCard 
-           label="Valor Total Movimentado" 
-           value={data.reduce((sum, item) => sum + item.estatisticas.valorTotalManutencoes, 0)} 
-           isCurrency={true}
-         />
-         <StatCard label="Valor Total Movimentado" value={totalValor} isCurrency={true} />
-         <StatCard 
-           label="Taxa Média de Sucesso" 
-           value={Math.round(data.reduce((sum, item) => sum + item.estatisticas.taxaSucesso, 0) / data.length * 100) / 100} 
-           isPercentage={true}
-         />
-         <StatCard label="Taxa Média de Sucesso" value={taxaMedia} isPercentage={true} />
-         <StatCard 
-           label="Tempo Médio Geral" 
-           value={Math.round(data.reduce((sum, item) => sum + item.estatisticas.tempoMedioResolucaoHoras, 0) / data.length * 100) / 100} 
-           isHours={true}         />
-         <StatCard label="Tempo Médio Geral" value={tempoMedioGeral} isHours={true} />
+          <StatCard label="Total de Técnicos" value={totalTecnicos} />
+          <StatCard label="Total de Ordens" value={totalOrdens} />
+          <StatCard label="Ordens Concluídas" value={totalConcluidas} />
+          <StatCard label="Taxa Média de Sucesso" value={taxaMedia} isPercentage={true} />
+          <StatCard label="Tempo Médio Geral" value={tempoMedioGeral} isHours={true} />
+          <StatCard label="Valor Total Movimentado" value={totalValor} isCurrency={true} />
         </View>
       </View>
     </BaseReport>
