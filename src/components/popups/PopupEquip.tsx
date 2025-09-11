@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { FaFilePdf, FaPrint, FaCog, FaImage, FaFile, FaTimes, FaDownload, FaEye } from 'react-icons/fa';
+import { FaFilePdf, FaPrint, FaCog, FaImage, FaFile, FaTimes, FaDownload, FaEye, FaWrench, FaClock } from 'react-icons/fa';
 import api from '@/lib/api';
 import { pdf } from '@react-pdf/renderer';
 import { EquipmentDetailReport } from '@/components/reports/EquipmentDetailReport';
@@ -8,6 +8,7 @@ const PopupEquip = ({ equipamento, onClose, onOptionClick }) => {
   const modalRef = useRef();
   const printRef = useRef();
   const [showMenu, setShowMenu] = useState(false);
+  const [activeOSTab, setActiveOSTab] = useState('corretiva');
 
   const formatDate = (dateString) => {
     if (!dateString) return '-';
@@ -121,6 +122,10 @@ const PopupEquip = ({ equipamento, onClose, onOptionClick }) => {
       </span>
     );
   };
+
+  // Separar ordens de serviço por tipo
+  const ordensCorretivas = equipamento.ordensServico ? equipamento.ordensServico.filter(os => !os.preventiva) : [];
+  const ordensPreventivas = equipamento.ordensServico ? equipamento.ordensServico.filter(os => os.preventiva) : [];
 
   const totalManutencao = equipamento.ordensServico
     ? equipamento.ordensServico.reduce((acc, os) => acc + Number(os.valorManutencao || 0), 0)
@@ -357,82 +362,201 @@ const PopupEquip = ({ equipamento, onClose, onOptionClick }) => {
                   <div className="w-1 h-6 bg-slate-500 rounded mr-3"></div>
                   Ordens de Serviço ({equipamento.ordensServico.length})
                 </h3>
+                
+                {/* Abas */}
+                <div className="flex border-b border-gray-200 mb-6">
+                  <button
+                    className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+                      activeOSTab === 'corretiva'
+                        ? 'bg-red-100 text-red-700 border-b-2 border-red-500'
+                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                    }`}
+                    onClick={() => setActiveOSTab('corretiva')}
+                  >
+                    <FaWrench className="h-4 w-4" />
+                    Corretivas ({ordensCorretivas.length})
+                  </button>
+                  <button
+                    className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+                      activeOSTab === 'preventiva'
+                        ? 'bg-blue-100 text-blue-700 border-b-2 border-blue-500'
+                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                    }`}
+                    onClick={() => setActiveOSTab('preventiva')}
+                  >
+                    <FaClock className="h-4 w-4" />
+                    Preventivas ({ordensPreventivas.length})
+                  </button>
+                </div>
+
+                {/* Conteúdo das Abas */}
                 <div className="bg-white rounded-lg border overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="bg-gray-50 border-b">
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            ID
-                          </th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Descrição
-                          </th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status
-                          </th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Valor da Manutenção
-                          </th>
-                          <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Anexos
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200">
-                        {equipamento.ordensServico.map((os) => (
-                          <tr key={os.id} className="hover:bg-gray-50 transition-colors">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">#{os.id}</div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="text-sm text-gray-900 max-w-xs truncate" title={os.descricao}>
-                                {os.descricao}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              {getStatusBadge(os.status)}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">
-                                {os.valorManutencao
-                                  ? new Intl.NumberFormat("pt-BR", {
-                                    style: "currency",
-                                    currency: "BRL",
-                                  }).format(Number(os.valorManutencao))
-                                  : "-"}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              {os.arquivos && os.arquivos.length > 0 ? (
-                                <div className="flex items-center gap-2">
-                                  {os.arquivos.map((arquivo, idx) => {
-                                    const filename = arquivo.split(/[/\\]/).pop();
-                                    const fileInfo = getFileIcon(filename);
-                                    return (
-                                      <button
-                                        key={idx}
-                                        className={`p-2 rounded-lg ${fileInfo.bg} ${fileInfo.color} hover:scale-110 transition-transform`}
-                                        onClick={() => handleOpenFile(arquivo)}
-                                        title={filename}
-                                      >
-                                        {fileInfo.icon}
-                                      </button>
-                                    );
-                                  })}
-                                  <span className="text-xs text-gray-500 ml-2">
-                                    {os.arquivos.length} arquivo{os.arquivos.length > 1 ? 's' : ''}
-                                  </span>
-                                </div>
-                              ) : (
-                                <span className="text-gray-400 text-sm">Sem anexos</span>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  {activeOSTab === 'corretiva' && (
+                    <div className="overflow-x-auto">
+                      {ordensCorretivas.length > 0 ? (
+                        <table className="w-full">
+                          <thead>
+                            <tr className="bg-gray-50 border-b">
+                              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                ID
+                              </th>
+                              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Descrição
+                              </th>
+                              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status
+                              </th>
+                              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Valor da Manutenção
+                              </th>
+                              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Anexos
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200">
+                            {ordensCorretivas.map((os) => (
+                              <tr key={os.id} className="hover:bg-gray-50 transition-colors">
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <div className="text-sm font-medium text-gray-900">#{os.id}</div>
+                                </td>
+                                <td className="px-6 py-4">
+                                  <div className="text-sm text-gray-900 max-w-xs truncate" title={os.descricao}>
+                                    {os.descricao}
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  {getStatusBadge(os.status)}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {os.valorManutencao
+                                      ? new Intl.NumberFormat("pt-BR", {
+                                        style: "currency",
+                                        currency: "BRL",
+                                      }).format(Number(os.valorManutencao))
+                                      : "-"}
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  {os.arquivos && os.arquivos.length > 0 ? (
+                                    <div className="flex items-center gap-2">
+                                      {os.arquivos.map((arquivo, idx) => {
+                                        const filename = arquivo.split(/[/\\]/).pop();
+                                        const fileInfo = getFileIcon(filename);
+                                        return (
+                                          <button
+                                            key={idx}
+                                            className={`p-2 rounded-lg ${fileInfo.bg} ${fileInfo.color} hover:scale-110 transition-transform`}
+                                            onClick={() => handleOpenFile(arquivo)}
+                                            title={filename}
+                                          >
+                                            {fileInfo.icon}
+                                          </button>
+                                        );
+                                      })}
+                                      <span className="text-xs text-gray-500 ml-2">
+                                        {os.arquivos.length} arquivo{os.arquivos.length > 1 ? 's' : ''}
+                                      </span>
+                                    </div>
+                                  ) : (
+                                    <span className="text-gray-400 text-sm">Sem anexos</span>
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      ) : (
+                        <div className="text-center py-12 text-gray-500">
+                          <FaWrench className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                          <p className="text-lg font-medium">Nenhuma ordem corretiva encontrada</p>
+                          <p className="text-sm">Este equipamento não possui ordens de serviço corretivas.</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {activeOSTab === 'preventiva' && (
+                    <div className="overflow-x-auto">
+                      {ordensPreventivas.length > 0 ? (
+                        <table className="w-full">
+                          <thead>
+                            <tr className="bg-gray-50 border-b">
+                              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                ID
+                              </th>
+                              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Descrição
+                              </th>
+                              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status
+                              </th>
+                              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Data Agendada
+                              </th>
+                              <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Anexos
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200">
+                            {ordensPreventivas.map((os) => (
+                              <tr key={os.id} className="hover:bg-gray-50 transition-colors">
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <div className="text-sm font-medium text-gray-900">#{os.id}</div>
+                                </td>
+                                <td className="px-6 py-4">
+                                  <div className="text-sm text-gray-900 max-w-xs truncate" title={os.descricao}>
+                                    {os.descricao}
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  {getStatusBadge(os.status)}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <div className="text-sm font-medium text-gray-900">
+                                    {os.dataAgendada ? formatDate(os.dataAgendada) : '-'}
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  {os.arquivos && os.arquivos.length > 0 ? (
+                                    <div className="flex items-center gap-2">
+                                      {os.arquivos.map((arquivo, idx) => {
+                                        const filename = arquivo.split(/[/\\]/).pop();
+                                        const fileInfo = getFileIcon(filename);
+                                        return (
+                                          <button
+                                            key={idx}
+                                            className={`p-2 rounded-lg ${fileInfo.bg} ${fileInfo.color} hover:scale-110 transition-transform`}
+                                            onClick={() => handleOpenFile(arquivo)}
+                                            title={filename}
+                                          >
+                                            {fileInfo.icon}
+                                          </button>
+                                        );
+                                      })}
+                                      <span className="text-xs text-gray-500 ml-2">
+                                        {os.arquivos.length} arquivo{os.arquivos.length > 1 ? 's' : ''}
+                                      </span>
+                                    </div>
+                                  ) : (
+                                    <span className="text-gray-400 text-sm">Sem anexos</span>
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      ) : (
+                        <div className="text-center py-12 text-gray-500">
+                          <FaClock className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                          <p className="text-lg font-medium">Nenhuma ordem preventiva encontrada</p>
+                          <p className="text-sm">Este equipamento não possui ordens de serviço preventivas.</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Total */}
