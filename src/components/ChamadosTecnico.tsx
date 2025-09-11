@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { CheckCircle, ChevronDown, ChevronUp, Upload, X, FileText, Download } from 'lucide-react';
+import { CheckCircle, ChevronDown, ChevronUp, Upload, X, FileText, Download, Calendar, User, MapPin, Wrench, Clock, Settings, AlertTriangle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import api from '@/lib/api';
 
@@ -40,10 +40,18 @@ interface OS {
     marca?: string | null;
     modelo?: string | null;
   } | null;
+  recorrencia?: string;
+}
+
+interface ApiResponse {
+  preventivas: OS[];
+  corretivas: OS[];
+  totalManutencao?: number;
 }
 
 const ChamadosTecnico = () => {
-  const [chamados, setChamados] = useState<OS[]>([]);
+  const [dadosOS, setDadosOS] = useState<ApiResponse>({ preventivas: [], corretivas: [] });
+  const [tipoAtivo, setTipoAtivo] = useState<'preventivas' | 'corretivas'>('preventivas');
   const [aberto, setAberto] = useState<number | null>(null);
   const [resolucao, setResolucao] = useState('');
   const [arquivos, setArquivos] = useState<File[]>([]);
@@ -67,7 +75,16 @@ const ChamadosTecnico = () => {
         setLoading(true);
         const endpoint = endpointMap[statusFiltro];
         const { data } = await api.get(endpoint, { withCredentials: true });
-        setChamados(data);
+        
+        // Se a resposta já tem a estrutura separada, use-a diretamente
+        if (data.preventivas && data.corretivas) {
+          setDadosOS(data);
+        } else {
+          // Caso contrário, mantenha compatibilidade com a estrutura antiga
+          const preventivas = data.filter((os: OS) => os.preventiva);
+          const corretivas = data.filter((os: OS) => !os.preventiva);
+          setDadosOS({ preventivas, corretivas });
+        }
       } catch (error) {
         console.error('Erro ao buscar chamados:', error);
         toast({
@@ -81,6 +98,9 @@ const ChamadosTecnico = () => {
     };
     fetchChamados();
   }, [statusFiltro, toast]);
+
+  // Obter a lista de OSs baseada no tipo ativo
+  const chamadosAtivos = tipoAtivo === 'preventivas' ? dadosOS.preventivas : dadosOS.corretivas;
 
   // Abrir/Fechar Collapsible
   const handleAbrir = (id: number) => {
@@ -119,12 +139,10 @@ const ChamadosTecnico = () => {
       const filename = getFileNameFromPath(filePath);
       const isPdf = filename.toLowerCase().endsWith('.pdf');
       
-      // Define a URL baseado no tipo de arquivo
       const fileUrl = isPdf 
         ? `${import.meta.env.VITE_API_URL2}/uploads/pdfs/${filename.replace(/^uploads[\/\\]pdfs[\/\\]/i, '')}`
         : `${import.meta.env.VITE_API_URL2}/uploads/${filename.replace(/^uploads[\/\\]pdfs[\/\\]/i, '')}`;
       
-      // Abre o arquivo em nova aba para download
       const link = document.createElement('a');
       link.href = fileUrl;
       link.target = '_blank';
@@ -167,9 +185,14 @@ const ChamadosTecnico = () => {
         description: `OS alterada para ${status} com sucesso!`,
       });
 
-      // Atualiza lista de chamados
       const { data } = await api.get(endpointMap[statusFiltro], { withCredentials: true });
-      setChamados(data);
+      if (data.preventivas && data.corretivas) {
+        setDadosOS(data);
+      } else {
+        const preventivas = data.filter((os: OS) => os.preventiva);
+        const corretivas = data.filter((os: OS) => !os.preventiva);
+        setDadosOS({ preventivas, corretivas });
+      }
 
     } catch (error) {
       console.error("Erro ao alterar status:", error);
@@ -216,9 +239,14 @@ const ChamadosTecnico = () => {
       setFileNames([]);
       setValorManutencao('');
 
-      // Atualiza lista de chamados
       const { data } = await api.get(endpointMap[statusFiltro], { withCredentials: true });
-      setChamados(data);
+      if (data.preventivas && data.corretivas) {
+        setDadosOS(data);
+      } else {
+        const preventivas = data.filter((os: OS) => os.preventiva);
+        const corretivas = data.filter((os: OS) => !os.preventiva);
+        setDadosOS({ preventivas, corretivas });
+      }
     } catch (error) {
       console.error('Erro ao finalizar chamado:', error);
       toast({
@@ -239,6 +267,16 @@ const ChamadosTecnico = () => {
     }
   };
 
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'URGENTE': return 'bg-red-600';
+      case 'ALTO': return 'bg-orange-500';
+      case 'MEDIO': return 'bg-yellow-600';
+      case 'BAIXO': return 'bg-green-600';
+      default: return 'bg-gray-500';
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR', {
       day: '2-digit',
@@ -249,10 +287,18 @@ const ChamadosTecnico = () => {
     });
   };
 
+  function formatDateOnly(dateString: string) {
+    if (!dateString) return "";
+    const [dia, mes, ano] = dateString.split("/");
+    return `${dia}/${mes}/${ano}`;
+  }
+
   if (loading) {
     return (
       <div className="space-y-4 p-4">
-        <h2 className="text-xl font-bold">Chamados Atribuídos</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-foreground">Ordens de Serviço</h2>
+        </div>
         {Array.from({ length: 3 }).map((_, i) => (
           <Card key={i} className="animate-pulse">
             <CardHeader>
@@ -266,109 +312,227 @@ const ChamadosTecnico = () => {
   }
 
   return (
-    <div className="space-y-4 p-4">
-      <h2 className="text-xl font-bold text-foreground">Chamados Atribuídos</h2>
-      <select
-        value={statusFiltro}
-        onChange={(e) => setStatusFiltro(e.target.value)}
-        className="border rounded p-2 text-sm"
-      >
-        <option value="ABERTA">Abertas</option>
-        <option value="EM_ANDAMENTO">Em Andamento</option>
-        <option value="CONCLUIDA">Concluídas</option>
-        <option value="CANCELADA">Canceladas</option>
-      </select>
-      {chamados.length === 0 ? (
+    <div className="space-y-6 p-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-foreground">Ordens de Serviço</h2>
+        <select
+          value={statusFiltro}
+          onChange={(e) => setStatusFiltro(e.target.value)}
+          className="border rounded-lg px-3 py-2 text-sm bg-background"
+        >
+          <option value="ABERTA">Abertas</option>
+          <option value="EM_ANDAMENTO">Em Andamento</option>
+          <option value="CONCLUIDA">Concluídas</option>
+          <option value="CANCELADA">Canceladas</option>
+        </select>
+      </div>
+
+      {/* Tabs para separar Preventivas e Corretivas */}
+      <div className="border-b border-border">
+        <nav className="-mb-px flex space-x-8">
+          <button
+            onClick={() => setTipoAtivo('preventivas')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors ${
+              tipoAtivo === 'preventivas'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300'
+            }`}
+          >
+            <Settings className="w-4 h-4" />
+            Preventivas
+            <Badge variant="secondary" className="ml-1">
+              {dadosOS.preventivas.length}
+            </Badge>
+          </button>
+          <button
+            onClick={() => setTipoAtivo('corretivas')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors ${
+              tipoAtivo === 'corretivas'
+                ? 'border-orange-500 text-orange-600'
+                : 'border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300'
+            }`}
+          >
+            <AlertTriangle className="w-4 h-4" />
+            Corretivas
+            <Badge variant="secondary" className="ml-1">
+              {dadosOS.corretivas.length}
+            </Badge>
+          </button>
+        </nav>
+      </div>
+
+      {/* Resumo de valores */}
+      {dadosOS.totalManutencao !== undefined && (
+        <Card className="bg-muted/30">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Wrench className="w-5 h-5" />
+              Resumo Financeiro
+            </CardTitle>
+            <div className="text-2xl font-bold text-green-600">
+              Total: R$ {dadosOS.totalManutencao.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </div>
+          </CardHeader>
+        </Card>
+      )}
+
+      {chamadosAtivos.length === 0 ? (
         <Card>
           <CardContent className="pt-6">
-            <p className="text-center text-muted-foreground">Nenhum chamado atribuído.</p>
+            <p className="text-center text-muted-foreground">
+              Nenhuma ordem de serviço {tipoAtivo === 'preventivas' ? 'preventiva' : 'corretiva'} encontrada.
+            </p>
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-3">
-          {chamados.map((os) => (
-            <Card key={os.id} className="overflow-hidden">
+        <div className="space-y-4">
+          {chamadosAtivos.map((os) => (
+            <Card key={os.id} className={`overflow-hidden border-l-4 ${
+              tipoAtivo === 'preventivas' ? 'border-l-blue-500' : 'border-l-orange-500'
+            }`}>
               <Collapsible open={aberto === os.id} onOpenChange={() => handleAbrir(os.id)}>
                 <CollapsibleTrigger asChild>
                   <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-2 flex-1">
-                        <div className="flex items-center gap-2">
-                          <CardTitle className="text-sm font-medium">OS #{os.id}</CardTitle>
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-3 flex-1">
+                        {/* Cabeçalho com badges */}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <CardTitle className="text-lg font-semibold">OS #{os.id}</CardTitle>
                           <Badge className={`text-white ${getStatusColor(os.status)}`}>
-                            {os.status}
+                            {os.status.replace('_', ' ')}
                           </Badge>
-                          <Badge className={`text-white ${getStatusColor(os.prioridade)}`}>
+                          <Badge className={`text-white ${getPriorityColor(os.prioridade)}`}>
                             {os.prioridade}
                           </Badge>
-                          {os.preventiva && (
-                            <Badge variant="outline" className="text-xs">Preventiva</Badge>
+                          {os.preventiva ? (
+                            <Badge className="bg-blue-100 text-blue-800">
+                              <Settings className="w-3 h-3 mr-1" />
+                              Preventiva
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-orange-100 text-orange-800">
+                              <AlertTriangle className="w-3 h-3 mr-1" />
+                              Corretiva
+                            </Badge>
+                          )}
+                          {os.recorrencia && os.recorrencia !== 'NENHUMA' && (
+                            <Badge variant="outline" className="text-xs">
+                              {os.recorrencia}
+                            </Badge>
                           )}
                           {os.arquivos && os.arquivos.length > 0 && (
-                            <Badge variant="secondary" className="text-xs">
+                            <Badge variant="outline" className="text-xs">
+                              <FileText className="w-3 h-3 mr-1" />
                               {os.arquivos.length} arquivo{os.arquivos.length > 1 ? 's' : ''}
                             </Badge>
                           )}
                         </div>
-                        <div className="space-y-1">
-                          <p className="text-sm text-foreground font-medium">{os.descricao}</p>
-                        
-                          <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-                            {os.tipoEquipamento && <div><span className="font-medium">Tipo:</span> {os.tipoEquipamento.nome}</div>}
-                            {os.Setor && <div><span className="font-medium">Setor:</span> {os.Setor.nome}</div>}
-                            {os.solicitante && <div><span className="font-medium">Solicitante:</span> {os.solicitante.nome}</div>}
-                            <div>
-                              <span className="font-medium">Criado:</span> {formatDate(os.criadoEm)}
+
+                        {/* Descrição em destaque */}
+                        <div className="bg-muted/30 p-3 rounded-lg">
+                          <p className="text-sm font-medium text-foreground">{os.descricao}</p>
+                        </div>
+
+                        {/* Data agendada em destaque */}
+                        {os.dataAgendada && (
+                          <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4 text-blue-600" />
+                              <span className="font-semibold text-blue-800">Agendado para:</span>
+                              <span className="text-blue-700 font-medium">
+                                {formatDateOnly(os.dataAgendada)}
+                              </span>
                             </div>
+                          </div>
+                        )}
 
-                            {os.iniciadaEm && (
-                              <div>
-                                <span className="font-medium">Iniciado:</span> {formatDate(os.iniciadaEm)}
-                              </div>
-                            )}
+                        {/* Informações organizadas em grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                          {/* Informações do equipamento */}
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-1 text-muted-foreground font-medium">
+                              <Wrench className="w-3 h-3" />
+                              Equipamento
+                            </div>
+                            <div className="pl-4 space-y-1">
+                              {os.tipoEquipamento && (
+                                <div><span className="font-medium">Tipo:</span> {os.tipoEquipamento.nome}</div>
+                              )}
+                              {os.equipamento ? (
+                                <>
+                                  <div><span className="font-medium">Nome:</span> {os.equipamento.nomeEquipamento || "N/I"}</div>
+                                  <div><span className="font-medium">Série:</span> {os.equipamento.numeroSerie || "N/I"}</div>
+                                  {os.equipamento.marca && (
+                                    <div><span className="font-medium">Marca:</span> {os.equipamento.marca}</div>
+                                  )}
+                                  {os.equipamento.modelo && (
+                                    <div><span className="font-medium">Modelo:</span> {os.equipamento.modelo}</div>
+                                  )}
+                                </>
+                              ) : (
+                                <div>N/I</div>
+                              )}
+                            </div>
+                          </div>
 
-                            {os.finalizadoEm && (
-                              <div>
-                                <span className="font-medium">Finalizado:</span> {formatDate(os.finalizadoEm)}
-                              </div>
-                            )}
-
-                            {os.equipamento ? (
-                              <>
-                                <div>
-                                  <span className="font-medium">Equipamento:</span>{" "}
-                                  {os.equipamento.nomeEquipamento?.trim() || "N/I"}
+                          {/* Informações de pessoas e local */}
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-1 text-muted-foreground font-medium">
+                              <User className="w-3 h-3" />
+                              Responsáveis
+                            </div>
+                            <div className="pl-4 space-y-1">
+                              {os.solicitante && (
+                                <div><span className="font-medium">Solicitante:</span> {os.solicitante.nome}</div>
+                              )}
+                              <div><span className="font-medium">Técnico:</span> {os.tecnico.nome}</div>
+                              {os.Setor && (
+                                <div className="flex items-center gap-1">
+                                  <MapPin className="w-3 h-3" />
+                                  <span className="font-medium">Setor:</span> {os.Setor.nome}
                                 </div>
-                                <div>
-                                  <span className="font-medium">SN:</span>{" "}
-                                  {os.equipamento.numeroSerie?.trim() || "N/I"}
-                                </div>
-                              </>
-                            ) : (
-                              <div>
-                                <span className="font-medium">Equipamento:</span> N/I
-                              </div>
-                            )}
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Informações de tempo */}
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-1 text-muted-foreground font-medium">
+                              <Clock className="w-3 h-3" />
+                              Histórico
+                            </div>
+                            <div className="pl-4 space-y-1">
+                              <div><span className="font-medium">Criado:</span> {formatDate(os.criadoEm)}</div>
+
+                              {os.iniciadaEm && (
+                                <div><span className="font-medium">Iniciado:</span> {formatDate(os.iniciadaEm)}</div>
+                              )}
+
+                              {os.finalizadoEm && (
+                                <div><span className="font-medium">Finalizado:</span> {formatDate(os.finalizadoEm)}</div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
+                      
                       <div className="flex items-center gap-2 ml-4">
-                        <CheckCircle className="h-4 w-4" />
-                        {aberto === os.id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        <CheckCircle className="h-5 w-5 text-muted-foreground" />
+                        {aberto === os.id ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                       </div>
                     </div>
                   </CardHeader>
                 </CollapsibleTrigger>
 
                 <CollapsibleContent>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-4 border-t">
                     {/* Seção de arquivos existentes */}
                     {os.arquivos && os.arquivos.length > 0 && (
-                      <div className="space-y-2">
-                        <Label className="font-medium">Arquivos anexados:</Label>
+                      <div className="space-y-3">
+                        <Label className="font-medium text-base">Arquivos anexados:</Label>
                         <div className="space-y-2">
                           {os.arquivos.map((arquivo, idx) => (
-                            <div key={idx} className="flex items-center justify-between bg-muted p-2 rounded text-sm">
+                            <div key={idx} className="flex items-center justify-between bg-muted p-3 rounded-lg text-sm">
                               <div className="flex items-center gap-2">
                                 <FileText className="w-4 h-4 text-muted-foreground" />
                                 <span className="truncate">{getFileNameFromPath(arquivo)}</span>
@@ -378,9 +542,9 @@ const ChamadosTecnico = () => {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleDownloadFile(arquivo)}
-                                className="h-6 w-6 p-0"
+                                className="h-8 w-8 p-0"
                               >
-                                <Download className="w-3 h-3" />
+                                <Download className="w-4 h-4" />
                               </Button>
                             </div>
                           ))}
@@ -389,24 +553,25 @@ const ChamadosTecnico = () => {
                     )}
 
                     {/* Só mostra resolução e arquivos se OS não estiver concluída */}
-                    {os.status !== 'CONCLUIDA' && (
+                    {os.status !== 'CONCLUIDA' && os.status !== 'CANCELADA' && (
                       <>
                         {/* Resolução */}
                         {os.status === 'EM_ANDAMENTO' && (
                           <>
                             <div className="space-y-2">
-                              <Label htmlFor="resolucao">Resolução *</Label>
+                              <Label htmlFor="resolucao" className="text-base font-medium">Resolução *</Label>
                               <Textarea
                                 id="resolucao"
                                 rows={4}
-                                placeholder="Descreva a resolução..."
+                                placeholder="Descreva detalhadamente a resolução do problema..."
                                 value={resolucao}
                                 onChange={(e) => setResolucao(e.target.value)}
+                                className="resize-none"
                               />
                             </div>
 
                             <div className="space-y-2">
-                              <Label htmlFor="valorManutencao">Valor da manutenção (R$)</Label>
+                              <Label htmlFor="valorManutencao" className="text-base font-medium">Valor da manutenção (R$)</Label>
                               <Input
                                 id="valorManutencao"
                                 type="number"
@@ -419,34 +584,35 @@ const ChamadosTecnico = () => {
 
                             {/* Arquivos */}
                             <div className="space-y-2">
-                              <Label htmlFor="arquivos">
+                              <Label htmlFor="arquivos" className="text-base font-medium">
                                 <Upload className="w-4 h-4 inline mr-2" />
                                 Anexar novos arquivos
                               </Label>
-                              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 text-center hover:border-muted-foreground/50 transition-colors">
+                              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center hover:border-muted-foreground/50 transition-colors">
                                 <input
                                   type="file"
                                   id="arquivos"
                                   multiple
-                                  accept="image/*"
+                                  accept="image/*,.pdf"
                                   onChange={handleFileChange}
                                   className="hidden"
                                 />
                                 <label htmlFor="arquivos" className="cursor-pointer">
                                   <div className="flex flex-col items-center gap-2">
-                                    <Upload className="w-6 h-6 text-muted-foreground" />
+                                    <Upload className="w-8 h-8 text-muted-foreground" />
                                     <span className="text-sm text-muted-foreground">Clique para selecionar arquivos</span>
+                                    <span className="text-xs text-muted-foreground">Aceita imagens e PDFs</span>
                                   </div>
                                 </label>
                               </div>
 
                               {fileNames.length > 0 && (
-                                <div className="space-y-1">
+                                <div className="space-y-2">
                                   {fileNames.map((name, idx) => (
-                                    <div key={idx} className="flex items-center justify-between bg-muted p-2 rounded text-sm">
+                                    <div key={idx} className="flex items-center justify-between bg-muted p-3 rounded-lg text-sm">
                                       <span className="truncate">{name}</span>
-                                      <Button type="button" variant="ghost" size="sm" onClick={() => removeFile(idx)} className="h-6 w-6 p-0">
-                                        <X className="w-3 h-3" />
+                                      <Button type="button" variant="ghost" size="sm" onClick={() => removeFile(idx)} className="h-8 w-8 p-0">
+                                        <X className="w-4 h-4" />
                                       </Button>
                                     </div>
                                   ))}
@@ -456,9 +622,10 @@ const ChamadosTecnico = () => {
 
                             <Button
                               onClick={() => handleFinalizar(os)}
-                              className="w-full bg-gradient-brand hover:opacity-90"
+                              className="w-full bg-green-600 hover:bg-green-700"
                               disabled={!resolucao.trim()}
                             >
+                              <CheckCircle className="w-4 h-4 mr-2" />
                               Confirmar Finalização
                             </Button>
                           </>
@@ -466,22 +633,24 @@ const ChamadosTecnico = () => {
 
                         {/* Botão para iniciar a OS se estiver ABERTA */}
                         {os.status === 'ABERTA' && (
-                          <Button
-                            onClick={() => handleMudarStatus(os.id, 'EM_ANDAMENTO')}
-                            className="w-full bg-blue-600 hover:bg-blue-700"
-                          >
-                            Iniciar OS
-                          </Button>
-                        )}
+                          <div className="space-y-2">
+                            <Button
+                              onClick={() => handleMudarStatus(os.id, 'EM_ANDAMENTO')}
+                              className="w-full bg-blue-600 hover:bg-blue-700"
+                            >
+                              <Clock className="w-4 h-4 mr-2" />
+                              Iniciar OS
+                            </Button>
 
-                        {/* Botão para cancelar OS (opcional) */}
-                        {os.status === 'ABERTA' && (
-                          <Button
-                            onClick={() => handleMudarStatus(os.id, 'CANCELADA')}
-                            className="w-full bg-red-500 hover:opacity-90 mt-2"
-                          >
-                            Cancelar OS
-                          </Button>
+                            <Button
+                              onClick={() => handleMudarStatus(os.id, 'CANCELADA')}
+                              variant="outline"
+                              className="w-full border-red-200 text-red-600 hover:bg-red-50"
+                            >
+                              <X className="w-4 h-4 mr-2" />
+                              Cancelar OS
+                            </Button>
+                          </div>
                         )}
                       </>
                     )}

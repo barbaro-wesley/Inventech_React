@@ -54,7 +54,8 @@ const menuItems = [
     title: "Manutenção",
     icon: Wrench,
     items: [
-      { title: "Calendário", url: "/calendario", icon: Calendar },
+      { title: "Calendário", url: "/calendario-tecnico", icon: Calendar },
+
     ],
   },
 ];

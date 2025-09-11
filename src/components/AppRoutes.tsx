@@ -31,6 +31,7 @@ import GestaoSoftware from "@/pages/GestaoSoftware";
 import TiposEPI from "@/pages/TiposEPI";
 import CadastroEPI from "@/pages/CadastroEPI";
 import RegistroEntregaEPI from "@/pages/RegistroEntregaEPI";
+import Calendariotecnico from "@/pages/CalendarioTecnico";
 export const AppRoutes = () => {
   return (
     <Routes>
@@ -115,6 +116,14 @@ export const AppRoutes = () => {
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador','tecnico']}>
             <Calendario />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/calendario-tecnico"
+        element={
+          <ProtectedRoute allowedRoles={['tecnico','cadastro']}>
+            <Calendariotecnico/>
           </ProtectedRoute>
         }
       />
