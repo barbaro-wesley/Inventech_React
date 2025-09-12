@@ -34,6 +34,7 @@ import RegistroEntregaEPI from "@/pages/RegistroEntregaEPI";
 import Calendariotecnico from "@/pages/CalendarioTecnico";
 import UserViewer from "./UserViewer";
 import GrupoManutencao from "@/pages/GrupoManutencao";
+import EquipamentosTecnico from "@/pages/EquipamentosTecnico";
 export const AppRoutes = () => {
   return (
     <Routes>
@@ -86,6 +87,14 @@ export const AppRoutes = () => {
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador', 'tecnico']}>
             <Equipamentos />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/equipamentos-tecnicos"
+        element={
+          <ProtectedRoute allowedRoles={[ 'tecnico']}>
+            <EquipamentosTecnico/>
           </ProtectedRoute>
         }
       />

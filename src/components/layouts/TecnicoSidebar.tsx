@@ -38,9 +38,7 @@ const menuItems = [
       title: "Cadastros",
       icon: Plus,
       items: [
-        { title: "Equipamentos Médicos", url: "/equipamentos", icon: Stethoscope },
-        { title: "Ar Condicionado", url: "/condicionadores", icon: Wind },
-        { title: "Mobílias", url: "/mobilias", icon: Package },
+        { title: "Equipamentos", url: "/equipamentos-tecnicos", icon: Stethoscope },
       ],
     },
   {
