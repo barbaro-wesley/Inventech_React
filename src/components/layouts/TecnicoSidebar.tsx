@@ -31,16 +31,9 @@ import {
 } from "@/components/ui/sidebar";
 
 const menuItems = [
-  {
-    title: "Dashboard",
-    url: "/dashboard",
-    icon: Home,
-  },
-  {
-    title: "Minhas OS",
-    url: "/minhas-os",
-    icon: ClipboardList,
-  },
+        { title: "Calendário", url: "/calendario-tecnico", icon: Calendar },
+
+  
   {
       title: "Cadastros",
       icon: Plus,
@@ -54,7 +47,11 @@ const menuItems = [
     title: "Manutenção",
     icon: Wrench,
     items: [
-      { title: "Calendário", url: "/calendario-tecnico", icon: Calendar },
+      {
+    title: "Minhas OS",
+    url: "/minhas-os",
+    icon: ClipboardList,
+  },
 
     ],
   },

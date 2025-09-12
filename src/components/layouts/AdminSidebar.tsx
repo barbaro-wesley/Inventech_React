@@ -87,6 +87,8 @@ const menuItems = [
       { title: "Localizações", url: "/localizacoes", icon: MapPin },
       { title: "Tipos de Equipamento", url: "/tipos-equipamento", icon: Settings },
       { title: "Técnicos", url: "/tecnicos", icon: Wrench },
+      { title: "Grupos De Manutenção", url: "/grupo-manutencao", icon: Wrench },
+
     ],
   },
   {

@@ -41,15 +41,17 @@ export const ModuleSelection = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const handleModuleSelect = async (moduleId: string) => {
+const handleModuleSelect = async (moduleId: string) => {
     setIsLoading(true);
     localStorage.setItem("selectedModule", moduleId);
 
     setTimeout(() => {
-      if (moduleId === "inventory") {
-        navigate("/dashboard");
-      } else if (moduleId === "documents") {
-        navigate("/dashboard");
+      if (moduleId === "inventory" || moduleId === "documents") {
+        if (user?.papel === "tecnico") {
+          navigate("/calendario-tecnico");
+        } else {
+          navigate("/dashboard");
+        }
       }
     }, 500);
   };

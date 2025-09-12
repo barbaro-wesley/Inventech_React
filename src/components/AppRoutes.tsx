@@ -33,6 +33,7 @@ import CadastroEPI from "@/pages/CadastroEPI";
 import RegistroEntregaEPI from "@/pages/RegistroEntregaEPI";
 import Calendariotecnico from "@/pages/CalendarioTecnico";
 import UserViewer from "./UserViewer";
+import GrupoManutencao from "@/pages/GrupoManutencao";
 export const AppRoutes = () => {
   return (
     <Routes>
@@ -109,6 +110,14 @@ export const AppRoutes = () => {
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador', 'tecnico']}>
             <MobiliasPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/grupo-manutencao"
+        element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <GrupoManutencao/>
           </ProtectedRoute>
         }
       />
