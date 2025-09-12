@@ -41,6 +41,11 @@ const menuItems = [
     icon: Home,
   },
   {
+    title: "Acompanhar Meus Chamados",
+    url: "/userViewer",
+    icon: FileText,
+  },
+  {
     title: "Minhas OS",
     url: "/minhas-os",
     icon: ClipboardList,

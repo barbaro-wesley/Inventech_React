@@ -10,6 +10,7 @@ import {
   Wind,
   Eye,
   BarChart3,
+  FileText
 } from "lucide-react";
 
 import {
@@ -30,6 +31,7 @@ const menuItems = [
     url: "/dashboard",
     icon: Home,
   },
+
   {
     title: "Equipamentos",
     icon: Monitor,
@@ -39,8 +41,12 @@ const menuItems = [
   },
   {
     title: "Relatórios",
-    url: "/relatorios",
-    icon: BarChart3,
+    icon: FileText,
+    items: [
+      { title: "Relatórios", icon: BarChart3, url: "/relatorios" },
+      { title: "Pesquisar Equipamentos", icon: BarChart3, url: "/pesquisar-equipamento" },
+      { title: "Acompanhar Meus Chamados", url: "/userViewer",icon: FileText, }
+    ],
   },
 ];
 
