@@ -11,7 +11,6 @@ import { EquipamentosPorSetorReport } from './EquipamentosPorSetorReport';
 import { OsPorTecnicoReport } from './OsPorTecnicoReport';
 import { ReportConfigEquipamentosPorSetor } from './configs/ReportConfigEquipamentosPorSetor';
 import { ReportConfigOsPorTecnico } from './configs/ReportConfigOsPorTecnico';
-import PerformanceTecnicosReport from './PerformanceTecnicosReport';
 import api from '@/lib/api';
 
 export const ReportGenerator: React.FC = () => {
@@ -174,7 +173,6 @@ export const ReportGenerator: React.FC = () => {
                   <SelectContent>
                     <SelectItem value="equipamentos-por-setor">Relatório de Equipamentos por Setor</SelectItem>
                     <SelectItem value="os-por-tecnico">Relatório de OS por Técnico</SelectItem>
-                    <SelectItem value="performance-tecnicos">Relatório de Performance dos Técnicos</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

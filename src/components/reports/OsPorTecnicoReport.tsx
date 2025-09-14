@@ -24,12 +24,81 @@ interface Props {
 }
 
 const styles = StyleSheet.create({
-  section: { marginBottom: 16 },
-  tecnicoHeader: { fontSize: 14, marginBottom: 6, fontWeight: 700 },
-  row: { flexDirection: 'row', fontSize: 10, borderBottomWidth: 0.5, paddingVertical: 3 },
-  cell: { flexGrow: 1 },
-  cellSmall: { width: 90 },
-  headerRow: { flexDirection: 'row', fontSize: 10, fontWeight: 700, borderBottomWidth: 1, paddingBottom: 4, marginBottom: 2 },
+  section: { 
+    marginBottom: 20,
+    pageBreakInside: 'avoid'
+  },
+  tecnicoHeader: { 
+    fontSize: 14, 
+    marginBottom: 8, 
+    fontWeight: 700,
+    backgroundColor: '#f5f5f5',
+    padding: 6,
+    borderRadius: 3
+  },
+  headerRow: { 
+    flexDirection: 'row', 
+    fontSize: 10, 
+    fontWeight: 700, 
+    borderBottomWidth: 1.5,
+    borderColor: '#333',
+    paddingVertical: 5,
+    marginBottom: 3,
+    backgroundColor: '#fafafa'
+  },
+  row: { 
+    flexDirection: 'row', 
+    fontSize: 10, 
+    borderBottomWidth: 0.5,
+    borderColor: '#ddd',
+    paddingVertical: 4,
+    minHeight: 16
+  },
+  cellOS: { 
+    width: 50,
+    paddingRight: 5
+  },
+  cellEquipamento: { 
+    width: 200, // Aumentei significativamente para nomes longos
+    paddingRight: 8,
+    overflow: 'hidden'
+  },
+  cellStatus: { 
+    width: 70,
+    paddingRight: 5
+  },
+  cellData: { 
+    width: 65,
+    paddingRight: 5
+  },
+  cellDataFinal: { 
+    width: 65
+  },
+  // Estilos para observações
+  observacoesContainer: {
+    marginTop: 10,
+    padding: 8,
+    backgroundColor: '#fafafa',
+    borderRadius: 3,
+    borderLeft: '3px solid #007bff'
+  },
+  observacoesTitle: {
+    fontSize: 10,
+    fontWeight: 700,
+    marginBottom: 4,
+    color: '#333'
+  },
+  observacaoItem: {
+    fontSize: 9,
+    marginBottom: 2,
+    lineHeight: 1.3,
+    paddingLeft: 8
+  },
+  equipamentoText: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap'
+  }
 });
 
 export function OsPorTecnicoReport({ data, filtros }: Props) {
@@ -39,6 +108,12 @@ export function OsPorTecnicoReport({ data, filtros }: Props) {
   if (filtros?.campoData) subtitleParts.push(`Campo de data: ${filtros.campoData}`);
   if (filtros?.status) subtitleParts.push(`Status: ${filtros.status}`);
   const subtitle = subtitleParts.join(' | ');
+
+  // Função para truncar texto se necessário
+  const truncateText = (text: string, maxLength: number) => {
+    if (!text) return '-';
+    return text.length > maxLength ? text.substring(0, maxLength - 3) + '...' : text;
+  };
 
   return (
     <BaseReport
@@ -52,39 +127,38 @@ export function OsPorTecnicoReport({ data, filtros }: Props) {
           data.map((tec, idx) => (
             <View key={idx} style={styles.section}>
               <Text style={styles.tecnicoHeader}>
-                Técnico: {tec.tecnico} • Total: {tec.quantidade ?? tec.ordens?.length ?? 0}
+                Técnico: {tec.tecnico} • Total de OS: {tec.quantidade ?? tec.ordens?.length ?? 0}
               </Text>
 
+              {/* Cabeçalho da tabela */}
               <View style={styles.headerRow}>
-                <Text style={[styles.cellSmall]}>OS</Text>
-                <Text style={[styles.cell]}>Equipamento</Text>
-                <Text style={[styles.cellSmall]}>Status</Text>
-                <Text style={[styles.cellSmall]}>Criado</Text>
-                <Text style={[styles.cellSmall]}>Finalizado</Text>
+                <Text style={styles.cellOS}>OS</Text>
+                <Text style={styles.cellEquipamento}>Equipamento</Text>
+                <Text style={styles.cellStatus}>Status</Text>
+                <Text style={styles.cellData}>Criado</Text>
+                <Text style={styles.cellDataFinal}>Finalizado</Text>
               </View>
 
+              {/* Linhas de dados */}
               {tec.ordens?.map((os, oidx) => (
                 <View key={oidx} style={styles.row}>
-                  <Text style={[styles.cellSmall]}>{String(os.id || '-')}</Text>
-                  <Text style={[styles.cell]}>{os.equipamento || '-'}</Text>
-                  <Text style={[styles.cellSmall]}>{os.status || '-'}</Text>
-                  <Text style={[styles.cellSmall]}>{os.criadoEm || '-'}</Text>
-                  <Text style={[styles.cellSmall]}>{os.finalizadoEm || '-'}</Text>
+                  <Text style={styles.cellOS}>{String(os.id || '-')}</Text>
+                  <Text style={styles.cellEquipamento}>
+                    {truncateText(os.equipamento || '', 35)}
+                  </Text>
+                  <Text style={styles.cellStatus}>{os.status || '-'}</Text>
+                  <Text style={styles.cellData}>{os.criadoEm || '-'}</Text>
+                  <Text style={styles.cellDataFinal}>{os.finalizadoEm || '-'}</Text>
                 </View>
-              ))}
-
-              {tec.ordens?.some((o) => o.resolucao) && (
-                <View style={{ marginTop: 6 }}>
-                  <Text style={{ fontSize: 10, fontWeight: 700 }}>Observações/Resoluções:</Text>
-                  {tec.ordens.filter((o) => o.resolucao).map((o, ridx) => (
-                    <Text key={ridx} style={{ fontSize: 10 }}>• {o.resolucao}</Text>
-                  ))}
-                </View>
-              )}
+              ))}              
             </View>
           ))
         ) : (
-          <Text style={{ fontSize: 12 }}>Nenhum dado para exibir.</Text>
+          <View style={{ textAlign: 'center', marginTop: 40 }}>
+            <Text style={{ fontSize: 12, color: '#666' }}>
+              Nenhum dado disponível para exibir no relatório.
+            </Text>
+          </View>
         )}
       </View>
     </BaseReport>

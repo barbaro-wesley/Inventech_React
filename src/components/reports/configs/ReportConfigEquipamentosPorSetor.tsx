@@ -70,77 +70,144 @@ export function ReportConfigEquipamentosPorSetor({ onConfigChange, onGenerate, l
     }
   };
 
+  // Função para selecionar/desselecionar todos os setores
+  const handleSelectAllSetores = (checked: boolean) => {
+    if (checked) {
+      setSelectedSetores(setores.map(setor => setor.id));
+    } else {
+      setSelectedSetores([]);
+    }
+  };
+
+  // Função para selecionar/desselecionar todos os tipos
+  const handleSelectAllTipos = (checked: boolean) => {
+    if (checked) {
+      setSelectedTipos(tipos.map(tipo => tipo.id));
+    } else {
+      setSelectedTipos([]);
+    }
+  };
+
   // ✅ só dispara quando clicar no botão
   const handleGenerate = () => {
     onConfigChange({
-      setores: selectedSetores.join(','),
+      setores: selectedSetores.join(','), // Se vazio, será uma string vazia
       tipos: selectedTipos.join(',')
     });
     onGenerate();
   };
 
-  const canGenerate = selectedSetores.length > 0 && selectedTipos.length > 0;
+  // ✅ Agora só precisa de tipos selecionados (setores é opcional)
+  const canGenerate = selectedTipos.length > 0;
+
+  const allSetoresSelected = selectedSetores.length === setores.length && setores.length > 0;
+  const allTiposSelected = selectedTipos.length === tipos.length && tipos.length > 0;
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Equipamentos por Setor</CardTitle>
         <CardDescription>
-          Selecione os setores e tipos de equipamento para o relatório
+          Selecione os tipos de equipamento (obrigatório) e opcionalmente os setores para filtrar o relatório
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <Label className="text-sm font-medium mb-2 block">Setores</Label>
+          <div className="flex items-center justify-between mb-2">
+            <Label className="text-sm font-medium">Setores (Opcional)</Label>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleSelectAllSetores(!allSetoresSelected)}
+              disabled={loadingData || setores.length === 0}
+            >
+              {allSetoresSelected ? 'Desmarcar Todos' : 'Selecionar Todos'}
+            </Button>
+          </div>
           <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-3">
             {loadingData ? (
               <p className="text-sm text-muted-foreground">Carregando setores...</p>
+            ) : setores.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhum setor encontrado</p>
             ) : (
-              setores.map((setor) => (
-                <div key={setor.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`setor-${setor.id}`}
-                    checked={selectedSetores.includes(setor.id)}
-                    onCheckedChange={(checked) => handleSetorChange(setor.id, checked as boolean)}
-                  />
-                  <Label htmlFor={`setor-${setor.id}`} className="text-sm">
-                    {setor.nome}
-                  </Label>
-                </div>
-              ))
+              <>
+                <p className="text-xs text-muted-foreground mb-2">
+                  {selectedSetores.length === 0 
+                    ? "Todos os setores serão incluídos" 
+                    : `${selectedSetores.length} setor(es) selecionado(s)`}
+                </p>
+                {setores.map((setor) => (
+                  <div key={setor.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`setor-${setor.id}`}
+                      checked={selectedSetores.includes(setor.id)}
+                      onCheckedChange={(checked) => handleSetorChange(setor.id, checked as boolean)}
+                    />
+                    <Label htmlFor={`setor-${setor.id}`} className="text-sm">
+                      {setor.nome}
+                    </Label>
+                  </div>
+                ))}
+              </>
             )}
           </div>
         </div>
 
         <div>
-          <Label className="text-sm font-medium mb-2 block">Tipos de Equipamento</Label>
+          <div className="flex items-center justify-between mb-2">
+            <Label className="text-sm font-medium">
+              Tipos de Equipamento <span className="text-red-500">*</span>
+            </Label>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleSelectAllTipos(!allTiposSelected)}
+              disabled={loadingData || tipos.length === 0}
+            >
+              {allTiposSelected ? 'Desmarcar Todos' : 'Selecionar Todos'}
+            </Button>
+          </div>
           <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-3">
             {loadingData ? (
               <p className="text-sm text-muted-foreground">Carregando tipos...</p>
+            ) : tipos.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhum tipo encontrado</p>
             ) : (
-              tipos.map((tipo) => (
-                <div key={tipo.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`tipo-${tipo.id}`}
-                    checked={selectedTipos.includes(tipo.id)}
-                    onCheckedChange={(checked) => handleTipoChange(tipo.id, checked as boolean)}
-                  />
-                  <Label htmlFor={`tipo-${tipo.id}`} className="text-sm">
-                    {tipo.nome || '-'} ({tipo.grupo?.nome || '-'})
-                  </Label>
-                </div>
-              ))
+              <>
+                <p className="text-xs text-muted-foreground mb-2">
+                  {selectedTipos.length} tipo(s) selecionado(s)
+                </p>
+                {tipos.map((tipo) => (
+                  <div key={tipo.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`tipo-${tipo.id}`}
+                      checked={selectedTipos.includes(tipo.id)}
+                      onCheckedChange={(checked) => handleTipoChange(tipo.id, checked as boolean)}
+                    />
+                    <Label htmlFor={`tipo-${tipo.id}`} className="text-sm">
+                      {tipo.nome || '-'} ({tipo.grupo?.nome || '-'})
+                    </Label>
+                  </div>
+                ))}
+              </>
             )}
           </div>
         </div>
 
-        <Button
-          onClick={handleGenerate} // <-- chama a função que combina filtros e generate
-          disabled={!canGenerate || loading}
-          className="w-full"
-        >
-          {loading ? 'Gerando relatório...' : 'Gerar Relatório'}
-        </Button>
+        <div className="pt-2">
+          {!canGenerate && (
+            <p className="text-sm text-muted-foreground mb-2">
+              * Selecione pelo menos um tipo de equipamento para gerar o relatório
+            </p>
+          )}
+          <Button
+            onClick={handleGenerate}
+            disabled={!canGenerate || loading}
+            className="w-full"
+          >
+            {loading ? 'Gerando relatório...' : 'Gerar Relatório'}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
