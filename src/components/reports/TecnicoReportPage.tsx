@@ -201,9 +201,9 @@ export function TecnicoReportPage() {
             <div className="flex items-center gap-3 mb-6">
                 <Calendar className="h-6 w-6 text-blue-600" />
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Relatórios de Técnicos</h1>
+                    <h1 className="text-2xl font-bold text-gray-900">Relatório de Ordens de Serviço por Período </h1>
                     <p className="text-muted-foreground">
-                        Gere relatórios completos sobre as atividades dos técnicos
+                        Gere relatórios completos sobre sua atividades.
                     </p>
                 </div>
             </div>

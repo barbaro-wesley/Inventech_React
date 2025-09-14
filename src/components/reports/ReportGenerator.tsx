@@ -11,7 +11,6 @@ import { EquipamentosPorSetorReport } from './EquipamentosPorSetorReport';
 import { OsPorTecnicoReport } from './OsPorTecnicoReport';
 import { ReportConfigEquipamentosPorSetor } from './configs/ReportConfigEquipamentosPorSetor';
 import { ReportConfigOsPorTecnico } from './configs/ReportConfigOsPorTecnico';
-import ReportConfigPerformanceTecnicos from './configs/ReportConfigPerformanceTecnicos';
 import PerformanceTecnicosReport from './PerformanceTecnicosReport';
 import api from '@/lib/api';
 
@@ -34,7 +33,6 @@ export const ReportGenerator: React.FC = () => {
   const [condicionadores, setCondicionadores] = useState<any[]>([]);
   const [equipamentosPorSetor, setEquipamentosPorSetor] = useState<any[]>([]);
   const [osPorTecnico, setOsPorTecnico] = useState<any[]>([]);
-  const [performanceTecnicos, setPerformanceTecnicos] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [reportConfig, setReportConfig] = useState<any>({});
 
@@ -48,12 +46,6 @@ export const ReportGenerator: React.FC = () => {
     if (reportType === 'os-por-tecnico') {
       if (filters.tecnicos && filters.inicio && filters.fim) {
         fetchOsPorTecnico();
-      }
-      return;
-    }
-    if (reportType === 'performance-tecnicos') {
-      if (filters.inicio && filters.fim) {
-        fetchPerformanceTecnicos();
       }
       return;
     }
@@ -100,26 +92,6 @@ export const ReportGenerator: React.FC = () => {
     }
   };
 
-  const fetchPerformanceTecnicos = async (config?: any) => {
-    try {
-      const configToUse = config || reportConfig;
-      if (!configToUse.inicio || !configToUse.fim) return;
-      setLoading(true);
-      const response = await api.get('/reports/performance-tecnicos', {
-        params: {
-          tecnicos: configToUse.tecnicos,
-          inicio: configToUse.inicio,
-          fim: configToUse.fim,
-          detalhes: configToUse.detalhes || false,
-        },
-      });
-      setPerformanceTecnicos(response.data);
-    } catch (error) {
-      console.error('Erro ao buscar performance dos técnicos:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const getReportComponent = () => {
     switch (reportType) {
@@ -137,17 +109,8 @@ export const ReportGenerator: React.FC = () => {
             filtros={reportConfig}
           />
         );
-      case 'performance-tecnicos':
-        return (
-          <PerformanceTecnicosReport
-            data={performanceTecnicos}
-            filtros={reportConfig}
-          />
-        );
-      default:
-        return null;
-    }
-  };
+  }};
+
 
   const getReportFilename = () => {
     const now = new Date().toISOString().split('T')[0];
@@ -160,8 +123,6 @@ export const ReportGenerator: React.FC = () => {
         return `relatorio-equip-por-setor-${now}.pdf`;
       case 'os-por-tecnico':
         return `relatorio-os-por-tecnico-${now}.pdf`;
-      case 'performance-tecnicos':
-        return `relatorio-performance-tecnicos-${now}.pdf`;
       default:
         return `relatorio-${now}.pdf`;
     }
@@ -191,19 +152,6 @@ export const ReportGenerator: React.FC = () => {
             loading={loading}
           />
         );
-      case 'performance-tecnicos':
-        return (
-          <ReportConfigPerformanceTecnicos
-            onConfigChange={(config) => {
-              setReportConfig(config);
-            }}
-            onGenerate={() => {
-              fetchPerformanceTecnicos(reportConfig);
-              setShowPreview(true);
-            }}
-            loading={loading}
-          />
-        );
       default:
         return (
           <Card>
@@ -229,31 +177,6 @@ export const ReportGenerator: React.FC = () => {
                     <SelectItem value="performance-tecnicos">Relatório de Performance dos Técnicos</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <Label htmlFor="dataInicio">Data Início</Label>
-                  <Input
-                    id="dataInicio"
-                    type="date"
-                    value={filters.dataInicio}
-                    onChange={(e) =>
-                      setFilters(prev => ({ ...prev, dataInicio: e.target.value }))
-                    }
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="dataFim">Data Fim</Label>
-                  <Input
-                    id="dataFim"
-                    type="date"
-                    value={filters.dataFim}
-                    onChange={(e) =>
-                      setFilters(prev => ({ ...prev, dataFim: e.target.value }))
-                    }
-                  />
-                </div>
               </div>
 
               <div className="flex gap-2">
