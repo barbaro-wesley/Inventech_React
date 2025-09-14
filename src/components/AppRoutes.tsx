@@ -35,6 +35,7 @@ import Calendariotecnico from "@/pages/CalendarioTecnico";
 import UserViewer from "./UserViewer";
 import GrupoManutencao from "@/pages/GrupoManutencao";
 import EquipamentosTecnico from "@/pages/EquipamentosTecnico";
+import { TecnicoReportPage } from "./reports/TecnicoReportPage";
 export const AppRoutes = () => {
   return (
     <Routes>
@@ -172,6 +173,18 @@ export const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/relatoriosTecnicos"
+        element={
+          <ProtectedRoute allowedRoles={['tecnico']}>
+            <TecnicoReportPage />
+          </ProtectedRoute>
+        }
+      />
+
+
+
+      
       <Route
         path="/tecnicos"
         element={

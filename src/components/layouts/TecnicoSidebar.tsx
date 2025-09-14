@@ -15,6 +15,8 @@ import {
   Stethoscope,
   Wind,
   Package,
+  BarChart3,
+  FileText
 } from "lucide-react";
 
 import {
@@ -27,32 +29,41 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-  
+
 } from "@/components/ui/sidebar";
 
 const menuItems = [
-        { title: "Calendário", url: "/calendario-tecnico", icon: Calendar },
+  { title: "Calendário", url: "/calendario-tecnico", icon: Calendar },
 
-  
+
   {
-      title: "Cadastros",
-      icon: Plus,
-      items: [
-        { title: "Equipamentos", url: "/equipamentos-tecnicos", icon: Stethoscope },
-      ],
-    },
+    title: "Cadastros",
+    icon: Plus,
+    items: [
+      { title: "Equipamentos", url: "/equipamentos-tecnicos", icon: Stethoscope },
+    ],
+  },
+
   {
     title: "Manutenção",
     icon: Wrench,
     items: [
       {
-    title: "Minhas OS",
-    url: "/minhas-os",
-    icon: ClipboardList,
-  },
+        title: "Minhas OS",
+        url: "/minhas-os",
+        icon: ClipboardList,
+      },
+  
 
     ],
   },
+  {
+      title: "Relatórios",
+      icon: FileText,
+      items: [
+        { title: "Relatórios", icon: BarChart3, url: "/relatoriosTecnicos" },
+      ],
+    },
 ];
 
 export function TecnicoSidebar() {
