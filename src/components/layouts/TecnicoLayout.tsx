@@ -23,9 +23,7 @@ export const TecnicoLayout = ({ children }: TecnicoLayoutProps) => {
         </div>
 
         {/* Sidebar direita com os chamados do técnico */}
-        <div className="w-80 border-l bg-background overflow-y-auto">
-          <ChamadosTecnico />
-        </div>
+        
       </div>
     </SidebarProvider>
   );

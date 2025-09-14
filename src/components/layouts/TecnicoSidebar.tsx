@@ -53,17 +53,19 @@ const menuItems = [
         url: "/minhas-os",
         icon: ClipboardList,
       },
-  
+
 
     ],
   },
   {
-      title: "Relatórios",
-      icon: FileText,
-      items: [
-        { title: "Relatórios", icon: BarChart3, url: "/relatoriosTecnicos" },
-      ],
-    },
+    title: "Relatórios",
+    icon: FileText,
+    items: [
+      { title: "Relatórios", icon: BarChart3, url: "/relatoriosTecnicos" },
+      { title: "Meus chamados ", icon: BarChart3, url: "/userViewer" },
+
+    ],
+  },
 ];
 
 export function TecnicoSidebar() {

@@ -27,13 +27,13 @@ interface OSDetailsData {
   recorrencia: string | null;
   intervaloDias: number | null;
   setorId: number;
-  tipoEquipamento: {
+  tipoEquipamento?: {
     id: number;
     nome: string;
     grupoId: number;
     taxaDepreciacao: number | null;
-  };
-  tecnico: {
+  } | null;
+  tecnico?: {
     id: number;
     nome: string;
     email: string;
@@ -44,20 +44,20 @@ interface OSDetailsData {
     ativo: boolean;
     telegramChatId: string;
     grupoId: number;
-  };
-  Setor: {
+  } | null;
+  Setor?: {
     id: number;
     nome: string;
-  };
-  solicitante: {
+  } | null;
+  solicitante?: {
     nome: string;
-  };
-  equipamento: {
+  } | null;
+  equipamento?: {
     nomeEquipamento: string;
     marca: string | null;
     modelo: string;
     numeroSerie: string;
-  };
+  } | null;
 }
 
 interface OSDetailsProps {
@@ -135,6 +135,11 @@ const OSDetails: React.FC<OSDetailsProps> = ({ osId, isOpen, onClose }) => {
     }).format(value);
   };
 
+  // Função para verificar se um valor é válido (não nulo, não vazio, não undefined)
+  const isValidValue = (value: any): boolean => {
+    return value !== null && value !== undefined && value !== '';
+  };
+
   if (loading) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -197,15 +202,15 @@ const OSDetails: React.FC<OSDetailsProps> = ({ osId, isOpen, onClose }) => {
             <CardContent className="space-y-4">
               <div>
                 <h4 className="font-medium text-sm text-muted-foreground">Descrição</h4>
-                <p className="text-sm">{osData.descricao}</p>
+                <p className="text-sm">{osData.descricao || '-'}</p>
               </div>
-              {osData.resolucao && (
+              {isValidValue(osData.resolucao) && (
                 <div>
                   <h4 className="font-medium text-sm text-muted-foreground">Resolução</h4>
                   <p className="text-sm">{osData.resolucao}</p>
                 </div>
               )}
-              {osData.valorManutencao && (
+              {isValidValue(osData.valorManutencao) && (
                 <div>
                   <h4 className="font-medium text-sm text-muted-foreground">Valor da Manutenção</h4>
                   <p className="text-sm font-medium">{formatCurrency(osData.valorManutencao)}</p>
@@ -215,82 +220,107 @@ const OSDetails: React.FC<OSDetailsProps> = ({ osId, isOpen, onClose }) => {
           </Card>
 
           {/* Equipamento */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Equipamento
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground">Nome do Equipamento</h4>
-                  <p className="text-sm">{osData?.equipamento?.nomeEquipamento || '-'}</p>
+          {osData.equipamento && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  Equipamento
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-2 gap-4">
+                  {isValidValue(osData.equipamento.nomeEquipamento) && (
+                    <div>
+                      <h4 className="font-medium text-sm text-muted-foreground">Nome do Equipamento</h4>
+                      <p className="text-sm">{osData.equipamento.nomeEquipamento}</p>
+                    </div>
+                  )}
+                  {osData.tipoEquipamento?.nome && (
+                    <div>
+                      <h4 className="font-medium text-sm text-muted-foreground">Tipo</h4>
+                      <p className="text-sm">{osData.tipoEquipamento.nome}</p>
+                    </div>
+                  )}
+                  {isValidValue(osData.equipamento.marca) && (
+                    <div>
+                      <h4 className="font-medium text-sm text-muted-foreground">Marca</h4>
+                      <p className="text-sm">{osData.equipamento.marca}</p>
+                    </div>
+                  )}
+                  {isValidValue(osData.equipamento.modelo) && (
+                    <div>
+                      <h4 className="font-medium text-sm text-muted-foreground">Modelo</h4>
+                      <p className="text-sm">{osData.equipamento.modelo}</p>
+                    </div>
+                  )}
+                  {isValidValue(osData.equipamento.numeroSerie) && (
+                    <div>
+                      <h4 className="font-medium text-sm text-muted-foreground">Número de Série</h4>
+                      <p className="text-sm">{osData.equipamento.numeroSerie}</p>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground">Tipo</h4>
-                  <p className="text-sm">{osData?.tipoEquipamento?.nome || '-'}</p>
-                </div>
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground">Marca</h4>
-                  <p className="text-sm">{osData?.equipamento?.marca || '-'}</p>
-                </div>
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground">Modelo</h4>
-                  <p className="text-sm">{osData?.equipamento?.modelo || '-'}</p>
-                </div>
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground">Número de Série</h4>
-                  <p className="text-sm">{osData?.equipamento?.numeroSerie || '-'}</p>
-                </div>
-              </div>
-            </CardContent>
-
-          </Card>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Pessoas Envolvidas */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Pessoas Envolvidas
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground mb-2">Técnico Responsável</h4>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">{osData.tecnico.nome}</p>
-                    <p className="text-xs text-muted-foreground">{osData.tecnico.email}</p>
-                    <p className="text-xs text-muted-foreground">{osData.tecnico.telefone}</p>
-                    <p className="text-xs text-muted-foreground">Matrícula: {osData.tecnico.matricula}</p>
-                  </div>
+          {(osData.tecnico || osData.solicitante) && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Pessoas Envolvidas
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {osData.tecnico && (
+                    <div>
+                      <h4 className="font-medium text-sm text-muted-foreground mb-2">Técnico Responsável</h4>
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium">{osData.tecnico.nome || '-'}</p>
+                        {isValidValue(osData.tecnico.email) && (
+                          <p className="text-xs text-muted-foreground">{osData.tecnico.email}</p>
+                        )}
+                        {isValidValue(osData.tecnico.telefone) && (
+                          <p className="text-xs text-muted-foreground">{osData.tecnico.telefone}</p>
+                        )}
+                        {isValidValue(osData.tecnico.matricula) && (
+                          <p className="text-xs text-muted-foreground">Matrícula: {osData.tecnico.matricula}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {osData.solicitante && (
+                    <div>
+                      <h4 className="font-medium text-sm text-muted-foreground mb-2">Solicitante</h4>
+                      <p className="text-sm font-medium">{osData.solicitante.nome || '-'}</p>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground mb-2">Solicitante</h4>
-                  <p className="text-sm font-medium">{osData.solicitante.nome}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Localização */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="h-5 w-5" />
-                Localização
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div>
-                <h4 className="font-medium text-sm text-muted-foreground">Setor</h4>
-                <p className="text-sm">{osData.Setor.nome}</p>
-              </div>
-            </CardContent>
-          </Card>
+          {osData.Setor && isValidValue(osData.Setor.nome) && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5" />
+                  Localização
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div>
+                  <h4 className="font-medium text-sm text-muted-foreground">Setor</h4>
+                  <p className="text-sm">{osData.Setor.nome}</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Datas e Timeline */}
           <Card>
@@ -302,36 +332,38 @@ const OSDetails: React.FC<OSDetailsProps> = ({ osId, isOpen, onClose }) => {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground">Criado em</h4>
-                  <p className="text-sm">{formatDate(osData.criadoEm)}</p>
-                </div>
-                {osData.dataAgendada && (
+                {isValidValue(osData.criadoEm) && (
+                  <div>
+                    <h4 className="font-medium text-sm text-muted-foreground">Criado em</h4>
+                    <p className="text-sm">{formatDate(osData.criadoEm)}</p>
+                  </div>
+                )}
+                {isValidValue(osData.dataAgendada) && (
                   <div>
                     <h4 className="font-medium text-sm text-muted-foreground">Data Agendada</h4>
                     <p className="text-sm">{formatDate(osData.dataAgendada)}</p>
                   </div>
                 )}
-                {osData.iniciadaEm && (
+                {isValidValue(osData.iniciadaEm) && (
                   <div>
                     <h4 className="font-medium text-sm text-muted-foreground">Iniciado em</h4>
                     <p className="text-sm">{formatDate(osData.iniciadaEm)}</p>
                   </div>
                 )}
-                {osData.finalizadoEm && (
+                {isValidValue(osData.finalizadoEm) && (
                   <div>
                     <h4 className="font-medium text-sm text-muted-foreground">Finalizado em</h4>
                     <p className="text-sm">{formatDate(osData.finalizadoEm)}</p>
                   </div>
                 )}
-                {osData.canceladaEm && (
+                {isValidValue(osData.canceladaEm) && (
                   <div>
                     <h4 className="font-medium text-sm text-muted-foreground">Cancelado em</h4>
                     <p className="text-sm">{formatDate(osData.canceladaEm)}</p>
                   </div>
                 )}
               </div>
-              {osData.preventiva && osData.recorrencia && (
+              {osData.preventiva && isValidValue(osData.recorrencia) && (
                 <div>
                   <h4 className="font-medium text-sm text-muted-foreground">Recorrência</h4>
                   <p className="text-sm">{osData.recorrencia}</p>

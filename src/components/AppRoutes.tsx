@@ -62,19 +62,18 @@ export const AppRoutes = () => {
         path="/usuarios"
         element={
           <ProtectedRoute>
-            <Usuarios/>
+            <Usuarios />
           </ProtectedRoute>
         }
       />
       <Route
         path="/userViewer"
         element={
-          <ProtectedRoute>
-            <UserViewer/>
+          <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador','tecnico']}>            <UserViewer />
           </ProtectedRoute>
         }
       />
-      
+
       <Route
         path="/computadores"
         element={
@@ -94,8 +93,8 @@ export const AppRoutes = () => {
       <Route
         path="/equipamentos-tecnicos"
         element={
-          <ProtectedRoute allowedRoles={[ 'tecnico']}>
-            <EquipamentosTecnico/>
+          <ProtectedRoute allowedRoles={['tecnico']}>
+            <EquipamentosTecnico />
           </ProtectedRoute>
         }
       />
@@ -127,14 +126,14 @@ export const AppRoutes = () => {
         path="/grupo-manutencao"
         element={
           <ProtectedRoute allowedRoles={['admin']}>
-            <GrupoManutencao/>
+            <GrupoManutencao />
           </ProtectedRoute>
         }
       />
       <Route
         path="/pesquisar-equipamento"
         element={
-          <ProtectedRoute allowedRoles={['admin', 'cadastro', 'tecnico', 'visualizador']}>
+          <ProtectedRoute allowedRoles={['admin', 'cadastro', 'tecnico',]}>
             <PesquisarEquipamento />
           </ProtectedRoute>
         }
@@ -143,7 +142,7 @@ export const AppRoutes = () => {
       <Route
         path="/calendario"
         element={
-          <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador','tecnico']}>
+          <ProtectedRoute allowedRoles={['admin', 'cadastro', 'tecnico']}>
             <Calendario />
           </ProtectedRoute>
         }
@@ -151,24 +150,24 @@ export const AppRoutes = () => {
       <Route
         path="/calendario-tecnico"
         element={
-          <ProtectedRoute allowedRoles={['tecnico','cadastro']}>
-            <Calendariotecnico/>
+          <ProtectedRoute allowedRoles={['tecnico', 'cadastro']}>
+            <Calendariotecnico />
           </ProtectedRoute>
         }
       />
-       <Route
+      <Route
         path="/minhas-os"
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'tecnico']}>
-            <ChamadosTecnico/>
+            <ChamadosTecnico />
           </ProtectedRoute>
         }
       />
-      
+
       <Route
         path="/relatorios"
         element={
-          <ProtectedRoute allowedRoles={['admin', 'cadastro','visualizador']}>
+          <ProtectedRoute allowedRoles={['admin', 'cadastro',]}>
             <Relatorios />
           </ProtectedRoute>
         }
@@ -184,20 +183,20 @@ export const AppRoutes = () => {
 
 
 
-      
+
       <Route
         path="/tecnicos"
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
-            <Tecnicos/>
+            <Tecnicos />
           </ProtectedRoute>
         }
       />
-       <Route
+      <Route
         path="/tipos-equipamento"
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
-            <Categorias/>
+            <Categorias />
           </ProtectedRoute>
         }
       />
@@ -205,7 +204,7 @@ export const AppRoutes = () => {
         path="/setores"
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
-            <Setores/>
+            <Setores />
           </ProtectedRoute>
         }
       />
@@ -213,7 +212,7 @@ export const AppRoutes = () => {
         path="/localizacoes"
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
-            <Localizacao/>
+            <Localizacao />
           </ProtectedRoute>
         }
       />
@@ -221,7 +220,7 @@ export const AppRoutes = () => {
         path="/osviewer"
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
-            <OSViewer/>
+            <OSViewer />
           </ProtectedRoute>
         }
       />
@@ -229,7 +228,7 @@ export const AppRoutes = () => {
         path="/sobre-aviso"
         element={
           <ProtectedRoute allowedRoles={['admin']}>
-            <SobreAvisoPage/>
+            <SobreAvisoPage />
           </ProtectedRoute>
         }
       />
@@ -239,7 +238,7 @@ export const AppRoutes = () => {
         path="/categorias-produtos"
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
-            <CategoriasProdutos/>
+            <CategoriasProdutos />
           </ProtectedRoute>
         }
       />
@@ -247,7 +246,7 @@ export const AppRoutes = () => {
         path="/produtos"
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro', 'visualizador']}>
-            <Produtos/>
+            <Produtos />
           </ProtectedRoute>
         }
       />
@@ -255,7 +254,7 @@ export const AppRoutes = () => {
         path="/movimentacoes-estoque"
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
-            <MovimentacoesEstoque/>
+            <MovimentacoesEstoque />
           </ProtectedRoute>
         }
       />
@@ -263,12 +262,12 @@ export const AppRoutes = () => {
         path="/software"
         element={
           <ProtectedRoute allowedRoles={['admin']}>
-            <GestaoSoftware/>
+            <GestaoSoftware />
           </ProtectedRoute>
         }
       />
-     
-      
+
+
 
       {/* Gestão de Documentos Module Routes - /gestao */}
       <Route

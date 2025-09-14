@@ -43,8 +43,6 @@ const menuItems = [
     title: "Relatórios",
     icon: FileText,
     items: [
-      { title: "Relatórios", icon: BarChart3, url: "/relatorios" },
-      { title: "Pesquisar Equipamentos", icon: BarChart3, url: "/pesquisar-equipamento" },
       { title: "Acompanhar Meus Chamados", url: "/userViewer",icon: FileText, }
     ],
   },
