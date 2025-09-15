@@ -62,8 +62,6 @@ const menuItems = [
     icon: FileText,
     items: [
       { title: "Relatórios", icon: BarChart3, url: "/relatoriosTecnicos" },
-      { title: "Meus chamados ", icon: BarChart3, url: "/userViewer" },
-
     ],
   },
 ];
