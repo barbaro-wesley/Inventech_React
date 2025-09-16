@@ -99,6 +99,8 @@ export default function Usuarios() {
     { value: "tecnico", label: "Técnico" },
     { value: "visualizador", label: "Visualizador" },
     { value: "usuario_comum", label: "Usuário Comum" },
+    { value: "CEP", label: "CEP" },
+
   ];
 
   useEffect(() => {
@@ -163,9 +165,9 @@ export default function Usuarios() {
         papel: formData.papel,
         tecnicoId: formData.tecnicoId ? parseInt(formData.tecnicoId) : null,
       });
-      
+
       await fetchData();
-      
+
       setFormData({ nome: "", email: "", senha: "", papel: "", tecnicoId: "" });
       setIsModalOpen(false);
       alert("Usuário cadastrado com sucesso!");
@@ -207,9 +209,9 @@ export default function Usuarios() {
       };
 
       await api.put(`/usuarios/${editingUser.id}`, updateData);
-      
+
       await fetchData();
-      
+
       setIsEditModalOpen(false);
       setEditingUser(null);
       alert("Usuário atualizado com sucesso!");
@@ -256,7 +258,7 @@ export default function Usuarios() {
       await api.put(`/usuarios/${passwordUser.id}/redefinir-senha`, {
         novaSenha: passwordFormData.novaSenha,
       });
-      
+
       setIsPasswordModalOpen(false);
       setPasswordUser(null);
       setPasswordFormData({ novaSenha: "", confirmarSenha: "" });
@@ -272,16 +274,16 @@ export default function Usuarios() {
   // Função para obter todos os técnicos disponíveis (incluindo o técnico atual do usuário sendo editado)
   const getTecnicosParaEdicao = () => {
     if (!editingUser) return tecnicosDisponiveis;
-    
+
     if (editingUser.tecnico) {
       const tecnicoAtual = editingUser.tecnico;
       const jaExisteNaLista = tecnicosDisponiveis.some(t => t.id === tecnicoAtual.id);
-      
+
       if (!jaExisteNaLista) {
         return [...tecnicosDisponiveis, tecnicoAtual];
       }
     }
-    
+
     return tecnicosDisponiveis;
   };
 
@@ -403,8 +405,8 @@ export default function Usuarios() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Button 
-                            variant="ghost" 
+                          <Button
+                            variant="ghost"
                             size="sm"
                             onClick={() => handleEdit(usuario)}
                             disabled={loading}
@@ -485,9 +487,9 @@ export default function Usuarios() {
             </div>
             <div>
               <label className="text-sm font-medium">Papel</label>
-              <Select 
-                name="papel" 
-                value={formData.papel} 
+              <Select
+                name="papel"
+                value={formData.papel}
                 onValueChange={(value) => setFormData({ ...formData, papel: value })}
                 disabled={loading}
               >
@@ -539,8 +541,8 @@ export default function Usuarios() {
               >
                 Cancelar
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
                 disabled={loading}
               >
@@ -582,9 +584,9 @@ export default function Usuarios() {
             </div>
             <div>
               <label className="text-sm font-medium">Papel</label>
-              <Select 
-                name="papel" 
-                value={editFormData.papel} 
+              <Select
+                name="papel"
+                value={editFormData.papel}
                 onValueChange={(value) => setEditFormData({ ...editFormData, papel: value })}
                 disabled={loading}
               >
@@ -636,8 +638,8 @@ export default function Usuarios() {
               >
                 Cancelar
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
                 disabled={loading}
               >
@@ -693,8 +695,8 @@ export default function Usuarios() {
               >
                 Cancelar
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="bg-amber-600 hover:bg-amber-700 text-white shadow-lg"
                 disabled={loading}
               >

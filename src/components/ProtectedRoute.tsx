@@ -11,10 +11,16 @@ import { Navigate, useLocation } from 'react-router-dom';
 interface ProtectedRouteProps {
   children: ReactNode;
   allowedRoles?: UserRole[];
+  allowedModules?: string[];
   noLayout?: boolean;
 }
 
-export const ProtectedRoute = ({ children, allowedRoles, noLayout }: ProtectedRouteProps) => {
+export const ProtectedRoute = ({ 
+  children, 
+  allowedRoles, 
+  allowedModules = [],
+  noLayout 
+}: ProtectedRouteProps) => {
   const { user, isLoading } = useAuth();
   const location = useLocation();
 
@@ -33,15 +39,43 @@ export const ProtectedRoute = ({ children, allowedRoles, noLayout }: ProtectedRo
     return <Navigate to="/" replace />;
   }
 
+  // Validação de roles (se especificado)
   if (allowedRoles && !allowedRoles.includes(user.papel)) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-destructive mb-4">Acesso Negado</h1>
-          <p className="text-muted-foreground">Você não tem permissão para acessar esta página.</p>
-        </div>
-      </div>
+    return <Navigate to="/sem-acesso" replace />;
+  }
+
+  // Validação de módulos (se especificado)
+  if (allowedModules.length > 0) {
+    if (!user.modulos || !Array.isArray(user.modulos)) {
+      return <Navigate to="/sem-acesso" replace />;
+    }
+
+    // Função para extrair nome do módulo baseado na estrutura real
+    const extractModuleName = (modulo: any): string => {
+      if (typeof modulo === 'string') return modulo;
+      if (typeof modulo === 'object' && modulo) {
+        // Estrutura: { modulo: { nome: "InvenTech" } }
+        if (modulo.modulo && modulo.modulo.nome) {
+          return modulo.modulo.nome;
+        }
+        // Fallback para outras estruturas possíveis
+        return modulo.nome || modulo.name || modulo.module || modulo.moduleName || modulo.title || String(modulo);
+      }
+      return String(modulo);
+    };
+
+    const userModuleNames = user.modulos.map(extractModuleName);
+    
+    // Verifica com case insensitive
+    const hasValidModule = userModuleNames.some((userModule) => 
+      allowedModules.some(allowedModule => 
+        userModule.toLowerCase() === allowedModule.toLowerCase()
+      )
     );
+    
+    if (!hasValidModule) {
+      return <Navigate to="/sem-acesso" replace />;
+    }
   }
 
   // Se for a página de seleção de módulo, não aplica layout
@@ -49,15 +83,13 @@ export const ProtectedRoute = ({ children, allowedRoles, noLayout }: ProtectedRo
     return <>{children}</>;
   }
 
-  // Se for uma rota do módulo de gestão, usa o DocumentosLayout
+  // Se for uma rota do módulo de gestão(CEP), usa o DocumentosLayout
   if (location.pathname.startsWith('/gestao') || location.pathname.startsWith('/tipos-documentos')) {
     return <DocumentosLayout>{children}</DocumentosLayout>;
   }
 
   // Escolhe o layout baseado no papel do usuário
   const getLayoutByRole = (role: UserRole, children: ReactNode) => {
-    console.log('Papel do usuário:', role); // Debug para verificar o papel
-    
     switch (role) {
       case 'admin':
         return <AdminLayout>{children}</AdminLayout>;
@@ -70,7 +102,6 @@ export const ProtectedRoute = ({ children, allowedRoles, noLayout }: ProtectedRo
       case 'usuario_comum':
         return <UsuarioComumLayout>{children}</UsuarioComumLayout>;
       default:
-        console.warn('Papel desconhecido:', role, 'usando AdminLayout como fallback');
         return <AdminLayout>{children}</AdminLayout>;
     }
   };
