@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,18 +16,18 @@ interface Module {
   available: boolean;
 }
 
-const modules: Module[] = [
+const allModules: Module[] = [
   {
-    id: "inventory",
-    name: "Controle de Inventário",
+    id: "InvenTech",
+    name: "InvenTech",
     description: "Gerencie equipamentos, computadores, condicionadores e impressoras",
     icon: Package,
     color: "bg-primary/10 text-primary border-primary/20",
     available: true,
   },
   {
-    id: "documents",
-    name: "Gestão de Documentos",
+    id: "CEP",
+    name: "CEP",
     description: "Controle e organize documentos e arquivos da empresa",
     icon: FileText,
     color: "bg-secondary/10 text-secondary border-secondary/20",
@@ -41,20 +41,45 @@ export const ModuleSelection = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-const handleModuleSelect = async (moduleId: string) => {
-    setIsLoading(true);
-    localStorage.setItem("selectedModule", moduleId);
+  // Filtra os módulos disponíveis para o usuário
+  const availableModules = useMemo(() => {
+  const moduleNames = user?.modulos
+    .filter((m: any) => m.ativo)          // só módulos ativos
+    .map((m: any) => m.modulo.nome)       // pega o nome do módulo
+    ?? [];
 
-    setTimeout(() => {
-      if (moduleId === "inventory" || moduleId === "documents") {
-        if (user?.papel === "tecnico") {
-          navigate("/calendario-tecnico");
-        } else {
-          navigate("/dashboard");
-        }
+  return allModules.map((module) => ({
+    ...module,
+    available: moduleNames.includes(module.id),
+  }));
+}, [user]);
+
+const handleModuleSelect = async (moduleId: string) => {
+  const moduleNames = user?.modulos
+    .filter((m: any) => m.ativo)
+    .map((m: any) => m.modulo.nome)
+    ?? [];
+
+  if (!moduleNames.includes(moduleId)) {
+    alert("Você não tem acesso a este módulo.");
+    return;
+  }
+
+  setIsLoading(true);
+  localStorage.setItem("selectedModule", moduleId);
+
+  setTimeout(() => {
+    if (moduleId === "InvenTech") {
+      if (user?.papel === "tecnico") {
+        navigate("/calendario-tecnico");
+      } else {
+        navigate("/dashboard");
       }
-    }, 500);
-  };
+    } else if (moduleId === "CEP") {
+      navigate("/dashboard-cep"); // rota do módulo CEP
+    }
+  }, 500);
+};
 
   return (
     <div className="min-h-screen bg-gradient-subtle flex items-center justify-center p-4">
@@ -72,7 +97,7 @@ const handleModuleSelect = async (moduleId: string) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {modules.map((module) => (
+          {availableModules.map((module) => (
             <Card
               key={module.id}
               className={`cursor-pointer transition-all duration-200 hover:shadow-lg border-2 ${
@@ -95,11 +120,11 @@ const handleModuleSelect = async (moduleId: string) => {
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="flex justify-between items-center">
-                  <Badge 
+                  <Badge
                     variant={module.available ? "default" : "secondary"}
                     className="text-xs"
                   >
-                    {module.available ? "Disponível" : "Em breve"}
+                    {module.available ? "Disponível" : "Sem acesso"}
                   </Badge>
                   {selectedModule === module.id && (
                     <ArrowRight className="h-4 w-4 text-primary animate-pulse" />

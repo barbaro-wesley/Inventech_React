@@ -8,6 +8,7 @@ interface User {
   email: string;
   nome: string;
   papel: UserRole;
+  modulos: string[];
 }
 
 interface AuthContextType {
@@ -39,8 +40,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const checkAuth = async () => {
     try {
       const response = await api.get('/usuarios/me');
-      console.log('Dados do usuário em checkAuth:', response.data); // Debug
-      setUser(response.data);
+      console.log('Dados do usuário em checkAuth:', response.data);
+      setUser(response.data); // response.data já deve conter user.modulos
     } catch (error) {
       setUser(null);
     } finally {
@@ -48,13 +49,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-const login = async (email: string, senha: string) => {
-  const response = await api.post('/usuarios/login', { email, senha });
-  const me = await api.get("/usuarios/me");
-  setUser(me.data);
+  const login = async (email: string, senha: string) => {
+    await api.post('/usuarios/login', { email, senha });
+    const me = await api.get("/usuarios/me"); // retorna usuário com modulos
+    setUser(me.data);
 
-  return me.data;
-};
+    return me.data;
+  };
 
   const logout = async () => {
     try {
