@@ -279,7 +279,7 @@ export const AppRoutes = () => {
         }
       />
       <Route
-        path="/tipos-documentos"
+        path="/gestao/tipos-documentos"
         element={
           <ProtectedRoute allowedRoles={['admin', 'cadastro']}>
             <TiposDocumentos />

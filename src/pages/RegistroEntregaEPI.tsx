@@ -73,7 +73,7 @@ export default function RegistroEntregaEPI() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterSetor, setFilterSetor] = useState("");
+  const [filterSetor, setFilterSetor] = useState("todos");
   const [formData, setFormData] = useState({
     funcionarioNome: "",
     funcionarioMatricula: "",
@@ -180,12 +180,11 @@ export default function RegistroEntregaEPI() {
     const matchesSearch = registro.funcionario.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          registro.funcionario.matricula.includes(searchTerm) ||
                          registro.epi.nome.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesSetor = !filterSetor || registro.funcionario.setor === filterSetor;
+    const matchesSetor = filterSetor === "todos" || registro.funcionario.setor === filterSetor;
     return matchesSearch && matchesSetor;
   });
 
   return (
-    <DocumentosLayout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Registro de Entrega de EPI</h1>
@@ -443,7 +442,7 @@ export default function RegistroEntregaEPI() {
                     <SelectValue placeholder="Todos os setores" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos os setores</SelectItem>
+                    <SelectItem value="todos">Todos os setores</SelectItem>
                     {setores.map((setor) => (
                       <SelectItem key={setor} value={setor}>{setor}</SelectItem>
                     ))}
@@ -502,6 +501,5 @@ export default function RegistroEntregaEPI() {
           </CardContent>
         </Card>
       </div>
-    </DocumentosLayout>
   );
 }

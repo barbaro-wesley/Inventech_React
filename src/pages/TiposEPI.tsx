@@ -112,7 +112,6 @@ export default function TiposEPI() {
   };
 
   return (
-    <DocumentosLayout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Tipos e Categorias de EPI</h1>
@@ -227,6 +226,5 @@ export default function TiposEPI() {
           </CardContent>
         </Card>
       </div>
-    </DocumentosLayout>
   );
 }

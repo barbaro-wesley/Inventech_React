@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Search, Edit, Trash2, Key } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Key, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,12 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
+interface Modulo {
+  id: number;
+  nome: string;
+  descricao?: string;
+}
+
 interface Tecnico {
   id: number;
   nome: string;
@@ -48,7 +54,10 @@ interface Usuario {
   papel: string;
   tecnicoId?: number;
   tecnico?: Tecnico;
-  modulos?: any[];
+  modulos?: Array<{
+    id: number;
+    modulo: Modulo;
+  }>;
 }
 
 interface TecnicoDisponivel {
@@ -67,6 +76,7 @@ interface TecnicoDisponivel {
 export default function Usuarios() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [tecnicosDisponiveis, setTecnicosDisponiveis] = useState<TecnicoDisponivel[]>([]);
+  const [modulosDisponiveis, setModulosDisponiveis] = useState<Modulo[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterPapel, setFilterPapel] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -81,12 +91,14 @@ export default function Usuarios() {
     senha: "",
     papel: "",
     tecnicoId: "",
+    modulos: [] as number[],
   });
   const [editFormData, setEditFormData] = useState({
     nome: "",
     email: "",
     papel: "",
     tecnicoId: "",
+    modulos: [] as number[],
   });
   const [passwordFormData, setPasswordFormData] = useState({
     novaSenha: "",
@@ -108,12 +120,14 @@ export default function Usuarios() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [usuariosResponse, tecnicosResponse] = await Promise.all([
+      const [usuariosResponse, tecnicosResponse, modulosResponse] = await Promise.all([
         api.get("/usuarios"),
         api.get("/usuarios/disponiveis"),
+        api.get("/modulos"), // Assumindo que existe um endpoint para buscar módulos
       ]);
       setUsuarios(usuariosResponse.data);
       setTecnicosDisponiveis(tecnicosResponse.data);
+      setModulosDisponiveis(modulosResponse.data);
     } catch (error) {
       console.error("Erro ao buscar dados:", error);
     } finally {
@@ -152,6 +166,42 @@ export default function Usuarios() {
     setFormData({ ...formData, [name]: value });
   };
 
+  // Função para adicionar módulo na criação
+  const handleAddModulo = (moduloId: number) => {
+    if (!formData.modulos.includes(moduloId)) {
+      setFormData({
+        ...formData,
+        modulos: [...formData.modulos, moduloId]
+      });
+    }
+  };
+
+  // Função para remover módulo na criação
+  const handleRemoveModulo = (moduloId: number) => {
+    setFormData({
+      ...formData,
+      modulos: formData.modulos.filter(id => id !== moduloId)
+    });
+  };
+
+  // Função para adicionar módulo na edição
+  const handleAddModuloEdit = (moduloId: number) => {
+    if (!editFormData.modulos.includes(moduloId)) {
+      setEditFormData({
+        ...editFormData,
+        modulos: [...editFormData.modulos, moduloId]
+      });
+    }
+  };
+
+  // Função para remover módulo na edição
+  const handleRemoveModuloEdit = (moduloId: number) => {
+    setEditFormData({
+      ...editFormData,
+      modulos: editFormData.modulos.filter(id => id !== moduloId)
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -162,11 +212,12 @@ export default function Usuarios() {
         senha: formData.senha,
         papel: formData.papel,
         tecnicoId: formData.tecnicoId ? parseInt(formData.tecnicoId) : null,
+        modulos: formData.modulos,
       });
       
       await fetchData();
       
-      setFormData({ nome: "", email: "", senha: "", papel: "", tecnicoId: "" });
+      setFormData({ nome: "", email: "", senha: "", papel: "", tecnicoId: "", modulos: [] });
       setIsModalOpen(false);
       alert("Usuário cadastrado com sucesso!");
     } catch (error: any) {
@@ -184,6 +235,7 @@ export default function Usuarios() {
       email: usuario.email,
       papel: usuario.papel,
       tecnicoId: usuario.tecnicoId?.toString() || "",
+      modulos: usuario.modulos?.map(m => m.modulo.id) || [],
     });
     setIsEditModalOpen(true);
   };
@@ -204,6 +256,7 @@ export default function Usuarios() {
         email: editFormData.email,
         papel: editFormData.papel,
         tecnicoId: editFormData.tecnicoId ? parseInt(editFormData.tecnicoId) : null,
+        modulos: editFormData.modulos,
       };
 
       await api.put(`/usuarios/${editingUser.id}`, updateData);
@@ -285,6 +338,11 @@ export default function Usuarios() {
     return tecnicosDisponiveis;
   };
 
+  // Função para obter módulos disponíveis para seleção (excluindo os já selecionados)
+  const getModulosDisponiveisParaSelecao = (modulosSelecionados: number[]) => {
+    return modulosDisponiveis.filter(modulo => !modulosSelecionados.includes(modulo.id));
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -364,6 +422,7 @@ export default function Usuarios() {
                     <TableHead>Papel</TableHead>
                     <TableHead>Técnico Associado</TableHead>
                     <TableHead>Grupo</TableHead>
+                    <TableHead>Módulos</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -399,6 +458,19 @@ export default function Usuarios() {
                           </Badge>
                         ) : (
                           <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {usuario.modulos && usuario.modulos.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {usuario.modulos.map((userModulo) => (
+                              <Badge key={userModulo.id} variant="outline" className="text-xs">
+                                {userModulo.modulo.nome}
+                              </Badge>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">Nenhum</span>
                         )}
                       </TableCell>
                       <TableCell className="text-right">
@@ -445,64 +517,67 @@ export default function Usuarios() {
 
       {/* Modal de Cadastro */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Cadastrar Usuário</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Nome</label>
-              <Input
-                type="text"
-                name="nome"
-                value={formData.nome}
-                onChange={handleChange}
-                required
-                disabled={loading}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Nome</label>
+                <Input
+                  type="text"
+                  name="nome"
+                  value={formData.nome}
+                  onChange={handleChange}
+                  required
+                  disabled={loading}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Email</label>
+                <Input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  disabled={loading}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Senha</label>
+                <Input
+                  type="password"
+                  name="senha"
+                  value={formData.senha}
+                  onChange={handleChange}
+                  required
+                  disabled={loading}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Papel</label>
+                <Select 
+                  name="papel" 
+                  value={formData.papel} 
+                  onValueChange={(value) => setFormData({ ...formData, papel: value })}
+                  disabled={loading}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um papel" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {papelOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div>
-              <label className="text-sm font-medium">Email</label>
-              <Input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                disabled={loading}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Senha</label>
-              <Input
-                type="password"
-                name="senha"
-                value={formData.senha}
-                onChange={handleChange}
-                required
-                disabled={loading}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Papel</label>
-              <Select 
-                name="papel" 
-                value={formData.papel} 
-                onValueChange={(value) => setFormData({ ...formData, papel: value })}
-                disabled={loading}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um papel" />
-                </SelectTrigger>
-                <SelectContent>
-                  {papelOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            
             <div>
               <label className="text-sm font-medium">Técnico</label>
               <Select
@@ -530,6 +605,63 @@ export default function Usuarios() {
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Seleção de Módulos */}
+            <div>
+              <label className="text-sm font-medium">Módulos</label>
+              <div className="space-y-3">
+                {/* Módulos Selecionados */}
+                {formData.modulos.length > 0 && (
+                  <div className="space-y-2">
+                    <span className="text-xs text-muted-foreground">Módulos selecionados:</span>
+                    <div className="flex flex-wrap gap-2">
+                      {formData.modulos.map((moduloId) => {
+                        const modulo = modulosDisponiveis.find(m => m.id === moduloId);
+                        return (
+                          <Badge key={moduloId} variant="default" className="flex items-center gap-1">
+                            {modulo?.nome}
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-4 w-4 p-0 hover:bg-transparent"
+                              onClick={() => handleRemoveModulo(moduloId)}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </Badge>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Seletor de Novos Módulos */}
+                <Select
+                  onValueChange={(value) => handleAddModulo(parseInt(value))}
+                  disabled={loading}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Adicionar módulo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getModulosDisponiveisParaSelecao(formData.modulos).map((modulo) => (
+                      <SelectItem key={modulo.id} value={modulo.id.toString()}>
+                        <div className="flex flex-col">
+                          <span>{modulo.nome}</span>
+                          {modulo.descricao && (
+                            <span className="text-xs text-muted-foreground">
+                              {modulo.descricao}
+                            </span>
+                          )}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <DialogFooter>
               <Button
                 type="button"
@@ -551,82 +683,141 @@ export default function Usuarios() {
         </DialogContent>
       </Dialog>
 
-      {/* Modal de Edição (sem campo de senha) */}
+      {/* Modal de Edição */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Editar Usuário</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleEditSubmit} className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Nome</label>
-              <Input
-                type="text"
-                name="nome"
-                value={editFormData.nome}
-                onChange={handleEditChange}
-                required
-                disabled={loading}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Nome</label>
+                <Input
+                  type="text"
+                  name="nome"
+                  value={editFormData.nome}
+                  onChange={handleEditChange}
+                  required
+                  disabled={loading}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Email</label>
+                <Input
+                  type="email"
+                  name="email"
+                  value={editFormData.email}
+                  onChange={handleEditChange}
+                  required
+                  disabled={loading}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Papel</label>
+                <Select 
+                  name="papel" 
+                  value={editFormData.papel} 
+                  onValueChange={(value) => setEditFormData({ ...editFormData, papel: value })}
+                  disabled={loading}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um papel" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {papelOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Técnico</label>
+                <Select
+                  value={editFormData.tecnicoId || "none"}
+                  onValueChange={(value) =>
+                    setEditFormData({ ...editFormData, tecnicoId: value === "none" ? "" : value })
+                  }
+                  disabled={loading}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um técnico" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Nenhum</SelectItem>
+                    {getTecnicosParaEdicao().map((tecnico) => (
+                      <SelectItem key={tecnico.id} value={tecnico.id.toString()}>
+                        <div className="flex flex-col">
+                          <span>{tecnico.nome}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {tecnico.matricula} - {tecnico.grupo.nome}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
+
+            {/* Seleção de Módulos para Edição */}
             <div>
-              <label className="text-sm font-medium">Email</label>
-              <Input
-                type="email"
-                name="email"
-                value={editFormData.email}
-                onChange={handleEditChange}
-                required
-                disabled={loading}
-              />
+              <label className="text-sm font-medium">Módulos</label>
+              <div className="space-y-3">
+                {/* Módulos Selecionados */}
+                {editFormData.modulos.length > 0 && (
+                  <div className="space-y-2">
+                    <span className="text-xs text-muted-foreground">Módulos selecionados:</span>
+                    <div className="flex flex-wrap gap-2">
+                      {editFormData.modulos.map((moduloId) => {
+                        const modulo = modulosDisponiveis.find(m => m.id === moduloId);
+                        return (
+                          <Badge key={moduloId} variant="default" className="flex items-center gap-1">
+                            {modulo?.nome}
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-4 w-4 p-0 hover:bg-transparent"
+                              onClick={() => handleRemoveModuloEdit(moduloId)}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </Badge>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Seletor de Novos Módulos */}
+                <Select
+                  onValueChange={(value) => handleAddModuloEdit(parseInt(value))}
+                  disabled={loading}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Adicionar módulo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getModulosDisponiveisParaSelecao(editFormData.modulos).map((modulo) => (
+                      <SelectItem key={modulo.id} value={modulo.id.toString()}>
+                        <div className="flex flex-col">
+                          <span>{modulo.nome}</span>
+                          {modulo.descricao && (
+                            <span className="text-xs text-muted-foreground">
+                              {modulo.descricao}
+                            </span>
+                          )}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div>
-              <label className="text-sm font-medium">Papel</label>
-              <Select 
-                name="papel" 
-                value={editFormData.papel} 
-                onValueChange={(value) => setEditFormData({ ...editFormData, papel: value })}
-                disabled={loading}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um papel" />
-                </SelectTrigger>
-                <SelectContent>
-                  {papelOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-sm font-medium">Técnico</label>
-              <Select
-                value={editFormData.tecnicoId || "none"}
-                onValueChange={(value) =>
-                  setEditFormData({ ...editFormData, tecnicoId: value === "none" ? "" : value })
-                }
-                disabled={loading}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um técnico" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Nenhum</SelectItem>
-                  {getTecnicosParaEdicao().map((tecnico) => (
-                    <SelectItem key={tecnico.id} value={tecnico.id.toString()}>
-                      <div className="flex flex-col">
-                        <span>{tecnico.nome}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {tecnico.matricula} - {tecnico.grupo.nome}
-                        </span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+
             <DialogFooter>
               <Button
                 type="button"

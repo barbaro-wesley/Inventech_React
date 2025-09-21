@@ -76,7 +76,7 @@ const handleModuleSelect = async (moduleId: string) => {
         navigate("/dashboard");
       }
     } else if (moduleId === "CEP") {
-      navigate("/dashboard-cep"); // rota do módulo CEP
+      navigate("/gestao/funcionarios"); // rota do módulo CEP
     }
   }, 500);
 };

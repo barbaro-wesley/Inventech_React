@@ -151,7 +151,6 @@ export default function CadastroEPI() {
   };
 
   return (
-    <DocumentosLayout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Cadastro de EPI</h1>
@@ -348,6 +347,5 @@ export default function CadastroEPI() {
           </CardContent>
         </Card>
       </div>
-    </DocumentosLayout>
   );
 }
