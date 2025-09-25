@@ -33,14 +33,14 @@ const menuItems = [
     title: "Armazenamento",
     icon: Users,
     items: [
-      { title: "Pastas", url: "/gestao/funcionarios", icon: Users },
+      { title: "Pastas", url: "/Ged/Folders", icon: Users },
     ],
   },
   {
     title: "Assinaturas",
     icon: FileText,
     items: [
-      { title: "Nova assinatura", url: "/gestao/tipos-documentos", icon: FolderOpen },
+      { title: "Nova assinatura", url: "/Ged/Folders", icon: FolderOpen },
     ],
   },
   

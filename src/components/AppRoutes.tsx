@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { publicRoutes, inventechRoutes, cepRoutes } from "../components/routes";
+import { publicRoutes, inventechRoutes, GedRoutes } from "../components/routes";
 import SemAcesso from "@/components/SemAcesso"; // Criar este componente
 
 export const AppRoutes = () => {
@@ -40,14 +40,14 @@ export const AppRoutes = () => {
       ))}
 
       {/* Rotas do módulo CEP */}
-      {cepRoutes.map((route) => (
+      {GedRoutes.map((route) => (
         <Route 
           key={route.path}
           path={route.path} 
           element={
             <ProtectedRoute 
               allowedRoles={route.roles}
-              allowedModules={["CEP"]}
+              allowedModules={["GED"]}
             >
               {route.element}
             </ProtectedRoute>

@@ -195,49 +195,16 @@ export const inventechRoutes: RouteConfig[] = [
     element: <GestaoSoftware />,
     roles: ['admin']
   },
-  {
-    path: "/Ged/Folders",
-    element: <Folders/>,
-    roles: ['admin']
-  },
+
 ];
 
 // Rotas do módulo CEP
-export const cepRoutes: RouteConfig[] = [
+export const GedRoutes: RouteConfig[] = [
   {
     path: "/Ged/Folders",
     element: <Folders/>,
     roles: ['admin']
   },
   
-  {
-    path: "/tipos-documentos",
-    element: <TiposDocumentos />,
-    roles: ['CEP','admin']
-  },
-  {
-    path: "/gestao/registros-capacitacao",
-    element: <RegistrosCapacitacao />,
-    roles: ['CEP','admin']
-  },
-  {
-    path: "/gestao/pesquisar-documentos",
-    element: <PesquisarDocumentos />,
-    roles: ['CEP','admin']
-  },
-  {
-    path: "/gestao/tipos-epi",
-    element: <TiposEPI />,
-    roles: ['CEP','admin']
-  },
-  {
-    path: "/gestao/cadastro-epi",
-    element: <CadastroEPI />,
-    roles: ['CEP','admin']
-  },
-  {
-    path: "/gestao/registro-entrega-epi",
-    element: <RegistroEntregaEPI />,
-    roles: ['CEP','admin']
-  }
+  
 ];

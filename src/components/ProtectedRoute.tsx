@@ -1,12 +1,13 @@
 import { ReactNode } from 'react';
 import { useAuth, UserRole } from '@/contexts/AuthContext';
-import { AdminLayout } from '@/components/layouts/AdminLayout';
+import {AdminLayout} from '@/components/layouts/AdminLayout';
 import { TecnicoLayout } from '@/components/layouts/TecnicoLayout';
 import { CadastroLayout } from '@/components/layouts/CadastroLayout';
 import { VisualizadorLayout } from '@/components/layouts/VisualizadorLayout';
 import { UsuarioComumLayout } from '@/components/layouts/UsuarioComumLayout';
 import { DocumentosLayout } from '@/components/layouts/DocumentosLayout';
 import { Navigate, useLocation } from 'react-router-dom';
+import { GedLayout } from '@/components/layouts/GedLayout';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -84,8 +85,8 @@ export const ProtectedRoute = ({
   }
 
   // Se for uma rota do módulo de gestão(CEP), usa o DocumentosLayout
-  if (location.pathname.startsWith('/gestao') || location.pathname.startsWith('/tipos-documentos')) {
-    return <DocumentosLayout>{children}</DocumentosLayout>;
+  if (location.pathname.startsWith('/Ged') || location.pathname.startsWith('/Folders')) {
+    return <GedLayout>{children}</GedLayout>;
   }
 
   // Escolhe o layout baseado no papel do usuário
