@@ -34,6 +34,7 @@ import UserViewer from "./UserViewer";
 import GrupoManutencao from "@/pages/GrupoManutencao";
 import EquipamentosTecnico from "@/pages/EquipamentosTecnico";
 import { TecnicoReportPage } from "./reports/TecnicoReportPage";
+import Folders from "@/Modulos/GED/Pages/Folder";
 
 import { UserRole } from '@/contexts/AuthContext';
 
@@ -193,16 +194,22 @@ export const inventechRoutes: RouteConfig[] = [
     path: "/software",
     element: <GestaoSoftware />,
     roles: ['admin']
-  }
+  },
+  {
+    path: "/Ged/Folders",
+    element: <Folders/>,
+    roles: ['admin']
+  },
 ];
 
 // Rotas do módulo CEP
 export const cepRoutes: RouteConfig[] = [
   {
-    path: "/gestao/funcionarios",
-    element: <Funcionarios />,
-    roles: ['CEP','admin']
+    path: "/Ged/Folders",
+    element: <Folders/>,
+    roles: ['admin']
   },
+  
   {
     path: "/tipos-documentos",
     element: <TiposDocumentos />,

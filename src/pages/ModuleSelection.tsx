@@ -26,9 +26,9 @@ const allModules: Module[] = [
     available: true,
   },
   {
-    id: "CEP",
-    name: "CEP",
-    description: "Controle e organize documentos e arquivos da empresa",
+    id: "GED",
+    name: "GED",
+    description: "Gestão Eletrônica de Documentos",
     icon: FileText,
     color: "bg-secondary/10 text-secondary border-secondary/20",
     available: true,
@@ -75,8 +75,8 @@ const handleModuleSelect = async (moduleId: string) => {
       } else {
         navigate("/dashboard");
       }
-    } else if (moduleId === "CEP") {
-      navigate("/gestao/funcionarios"); // rota do módulo CEP
+    } else if (moduleId === "GED") {
+      navigate("/Ged/Folders"); // rota do módulo CEP
     }
   }, 500);
 };
